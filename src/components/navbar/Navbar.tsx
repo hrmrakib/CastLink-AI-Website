@@ -18,34 +18,36 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className='bg-white shadow-sm'>
+    <nav className='bg-white'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
-          {/* Logo */}
-          <div className='flex-shrink-0'>
-            <Link href='/' className='text-2xl font-bold text-gray-900'>
-              Poolio
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className='hidden md:flex items-center gap-8'>
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className='text-gray-700 hover:text-gray-900 transition-colors font-medium'
-              >
-                {link.name}
+          <div className='flex items-center gap-6 lg:gap-12'>
+            {/* Logo */}
+            <div className='shrink-0'>
+              <Link href='/' className='text-2xl font-bold text-gray-900'>
+                Poolio
               </Link>
-            ))}
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className='hidden md:flex items-center gap-8'>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className='text-gray-700 hover:text-gray-900 transition-colors font-medium'
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className='hidden md:flex items-center gap-4'>
+          <div className='hidden md:flex items-center gap-8'>
             <Link
               href='/login'
-              className='text-gray-700 hover:text-gray-900 transition-colors font-medium'
+              className='text-gray-700 hover:text-gray-900 transition-colors font-medium px-6 py-2 rounded-lg border border-gray-300'
             >
               Login
             </Link>
