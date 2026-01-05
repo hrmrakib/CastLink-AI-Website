@@ -6,11 +6,9 @@ import RolesSection from "@/components/home/RolesSection";
 export default function Home() {
   return (
     <>
-      <div className='container mx-auto'>
-        <HeroSection />
-        <RolesSection />
-        <FeaturesSection />
-      </div>
+      <HeroSection />
+      <RolesSection />
+      <FeaturesSection />
       <CTASection />
     </>
   );

@@ -115,6 +115,14 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.button {
+  @apply inline-flex h-14 items-center justify-center gap-2 rounded-lg 
+         bg-[#2563EB] px-8 text-xl font-bold text-white 
+         transition-all duration-200 cursor-pointer hover:bg-[#3B82F6]
+         hover:shadow-lg hover:shadow-[#3B82F6]/50 active:bg-[#3B82F6]
+        active:shadow-lg active:shadow-[#3B82F6]/50;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -32,13 +32,13 @@ export default function Footer() {
 
   return (
     <footer className='w-full bg-gray-50 border-t border-gray-200'>
-      <div className='mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 pt-10 pb-6 sm:px-6 lg:px-8'>
         {/* Footer Content Grid */}
         <div className='grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4'>
           {/* Brand Column */}
           <div className='space-y-4'>
-            <h3 className='text-xl font-bold text-gray-900'>Poolio</h3>
-            <p className='text-sm leading-relaxed text-gray-600'>
+            <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3>
+            <p className='text-sm leading-relaxed text-[#404145]'>
               AI-powered casting platform connecting clients, agents, and
               talents seamlessly.
             </p>
@@ -46,7 +46,7 @@ export default function Footer() {
 
           {/* Product Column */}
           <div>
-            <h4 className='mb-4 font-semibold text-gray-900'>Product</h4>
+            <h4 className='mb-4 font-bold text-[#000000]'>Product</h4>
             <ul className='space-y-3'>
               {footerLinks.product.map((link) => (
                 <li key={link.label}>
@@ -58,7 +58,7 @@ export default function Footer() {
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
                         ? "text-blue-600 font-medium"
-                        : "text-gray-600 hover:text-gray-900"
+                        : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >
                     {link.label}
@@ -70,7 +70,7 @@ export default function Footer() {
 
           {/* Company Column */}
           <div>
-            <h4 className='mb-4 font-semibold text-gray-900'>Company</h4>
+            <h4 className='mb-4 font-bold text-[#000000]'>Company</h4>
             <ul className='space-y-3'>
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
@@ -82,7 +82,7 @@ export default function Footer() {
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
                         ? "text-blue-600 font-medium"
-                        : "text-gray-600 hover:text-gray-900"
+                        : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >
                     {link.label}
@@ -94,7 +94,7 @@ export default function Footer() {
 
           {/* Legal Column */}
           <div>
-            <h4 className='mb-4 font-semibold text-gray-900'>Legal</h4>
+            <h4 className='mb-4 font-bold text-[#000000]'>Legal</h4>
             <ul className='space-y-3'>
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
@@ -106,7 +106,7 @@ export default function Footer() {
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
                         ? "text-blue-600 font-medium"
-                        : "text-gray-600 hover:text-gray-900"
+                        : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >
                     {link.label}
@@ -121,7 +121,7 @@ export default function Footer() {
         <div className='mt-12 border-t border-gray-200'></div>
 
         {/* Copyright */}
-        <div className='mt-8 text-center'>
+        <div className='mt-4 text-center'>
           <p className='text-sm text-gray-600'>
             © {new Date().getFullYear()} Poolio. All rights reserved.
           </p>

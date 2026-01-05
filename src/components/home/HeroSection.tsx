@@ -22,33 +22,33 @@ export default function HeroSection() {
     {
       id: 1,
       alt: "Male talent headshot",
-      src: "/images/image.png",
+      src: "/man.png",
     },
     {
       id: 2,
       alt: "Female talent headshot",
-      src: "/images/image.png",
+      src: "/man.png",
     },
     {
       id: 3,
       alt: "Female talent headshot",
-      src: "/images/image.png",
+      src: "/man.png",
     },
     {
       id: 4,
       alt: "Male talent headshot",
-      src: "/images/image.png",
+      src: "/man.png",
     },
   ];
 
   return (
-    <section className='w-full bg-white py-12 md:py-20 lg:py-28'>
-      <div className='mx-auto max-w-6xl px-4 sm:px-6 lg:px-8'>
+    <section className='w-full bg-[#F6F7F9] py-12 md:py-20 lg:py-28'>
+      <div className='mx-auto container px-4 sm:px-6 lg:px-8'>
         {/* Badge */}
         <div className='mb-8 flex justify-center'>
-          <div className='inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2'>
-            <div className='h-2 w-2 rounded-full bg-blue-600' />
-            <span className='text-sm font-medium text-gray-900'>
+          <div className='inline-flex items-center gap-2 rounded-full bg-white px-4 py-2'>
+            <div className='h-2 w-2 rounded-full bg-[#2563EB]' />
+            <span className='text-sm font-medium text-[#404145]'>
               Powered by Advanced AI Technology
             </span>
           </div>
@@ -56,15 +56,15 @@ export default function HeroSection() {
 
         {/* Headline */}
         <div className='mb-6 text-center'>
-          <h1 className='text-balance text-4xl font-bold leading-tight text-gray-900 md:text-5xl lg:text-6xl'>
-            AI-Powered Casting,{" "}
-            <span className='text-blue-600'>All in One Place</span>
+          <h1 className='text-balance text-4xl font-bold leading-tight text-[#000000] md:text-5xl lg:text-6xl'>
+            AI-Powered Casting, <br />
+            <span className='text-[#2563EB]'>All in One Place</span>
           </h1>
         </div>
 
         {/* Subheading */}
         <div className='mb-10 text-center'>
-          <p className='mx-auto max-w-2xl text-lg leading-relaxed text-gray-600 md:text-xl'>
+          <p className='mx-auto max-w-2xl text-lg leading-relaxed text-[#404145] md:text-xl'>
             Streamline your casting process from job creation to booking.
             Connect clients, agents, and talents seamlessly with intelligent
             automation.
@@ -75,15 +75,16 @@ export default function HeroSection() {
         <div className='mb-16 flex flex-col justify-center gap-4 sm:flex-row sm:gap-6 md:mb-20'>
           <Button
             onClick={handleCreateJob}
-            className='inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 font-semibold text-white transition-all duration-200 hover:bg-blue-700 active:scale-95 sm:px-12 md:h-14'
+            className='button'
+            // className='inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 font-semibold text-white transition-all duration-200 hover:bg-blue-700 active:scale-95 sm:px-12 md:h-14'
           >
             Create Job
-            <ArrowRight className='h-5 w-5' />
+            <ArrowRight className='h-6 w-6' />
           </Button>
           <Button
             onClick={handleJoinAgent}
             variant='outline'
-            className='inline-flex h-12 items-center justify-center rounded-lg border-2 border-gray-300 bg-white px-8 font-semibold text-gray-900 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 active:scale-95 sm:px-12 md:h-14'
+            className='inline-flex h-12 items-center justify-center rounded-lg border border-[#E7E8EA] bg-white px-8 text-xl font-bold text-gray-900 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 active:scale-95 sm:px-12 md:h-14 cursor-pointer'
           >
             Join as Agent
           </Button>
@@ -101,8 +102,8 @@ export default function HeroSection() {
               <Image
                 src={image.src || "/placeholder.svg"}
                 alt={image.alt}
-                width={0}
-                height={0}
+                width={500}
+                height={500}
                 className='aspect-square h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
               />
               {hoveredImage === image.id && (

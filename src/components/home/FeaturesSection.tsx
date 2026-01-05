@@ -38,10 +38,10 @@ export default function FeaturesSection() {
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12 md:mb-16'>
-          <h2 className='text-4xl md:text-5xl font-bold text-black mb-4 text-balance'>
+          <h2 className='text-2xl md:text-4xl font-bold text-[#1B1B1D] mb-4 text-balance'>
             Powerful Features
           </h2>
-          <p className='text-lg md:text-xl text-gray-600 text-balance'>
+          <p className='text-base md:text-lg text-[#404145] text-balance'>
             Everything you need for modern casting management
           </p>
         </div>
@@ -75,10 +75,10 @@ export default function FeaturesSection() {
               </div>
 
               {/* Content */}
-              <h3 className='text-lg md:text-xl font-bold text-black mb-3 leading-tight'>
+              <h3 className='text-lg md:text-xl font-bold text-[#1B1B1D] mb-3 leading-tight'>
                 {feature.title}
               </h3>
-              <p className='text-sm md:text-base text-gray-600 leading-relaxed'>
+              <p className='text-sm md:text-base text-[#404145] leading-relaxed'>
                 {feature.description}
               </p>
             </div>
