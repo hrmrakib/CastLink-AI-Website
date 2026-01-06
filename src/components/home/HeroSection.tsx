@@ -4,13 +4,17 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+  const router = useRouter();
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
 
   const handleCreateJob = () => {
     console.log("Create Job button clicked");
     // Add your navigation or action here
+    // router.push("/login");
+    router.push("/dashboard");
   };
 
   const handleJoinAgent = () => {

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import useHideNavFooter from "../utils/NavFooterNone";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const hideNavbar = useHideNavFooter();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -17,11 +19,13 @@ export default function Navbar() {
     { name: "Casting Directors", href: "#casting" },
   ];
 
+  if (hideNavbar) return null;
+
   return (
     <nav className='bg-white'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-23.75'>
-          <div className='flex items-center gap-6 lg:gap-12 border-b'>
+          <div className='flex items-center gap-6 lg:gap-12'>
             {/* Logo */}
             <div className='shrink-0'>
               <Link href='/' className='text-2xl font-bold text-[#000000]'>

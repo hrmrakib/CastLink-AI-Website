@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import useHideNavFooter from "../utils/NavFooterNone";
 
 export default function Footer() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const hideNavbar = useHideNavFooter();
+
+  if (hideNavbar) return null;
 
   const footerLinks = {
     product: [
