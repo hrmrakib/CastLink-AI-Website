@@ -239,7 +239,7 @@ export default function Home() {
                               title='Like'
                             >
                               <Heart size={20} fill='currentColor' />
-                            </button>
+                            </button>10
                             <button
                               className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-500 border border-transparent hover:border-blue-300'
                               aria-label='Schedule'

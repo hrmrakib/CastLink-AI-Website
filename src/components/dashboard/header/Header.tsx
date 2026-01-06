@@ -22,7 +22,10 @@ const Header = () => {
     setHeaderTitle(role);
   }, [role]);
 
-  if (pathname === "/dashboard/client/ai-chat") {
+  if (
+    pathname === "/dashboard/client/ai-chat" ||
+    pathname === "/dashboard/client/jobs"
+  ) {
     return null;
   }
 
