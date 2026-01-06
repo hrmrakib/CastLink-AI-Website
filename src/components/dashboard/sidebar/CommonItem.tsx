@@ -27,7 +27,7 @@ export function NavItem({
             "flex items-center gap-3 px-4 py-5! transition-colors rounded-full font-medium relative",
             active
               ? "bg-[#2563EB] hover:bg-[#2563EB]! text-white hover:text-white!"
-              : "text-sidebar-color hover:bg-[#2563EB]! hover:text-[#2563EB]!"
+              : "text-sidebar-color"
           )}
         >
           <Icon size={18} />

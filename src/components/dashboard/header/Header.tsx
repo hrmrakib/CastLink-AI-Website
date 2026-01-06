@@ -27,7 +27,7 @@ const Header = () => {
   }
 
   return (
-    <div className='bg-white mb-6'>
+    <div className='bg-white mb-6 h-20'>
       <div className='max-w-8xl mx-auto'>
         <div className='flex items-center justify-between py-2'>
           <div>

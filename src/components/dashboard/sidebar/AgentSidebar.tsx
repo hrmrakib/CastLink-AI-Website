@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-const AdminSidebar = () => {
+const AgentSidebar = () => {
   const pathname = usePathname();
 
   console.log(pathname);
@@ -89,4 +89,4 @@ const AdminSidebar = () => {
   );
 };
 
-export default AdminSidebar;
+export default AgentSidebar;

@@ -9,7 +9,6 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { usePathname, useRouter } from "next/navigation";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import {
@@ -22,19 +21,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import AdminSidebar from "./AdminSidebar";
+import AgentSidebar from "./AgentSidebar";
+import ClientSidebar from "./ClientSidebar";
 
 // import { logout } from "@/service/authService";
 
 export default function DashboardSidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [sidebarView, setSidebarView] = useState("admin");
+  const [sidebarView, setSidebarView] = useState<"agent" | "client" | string>(
+    "agent"
+  );
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setSidebarView(pathname.split("/")[2]);
   }, [pathname]);
+
+  console.log({ sidebarView });
 
   const handleLogout = async () => {
     // await logout();
@@ -66,14 +70,11 @@ export default function DashboardSidebar() {
               href='/'
               className='flex items-center justify-center gap-2 px-3 py-9'
             >
-             <h2 className='text-2xl font-bold text-[#000000]'>Poolio</h2>
+              <h2 className='text-2xl font-bold text-[#000000]'>Poolio</h2>
             </Link>
 
-            {sidebarView !== "agent" &&
-              sidebarView !== "venue" &&
-              sidebarView !== "artist" &&
-              sidebarView !== "organizer" &&
-              sidebarView !== "user" && <AdminSidebar />}
+            {sidebarView === "agent" && <AgentSidebar />}
+            {sidebarView === "client" && <ClientSidebar />}
           </SidebarContent>
 
           <SidebarFooter className='p-6'>
