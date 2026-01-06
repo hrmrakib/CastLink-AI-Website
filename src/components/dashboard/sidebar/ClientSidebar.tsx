@@ -1,7 +1,6 @@
 "use client";
 
 import { SidebarMenu } from "@/components/ui/sidebar";
-import { NavItem } from "@/components/dashboard/sidebar/CommonItem";
 import {
   LayoutDashboard,
   BanknoteArrowUp,
@@ -10,6 +9,7 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { NavItem } from "./CommonItem";
 
 const ClientSidebar = () => {
   const pathname = usePathname();
@@ -20,49 +20,52 @@ const ClientSidebar = () => {
     <>
       <SidebarMenu className='px-4 space-y-2'>
         <NavItem
-          href='/dashboard'
+          href='/dashboard/client'
           icon={LayoutDashboard}
           label='Dashboard'
-          active={pathname === "/dashboard/" || pathname === "/dashboard"}
+          active={
+            pathname === "/dashboard/client/" ||
+            pathname === "/dashboard/client"
+          }
         />
 
         <NavItem
-          href='/dashboard/ai-chat'
+          href='/dashboard/client/ai-chat'
           icon={BanknoteArrowUp}
           label='AI Chat'
           active={
-            pathname === "/dashboard/ai-chat" ||
-            pathname.startsWith("/dashboard/ai-chat/")
+            pathname === "/dashboard/client/ai-chat" ||
+            pathname.startsWith("/dashboard/client/ai-chat/")
           }
         />
 
         <NavItem
-          href='/dashboard/jobs'
+          href='/dashboard/client/jobs'
           icon={Medal}
           label='Jobs'
           active={
-            pathname === "/dashboard/jobs" ||
-            pathname.startsWith("/dashboard/jobs/")
+            pathname === "/dashboard/client/jobs" ||
+            pathname.startsWith("/dashboard/client/jobs/")
           }
         />
 
         <NavItem
-          href='/dashboard/message'
+          href='/dashboard/client/message'
           icon={FolderKanban}
           label='Messages'
           active={
-            pathname === "/dashboard/message" ||
-            pathname.startsWith("/dashboard/message/")
+            pathname === "/dashboard/client/message" ||
+            pathname.startsWith("/dashboard/client/message/")
           }
         />
 
         <NavItem
-          href='/dashboard/settings'
+          href='/dashboard/client/settings'
           icon={MessageCircleMore}
           label='Settings'
           active={
-            pathname === "/dashboard/settings" ||
-            pathname.startsWith("/dashboard/settings/")
+            pathname === "/dashboard/client/settings" ||
+            pathname.startsWith("/dashboard/client/settings/")
           }
         />
       </SidebarMenu>

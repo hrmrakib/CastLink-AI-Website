@@ -55,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <main className='min-h-screen bg-background'>
+    <main className='min-h-screen bg-transparent'>
       {/* Main Content */}
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10'>
         {/* Stats Grid */}

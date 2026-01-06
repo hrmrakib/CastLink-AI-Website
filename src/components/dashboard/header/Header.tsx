@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import useHideNavFooter from "@/components/utils/NavFooterNone";
+import getGreeting from "@/components/utils/getGreeting";
 
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathname = usePathname();
-  const hinderNavFooter = useHideNavFooter();
   const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
@@ -22,18 +22,19 @@ const Header = () => {
     setHeaderTitle(role);
   }, [role]);
 
-  if (hinderNavFooter) {
+  if (pathname === "/dashboard/client/ai-chat") {
     return null;
   }
 
   return (
-    <div className='bg-white mb-6 h-20'>
-      <div className='max-w-8xl mx-auto'>
+    <div className='bg-white mb-6 h-28 px-6 py-6 rounded-xl'>
+      <div className='max-w-8x mx-auto'>
         <div className='flex items-center justify-between py-2'>
           <div>
-            <h1 className='text-2xl lg:text-4xl font-bold text-[#222222] capitalize'>
-              {headerTitle} Dashboard
+            <h1 className='text-2xl font-medium text-[#222222] capitalize'>
+              Welcome, Sidney
             </h1>
+            <p className='text-sm text-[#606060]'>{getGreeting()}</p>
           </div>
           <div className='flex items-center gap-4'>
             {/* <Button variant='ghost' size='icon' className='relative'>
