@@ -57,7 +57,7 @@ export default function Navbar() {
             </Link>
             <Link
               href='/signup'
-              className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors'
+              className='bg-[#2563EB] hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors'
             >
               Sign Up
             </Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href='/signup'
-                  className='block px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-center'
+                  className='block px-3 py-2 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-center'
                   onClick={() => setIsOpen(false)}
                 >
                   Sign Up

@@ -1,7 +1,6 @@
 "use client";
 
 import { SidebarMenu } from "@/components/ui/sidebar";
-import { NavItem } from "@/components/dashboard/sidebar/CommonItem";
 import {
   LayoutDashboard,
   BanknoteArrowUp,
@@ -10,6 +9,7 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { NavItem } from "./CommonItem";
 
 const AgentSidebar = () => {
   const pathname = usePathname();
@@ -20,68 +20,70 @@ const AgentSidebar = () => {
     <>
       <SidebarMenu className='px-4 space-y-2'>
         <NavItem
-          href='/dashboard'
+          href='/dashboard/agent'
           icon={LayoutDashboard}
           label='Dashboard'
-          active={pathname === "/dashboard/" || pathname === "/dashboard"}
+          active={
+            pathname === "/dashboard/agent/" || pathname === "/dashboard/agent"
+          }
         />
 
         <NavItem
-          href='/dashboard/add-talent'
+          href='/dashboard/agent/add-talent'
           icon={BanknoteArrowUp}
           label='Add Talent'
           active={
-            pathname === "/dashboard/add-talent" ||
-            pathname.startsWith("/dashboard/add-talent/")
+            pathname === "/dashboard/agent/add-talent" ||
+            pathname.startsWith("/dashboard/agent/add-talent/")
           }
         />
 
         <NavItem
-          href='/dashboard/talent-vault'
+          href='/dashboard/agent/talent-vault'
           icon={Medal}
           label='Talent Vault'
           active={
-            pathname === "/dashboard/talent-vault" ||
-            pathname.startsWith("/dashboard/talent-vault/")
+            pathname === "/dashboard/agent/talent-vault" ||
+            pathname.startsWith("/dashboard/agent/talent-vault/")
           }
         />
 
         <NavItem
-          href='/dashboard/active-jobs'
+          href='/dashboard/agent/active-jobs'
           icon={FolderKanban}
           label='Active Jobs'
           active={
-            pathname === "/dashboard/active-jobs" ||
-            pathname.startsWith("/dashboard/active-jobs/")
+            pathname === "/dashboard/agent/active-jobs" ||
+            pathname.startsWith("/dashboard/agent/active-jobs/")
           }
         />
 
         <NavItem
-          href='/dashboard/calendar'
+          href='/dashboard/agent/calendar'
           icon={FolderKanban}
           label='Calendar'
           active={
-            pathname === "/dashboard/calendar" ||
-            pathname.startsWith("/dashboard/calendar/")
+            pathname === "/dashboard/agent/calendar" ||
+            pathname.startsWith("/dashboard/agent/calendar/")
           }
         />
         <NavItem
-          href='/dashboard/message'
+          href='/dashboard/agent/message'
           icon={FolderKanban}
           label='Messages'
           active={
-            pathname === "/dashboard/message" ||
-            pathname.startsWith("/dashboard/message/")
+            pathname === "/dashboard/agent/message" ||
+            pathname.startsWith("/dashboard/agent/message/")
           }
         />
 
         <NavItem
-          href='/dashboard/settings'
+          href='/dashboard/agent/settings'
           icon={MessageCircleMore}
           label='Settings'
           active={
-            pathname === "/dashboard/settings" ||
-            pathname.startsWith("/dashboard/settings/")
+            pathname === "/dashboard/agent/settings" ||
+            pathname.startsWith("/dashboard/agent/settings/")
           }
         />
       </SidebarMenu>

@@ -97,7 +97,7 @@ const STATUS_COLORS = {
   pending: "bg-slate-700 text-white",
   available: "bg-green-600 text-white",
   "not-available": "bg-red-600 text-white",
-  confirmed: "bg-blue-600 text-white",
+  confirmed: "bg-[#2563EB] text-white",
   completed: "bg-slate-700 text-white",
 };
 

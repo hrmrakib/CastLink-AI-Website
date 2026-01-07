@@ -215,7 +215,7 @@ export default function OTPVerifyPage() {
             <Button
               type='submit'
               disabled={isLoading || otp.some((digit) => !digit)}
-              className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              className='w-full bg-[#2563EB] hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {isLoading ? (
                 <>

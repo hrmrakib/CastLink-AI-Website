@@ -80,7 +80,7 @@ export default function HeroSection() {
           <Button
             onClick={handleCreateJob}
             className='button'
-            // className='inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-blue-600 px-8 font-semibold text-white transition-all duration-200 hover:bg-blue-700 active:scale-95 sm:px-12 md:h-14'
+            // className='inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-8 font-semibold text-white transition-all duration-200 hover:bg-blue-700 active:scale-95 sm:px-12 md:h-14'
           >
             Create Job
             <ArrowRight className='h-6 w-6' />

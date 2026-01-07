@@ -239,7 +239,8 @@ export default function Home() {
                               title='Like'
                             >
                               <Heart size={20} fill='currentColor' />
-                            </button>10
+                            </button>
+                            10
                             <button
                               className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-500 border border-transparent hover:border-blue-300'
                               aria-label='Schedule'
@@ -317,7 +318,7 @@ export default function Home() {
           bg-blue-500 text-white
           rounded-full
           flex items-center justify-center
-          hover:bg-blue-600 transition-colors
+          hover:bg-[#2563EB] transition-colors
           disabled:opacity-50 disabled:cursor-not-allowed
           shadow-sm
         '

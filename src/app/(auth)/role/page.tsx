@@ -88,7 +88,7 @@ export default function RoleSelection() {
                     e.stopPropagation();
                     handleProceed(card.id);
                   }}
-                  className='absolute bottom-6 md:bottom-8 right-8 md:right-10 p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 transform group-hover:scale-110 cursor-pointer'
+                  className='absolute bottom-6 md:bottom-8 right-8 md:right-10 p-3 rounded-full bg-blue-500 text-white hover:bg-[#2563EB] transition-colors duration-200 transform group-hover:scale-110 cursor-pointer'
                   aria-label={`Proceed as ${card.title}`}
                 >
                   <ArrowRight className='w-5 h-5' />
