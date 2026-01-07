@@ -5,6 +5,15 @@ import { useState, useMemo } from "react";
 import { ChevronDown, Grid3x3, Grid2X2 as Grid4x4 } from "lucide-react";
 import Image from "next/image";
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 // Mock talent data
 const TALENTS = [
   {
@@ -133,10 +142,10 @@ export default function TalentVault() {
       <div className='bg-card rounded-xl!'>
         <div className='mx-auto container px-4 pt-6 sm:px-6 lg:px-8'>
           <div className='mb-8'>
-            <h1 className='text-3xl font-bold tracking-tight text-foreground sm:text-4xl'>
+            <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
               Talent vault
             </h1>
-            <p className='mt-2 text-sm text-muted-foreground'>
+            <p className='mt-2 text-base text-[#404145]'>
               Visual overview of agency talent
             </p>
           </div>
@@ -145,32 +154,34 @@ export default function TalentVault() {
           <div className='flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
             <div className='flex gap-3'>
               {/* Availability Dropdown */}
-              <div className='relative inline-block'>
-                <select
-                  value={availability}
-                  onChange={(e) => setAvailability(e.target.value)}
-                  className='appearance-none rounded-md border border-border bg-background px-4 py-2 pr-10 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary'
-                >
-                  <option value='all'>Availability</option>
-                  <option value='available'>Available</option>
-                  <option value='unavailable'>Unavailable</option>
-                </select>
-                <ChevronDown className='pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground' />
-              </div>
+              <Select value={availability} onValueChange={setAvailability}>
+                <SelectTrigger className='w-45'>
+                  <SelectValue placeholder='Availability' />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value='all'>All</SelectItem>
+                    <SelectItem value='available'>Available</SelectItem>
+                    <SelectItem value='unavailable'>Unavailable</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
 
               {/* Role Dropdown */}
-              <div className='relative inline-block'>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className='appearance-none rounded-md border border-border bg-background px-4 py-2 pr-10 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary'
-                >
-                  <option value='all'>All Roles</option>
-                  <option value='model'>Model</option>
-                  <option value='actor'>Actor</option>
-                </select>
-                <ChevronDown className='pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground' />
-              </div>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger className='w-[180px]'>
+                  <SelectValue placeholder='All Roles' />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value='all'>All Roles</SelectItem>
+                    <SelectItem value='model'>Model</SelectItem>
+                    <SelectItem value='actor'>Actor</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className='flex items-center gap-4'>
