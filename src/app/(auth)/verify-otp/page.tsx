@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -26,6 +27,10 @@ export default function OTPVerifyPage() {
       setCanResend(true);
     }
   }, [resendTimer, canResend]);
+
+  const setInputRef = (index: number) => (el: HTMLInputElement | null) => {
+    inputRefs.current[index] = el;
+  };
 
   const handleOtpChange = (index: number, value: string) => {
     setError("");
@@ -116,17 +121,17 @@ export default function OTPVerifyPage() {
 
     try {
       // Simulate API call for resending OTP
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setSuccessMessage("Verification code sent to your registered email");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError("Failed to resend code. Please try again.");
+      // await new Promise((resolve) => setTimeout(resolve, 800));
+      // setSuccessMessage("Verification code sent to your registered email");
+      // setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err: any) {
+      setError("Failed to resend code. Please try again." + err.message);
     }
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md'>
+    <div className='min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='w-full max-w-xl'>
         {/* Card Container */}
         <div className='bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-10'>
           {/* Back Button */}
@@ -176,9 +181,10 @@ export default function OTPVerifyPage() {
                 {otp.map((digit, index) => (
                   <input
                     key={index}
-                    ref={(el) => {
-                      inputRefs.current[index] = el;
-                    }}
+                    // ref={(el) => {
+                    //   inputRefs.current[index] = el;
+                    // }}
+                    ref={setInputRef(index)}
                     type='text'
                     inputMode='numeric'
                     maxLength={1}
@@ -196,15 +202,17 @@ export default function OTPVerifyPage() {
 
             {/* Resend Link */}
             <div className='flex items-center justify-center gap-2 text-sm'>
-              <span className='text-gray-600'>Didn&apos;t receive code?</span>
+              <span className='text-[#707270] text-sm font-semibold'>
+                Didn&apos;t receive code?
+              </span>
               <button
                 type='button'
                 onClick={handleResend}
                 disabled={!canResend || resendTimer > 0 || isLoading}
                 className={`font-semibold transition-colors ${
                   canResend && resendTimer === 0 && !isLoading
-                    ? "text-blue-600 hover:text-blue-700 cursor-pointer"
-                    : "text-gray-400 cursor-not-allowed"
+                    ? "text-[#2563EB] hover:text-blue-700 cursor-pointer"
+                    : "text-[#707270] cursor-not-allowed"
                 }`}
               >
                 {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend again"}
@@ -215,7 +223,7 @@ export default function OTPVerifyPage() {
             <Button
               type='submit'
               disabled={isLoading || otp.some((digit) => !digit)}
-              className='w-full bg-[#2563EB] hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+              className='w-full h-12! bg-[#2563EB] hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {isLoading ? (
                 <>
@@ -230,11 +238,11 @@ export default function OTPVerifyPage() {
 
           {/* Back to Login Link */}
           <div className='mt-8 text-center'>
-            <p className='text-gray-600 text-sm'>
+            <p className='text-[#707270] text-sm'>
               Want to go back?{" "}
               <Link
                 href='/'
-                className='font-semibold text-blue-600 hover:text-blue-700 transition-colors'
+                className='font-semibold text-[#2563EB] hover:text-blue-700 transition-colors'
               >
                 Back to Login
               </Link>
@@ -243,7 +251,7 @@ export default function OTPVerifyPage() {
         </div>
 
         {/* Footer Info */}
-        <p className='text-center text-gray-500 text-xs mt-6'>
+        <p className='text-center text-[#707270] text-xs mt-6'>
           Secure verification process
         </p>
       </div>

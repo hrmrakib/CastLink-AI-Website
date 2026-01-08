@@ -43,15 +43,15 @@ export default function SignupPage() {
     }
 
     // Website URL validation
-    if (!formData.websiteUrl.trim()) {
-      newErrors.websiteUrl = "Website URL is required";
-    } else {
-      const urlRegex =
-        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-      if (!urlRegex.test(formData.websiteUrl)) {
-        newErrors.websiteUrl = "Please enter a valid website URL";
-      }
-    }
+    // if (!formData.websiteUrl.trim()) {
+    //   newErrors.websiteUrl = "Website URL is required";
+    // } else {
+    //   const urlRegex =
+    //     /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    //   if (!urlRegex.test(formData.websiteUrl)) {
+    //     newErrors.websiteUrl = "Please enter a valid website URL";
+    //   }
+    // }
 
     // Phone Number validation
     if (!formData.phoneNumber.trim()) {
@@ -137,8 +137,8 @@ export default function SignupPage() {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md'>
+    <div className='min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='w-full max-w-xl'>
         {/* Card Container */}
         <div className='bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-10'>
           {/* Header */}
@@ -163,7 +163,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='agencyName'
-                className='block text-base font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
               >
                 Agency Name
               </label>
@@ -190,9 +190,9 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='websiteUrl'
-                className='block text-base font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
               >
-                Website URL
+                Website URL <span className='text-sm'>(Optional)</span>
               </label>
               <input
                 id='websiteUrl'
@@ -217,7 +217,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='phoneNumber'
-                className='block text-base font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
               >
                 Phone Number
               </label>
@@ -246,7 +246,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='email'
-                className='block text-base font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
               >
                 Email
               </label>
@@ -273,7 +273,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='password'
-                className='block text-base font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
               >
                 Password
               </label>
@@ -311,7 +311,7 @@ export default function SignupPage() {
             <Button
               type='submit'
               disabled={isLoading}
-              className='w-full bg-[#2563EB] hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-6'
+              className='w-full h-12! bg-[#2563EB] hover:bg-blue-700 text-lg text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-6'
             >
               {isLoading ? (
                 <>
@@ -331,8 +331,8 @@ export default function SignupPage() {
             <p className='text-gray-600'>
               Already have account?{" "}
               <Link
-                href='/'
-                className='font-semibold text-blue-600 hover:text-blue-700 transition-colors'
+                href='/login'
+                className='font-semibold text-[#2563EB] hover:text-blue-700 transition-colors'
               >
                 Log In
               </Link>

@@ -7,9 +7,10 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
+export default function ChangePasswordPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -86,35 +87,6 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className='space-y-6'>
-            {/* Email Field */}
-            <div>
-              <label
-                htmlFor='email'
-                className='block text-base lg:text-xl font-medium text-[#1B1B1D] mb-2'
-              >
-                Email
-              </label>
-              <input
-                id='email'
-                type='email'
-                placeholder='you@gmail.com'
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) setErrors({ ...errors, email: "" });
-                }}
-                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email
-                    ? "border-red-500"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
-              )}
-            </div>
-
             {/* Password Field */}
             <div>
               <label
@@ -131,6 +103,46 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
+                    if (errors.password) setErrors({ ...errors, password: "" });
+                  }}
+                  className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.password
+                      ? "border-red-500"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  disabled={isLoading}
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[] transition-colors'
+                  disabled={isLoading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className='mt-2 text-sm text-red-600'>{errors.password}</p>
+              )}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <label
+                htmlFor='password'
+                className='block text-base lg:text-xl font-medium text-[#1B1B1D] mb-2'
+              >
+                Confirm Password
+              </label>
+              <div className='relative'>
+                <input
+                  id='confirm-password'
+                  type={showPassword ? "text" : "password"}
+                  placeholder='Enter your confirm password'
+                  value={password}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
                     if (errors.password) setErrors({ ...errors, password: "" });
                   }}
                   className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${

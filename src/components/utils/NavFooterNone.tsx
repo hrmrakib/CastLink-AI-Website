@@ -9,6 +9,7 @@ const hiddenRoutes = [
   "/reset-password",
   "/verify-otp",
   "/dashboard",
+  "/forgot-password",
 ];
 
 function useHideNavFooter() {
