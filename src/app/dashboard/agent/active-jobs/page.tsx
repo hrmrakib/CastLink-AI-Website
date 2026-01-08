@@ -273,6 +273,127 @@ export default function ActiveJobsPage() {
 
       {/* Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className='h-[90vh] lg:max-h-[80vh] max-w-6xl lg:min-w-5xl border-0 bg-[#D9D9D9]! p-8'>
+          {selectedJob && (
+            <div className='flex flex-col lg:flex-row gap-5 items-stretch overflow-y-auto'>
+              {/* Left Panel - Job Details */}
+              <div className='flex-1 bg-white! dark:bg-slate-950 p-8 rounded-lg'>
+                <div className='mb-6'>
+                  <span className='inline-block text-blue-600 font-medium text-sm mb-3'>
+                    AI Matched
+                  </span>
+                </div>
+
+                <h2 className='text-4xl font-bold text-foreground mb-8'>
+                  {selectedJob.jobName}
+                </h2>
+
+                {/* Details Section */}
+                <div className='mb-8'>
+                  <h3 className='text-xl font-bold text-foreground mb-2'>
+                    Details:
+                  </h3>
+                  <p className='text-muted-foreground'>
+                    {selectedJob.description}
+                  </p>
+                </div>
+
+                {/* Duration Section */}
+                <div className='mb-8'>
+                  <h3 className='text-xl font-bold text-foreground mb-2'>
+                    Duration:
+                  </h3>
+                  <p className='text-muted-foreground'>3 months</p>
+                </div>
+
+                {/* Budget Info Section */}
+                <div>
+                  <h3 className='text-xl font-bold text-foreground mb-2'>
+                    Budget info:
+                  </h3>
+                  <p className='text-muted-foreground'>{selectedJob.budget}</p>
+                </div>
+              </div>
+
+              {/* Right Panel - Talents & Client */}
+              <div className='flex-1 bg-white dark:bg-slate-900 p-8 rounded-lg space-y-6'>
+                {/* Talent Affected Section */}
+                <div className='bg-white px-5 py-6 rounded-lg'>
+                  <h3 className='text-xl font-bold text-foreground mb-4'>
+                    Talent Affected :
+                  </h3>
+                  <div className='space-y-4'>
+                    {/* Showing multiple talents */}
+                    {[1, 2, 3].map((idx) => (
+                      <div
+                        key={idx}
+                        className='flex items-center gap-4 p-3 bg-white dark:bg-slate-950 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition'
+                      >
+                        <Avatar className='h-10 w-10 shrink-0'>
+                          <AvatarImage
+                            src={
+                              selectedJob.talent.avatar || "/placeholder.svg"
+                            }
+                          />
+                          <AvatarFallback>
+                            {selectedJob.talent.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className='font-semibold text-foreground'>
+                            {selectedJob.talent.name}
+                          </p>
+                          <p className='text-sm text-muted-foreground'>
+                            Talent Profile
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Client Company Section */}
+                <div className='p-6 bg-white border-t border-t-amber-300 dark:bg-slate-950'>
+                  <div className='flex items-center gap-4'>
+                    <div className='w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shrink-0'>
+                      <span className='text-white font-bold text-lg'>T</span>
+                    </div>
+                    <div>
+                      <p className='font-bold text-foreground text-lg'>
+                        {selectedJob.clientCompany}
+                      </p>
+                      <p className='text-sm text-muted-foreground'>
+                        Client Company
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Action Buttons */}
+          {selectedJob && (
+            <div className='flex flex-col sm:flex-row gap-4 p-8 bg-transparent dark:bg-slate-900'>
+              <Button className='flex-1 bg-[#0F1C2E] hover:bg-slate-800 text-white rounded-lg h-12 font-semibold'>
+                Accept
+              </Button>
+              <Button className='flex-1 bg-[#CD0000] hover:bg-red-700 text-white rounded-lg h-12 font-semibold'>
+                Decline
+              </Button>
+              <Button className='flex-1 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg h-12 font-semibold'>
+                Respond
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Job Details Modal - temp */}
+      <Dialog>
         <DialogContent className='max-w-2xl'>
           <DialogHeader>
             <DialogTitle>{selectedJob?.jobName}</DialogTitle>
