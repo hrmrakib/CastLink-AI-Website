@@ -4,17 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Heart, Calendar, Camera, Phone, Check } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Message {
   id: number;
@@ -45,6 +35,8 @@ interface TalentProfile {
 }
 
 export default function Home() {
+  const [isOpen, setIsOpen] = useState(false);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -92,7 +84,7 @@ export default function Home() {
           shoeSize: "US 9 / UK# / EU 40",
           hairColor: "Light blond",
           eyeColor: "Brown",
-          image: "/woman.png",
+          image: "/man.png",
         },
         {
           id: 2,
@@ -103,7 +95,7 @@ export default function Home() {
           shoeSize: "US 9 / UK# / EU 40",
           hairColor: "Light blond",
           eyeColor: "Brown",
-          image: "/woman.png",
+          image: "/man.png",
           overlay: "+4",
         },
       ],
@@ -209,7 +201,11 @@ export default function Home() {
                   <div className='md:col-span-3'>
                     <div className='grid grid-cols-2 gap-4'>
                       {contentItems[index].profiles.map((profile) => (
-                        <div key={profile.id} className='space-y-3'>
+                        <div
+                          key={profile.id}
+                          className='space-y-3'
+                          onClick={() => setIsOpen(true)}
+                        >
                           {/* Profile Card */}
                           <div className='relative bg-[#404145] rounded-lg overflow-hidden aspect2/3 group cursor-pointer'>
                             <Image
@@ -342,11 +338,11 @@ export default function Home() {
         </div>
       </div>
 
-      <Dialog>
-        <DialogTrigger asChild>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        {/* <DialogTrigger asChild>
           <Button variant='outline'>Open Dialog</Button>
-        </DialogTrigger>
-        <DialogContent className='min-w-[55vw] bg-white max-w-6xl h-[90vh] max-h-[90vh] p-0 overflow-hidden'>
+        </DialogTrigger> */}
+        <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
           <ChatModalDetail />
         </DialogContent>
       </Dialog>

@@ -52,7 +52,7 @@ export default function Page() {
       <div className='px-6'>
         <button
           onClick={() => router.back()}
-          className='items-center gap-2 bg-white inline-flex mx-auto px-4 py-4 border rounded-xl! text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
+          className='items-center gap-2 bg-white inline-flex mx-auto px-3 py-2.5 border rounded-xl! text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
         >
           <ArrowLeft className='w-5 h-5' />
           Back

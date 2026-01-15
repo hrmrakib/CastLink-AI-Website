@@ -3,12 +3,13 @@
 import { useState } from "react";
 import {
   Search,
-  Plus,
   MapPin,
   Calendar,
   DollarSign,
   Users,
+  Sparkles,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Job {
   id: string;
@@ -84,6 +85,7 @@ const mockJobs: Job[] = [
 ];
 
 export default function Page() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -100,9 +102,9 @@ export default function Page() {
   });
 
   return (
-    <main className='min-h-screen bg-gray-50'>
+    <main className='min-h-screen bg-transparent'>
       {/* Header */}
-      <div className='sticky top-0 z-40 bg-white border-b border-gray-200'>
+      <div className='sticky top-0 z-40 bg-transparent'>
         <div className='container mx-auto px-4 py-6'>
           <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
             {/* Title Section */}
@@ -122,14 +124,17 @@ export default function Page() {
                   placeholder='Search Jobs'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className='w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent'
                 />
               </div>
               <button
-                onClick={() => setShowCreateModal(true)}
-                className='bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap'
+                onClick={() => router.push("/dashboard/client/ai-chat")}
+                className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
               >
-                <Plus className='w-5 h-5' />
+                <Sparkles
+                  className='w-6 h-6 text-[#ffffff]'
+                  strokeWidth={1.2}
+                />
                 Create New Job
               </button>
             </div>
@@ -138,7 +143,7 @@ export default function Page() {
       </div>
 
       {/* Filter Tabs */}
-      <div className='bg-white border-b border-gray-200 sticky top-20 z-30'>
+      <div className='bg-transparent sticky top-20 z-30'>
         <div className='container mx-auto px-4'>
           <div className='flex gap-2 overflow-x-auto py-4'>
             {["All", "Urgent", "This Week"].map((filter) => (
@@ -147,8 +152,8 @@ export default function Page() {
                 onClick={() => setSelectedFilter(filter)}
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
                   selectedFilter === filter
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-[#2563EB] text-white"
+                    : "bg-white text-[#404145] hover:bg-gray-200"
                 }`}
               >
                 {filter}
@@ -167,32 +172,32 @@ export default function Page() {
               className='bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition'
             >
               {/* Title and Description */}
-              <h3 className='text-lg font-bold text-gray-900 mb-2'>
+              <h3 className='text-lg font-bold text-[#000000] mb-2'>
                 {job.title}
               </h3>
-              <p className='text-gray-600 text-sm mb-4 line-clamp-2'>
+              <p className='text-[#404145] text-sm mb-4 line-clamp-2'>
                 {job.description}
               </p>
 
               {/* Status Badge */}
               <div className='mb-4'>
-                <span className='inline-block bg-cyan-100 text-cyan-700 px-3 py-1 rounded-full text-sm font-medium'>
+                <span className='inline-block bg-[#E7F8F2] text-[#009F91] px-3 py-1 rounded-full text-sm font-medium'>
                   {job.status}
                 </span>
               </div>
 
               {/* Details */}
               <div className='space-y-3 mb-4 text-sm'>
-                <div className='flex items-center gap-2 text-gray-700'>
-                  <MapPin className='w-4 h-4 text-gray-500' />
+                <div className='flex items-center gap-2 text-[#404145]'>
+                  <MapPin className='w-4 h-4 text-[#404145]' />
                   {job.location}
                 </div>
                 <div className='flex items-center gap-2 text-gray-700'>
-                  <Calendar className='w-4 h-4 text-gray-500' />
+                  <Calendar className='w-4 h-4 text-[#404145]' />
                   {job.date}
                 </div>
                 <div className='flex items-center gap-2 text-gray-700'>
-                  <DollarSign className='w-4 h-4 text-gray-500' />
+                  <DollarSign className='w-4 h-4 text-[#404145]' />
                   {job.budget}
                 </div>
               </div>
@@ -201,7 +206,7 @@ export default function Page() {
               <div className='mb-4 pb-4 border-b border-gray-200'>
                 <div className='flex gap-4 text-sm'>
                   <div className='flex items-center gap-1'>
-                    <Users className='w-4 h-4 text-gray-500' />
+                    <Users className='w-4 h-4 text-[#404145]' />
                     <span className='text-gray-700'>
                       <strong>{job.applicants}</strong> Applicants
                     </span>
@@ -219,7 +224,7 @@ export default function Page() {
               <div className='mb-6'>
                 <div className='w-full bg-gray-200 rounded-full h-2'>
                   <div
-                    className='bg-blue-500 h-2 rounded-full transition-all'
+                    className='bg-[#2563EB] h-2 rounded-full transition-all'
                     style={{ width: `${job.applicantProgress}%` }}
                   />
                 </div>
@@ -227,13 +232,18 @@ export default function Page() {
 
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row gap-2'>
-                <button className='flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm'>
+                <button
+                  onClick={() =>
+                    router.push(`/dashboard/client/active-jobs/${job.id}`)
+                  }
+                  className='flex-1 bg-[#F6F7F9] border border-[#91979F] text-[#000000] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                >
                   View AI Result
                 </button>
-                <button className='flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm'>
+                <button className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'>
                   E-Casting Room
                 </button>
-                <button className='flex-1 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm'>
+                <button className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'>
                   Selftapes
                 </button>
               </div>
@@ -262,12 +272,12 @@ export default function Page() {
               <input
                 type='text'
                 placeholder='Job Title'
-                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]'
               />
               <textarea
                 placeholder='Job Description'
                 rows={4}
-                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none'
               />
               <div className='flex gap-2 justify-end pt-4'>
                 <button
@@ -278,7 +288,7 @@ export default function Page() {
                 </button>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium'
+                  className='px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-600 transition font-medium'
                 >
                   Create
                 </button>
