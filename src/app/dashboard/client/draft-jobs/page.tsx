@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 export interface Job {
@@ -39,7 +39,9 @@ function JobCard({
         </div>
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1'>
-            <h3 className='font-bold text-xl text-[#000000] mb-2'>{job.title}</h3>
+            <h3 className='font-bold text-xl text-[#000000] mb-2'>
+              {job.title}
+            </h3>
             <p className='text-sm text-[#404145]'>{job.description}</p>
           </div>
           <div className='whitespace-nowrap text-xs text-[#404145]'>
@@ -130,7 +132,7 @@ export default function DraftJobsPage() {
             </p>
           </div>
           <button className='flex items-center gap-2 rounded-lg bg-[#2563EB] px-6 py-3 font-semibold text-white transition-all hover:bg-blue-700 active:scale-95'>
-            <Plus size={20} />
+            <Sparkles className='w-6 h-6 text-[#ffffff]' strokeWidth={1.2} />
             Create New Job
           </button>
         </div>

@@ -2,7 +2,17 @@
 
 import type React from "react";
 import { useState } from "react";
-import { Eye, Trash2, Filter, Share2, Download } from "lucide-react";
+import {
+  Eye,
+  Trash2,
+  Filter,
+  Share2,
+  Download,
+  UserRoundPlus,
+  MapPin,
+  CalendarMinus2,
+  UserRound,
+} from "lucide-react";
 
 interface Talent {
   id: string;
@@ -113,13 +123,13 @@ export default function ShortlistDetailPage() {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <div className='mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
+      <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
         {/* Header Section */}
         <div className='mb-8'>
-          <h1 className='text-2xl font-bold text-gray-900 sm:text-3xl'>
+          <h1 className='text-2xl font-bold text-[#000000] sm:text-3xl'>
             Shortlist: Summer Fashion Campaign
           </h1>
-          <p className='mt-2 text-sm text-gray-600 sm:text-base'>
+          <p className='mt-2 text-sm text-[#404145] sm:text-base'>
             Drag to reorder • {talents.length} talents selected
           </p>
 
@@ -127,21 +137,21 @@ export default function ShortlistDetailPage() {
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
             <button
               onClick={handleFilter}
-              className='flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
               <Filter size={18} />
               Filter
             </button>
             <button
               onClick={handleShareLink}
-              className='flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
               <Share2 size={18} />
               Share Link
             </button>
             <button
               onClick={handleDownloadPDF}
-              className='flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
+              className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
             >
               <Download size={18} />
               Download PDF
@@ -163,85 +173,31 @@ export default function ShortlistDetailPage() {
               } hover:shadow-md cursor-move active:cursor-grabbing`}
             >
               {/* Number Badge */}
-              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white shrink-0'>
+              <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
                 {index + 1}
               </div>
 
               {/* Avatar Icon */}
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shrink-0'>
-                <svg
-                  className='h-6 w-6'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M12 4.354a4 4 0 110 5.292M15 12H9m4 8H9m4 0a4 4 0 100-8 4 4 0 000 8z'
-                  />
-                </svg>
+              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white shrink-0'>
+                <UserRoundPlus />
               </div>
 
               {/* Talent Info */}
               <div className='flex-1 min-w-0'>
-                <h3 className='font-bold text-gray-900 text-sm sm:text-base truncate'>
+                <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
                   {talent.name}
                 </h3>
-                <div className='mt-1 flex flex-wrap gap-2 text-xs text-gray-600 sm:text-sm'>
+                <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
                   <span className='flex items-center gap-1'>
-                    <svg
-                      className='h-3 w-3'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
-                      />
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
-                      />
-                    </svg>
+                    <MapPin size={14} />
                     {talent.location}
                   </span>
                   <span className='flex items-center gap-1'>
-                    <svg
-                      className='h-3 w-3'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                      />
-                    </svg>
+                    <CalendarMinus2 size={14} />
                     {talent.height}
                   </span>
                   <span className='flex items-center gap-1'>
-                    <svg
-                      className='h-3 w-3'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-                      />
-                    </svg>
+                    <UserRound size={14} />
                     {talent.gender} {talent.age}
                   </span>
                 </div>
@@ -251,14 +207,14 @@ export default function ShortlistDetailPage() {
               <div className='flex gap-2 shrink-0'>
                 <button
                   onClick={() => handleViewTalent(talent.id)}
-                  className='rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:scale-95'
+                  className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
                   aria-label='View talent'
                 >
                   <Eye size={20} />
                 </button>
                 <button
                   onClick={() => handleDeleteTalent(talent.id)}
-                  className='rounded-lg p-2 text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
+                  className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
                   aria-label='Delete talent'
                 >
                   <Trash2 size={20} />
