@@ -339,9 +339,6 @@ export default function Home() {
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        {/* <DialogTrigger asChild>
-          <Button variant='outline'>Open Dialog</Button>
-        </DialogTrigger> */}
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
           <ChatModalDetail />
         </DialogContent>

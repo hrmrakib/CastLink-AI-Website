@@ -14,8 +14,8 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Clients", href: "#clients" },
-    { name: "Agents", href: "#agents" },
+    { name: "Clients", href: "/dashboard/client" },
+    { name: "Agents", href: "/dashboard/agent" },
     { name: "Casting Directors", href: "#casting" },
   ];
 

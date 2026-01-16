@@ -41,7 +41,7 @@ export default function RootLayout({
               <SidebarTrigger
                 className={`text-black absolute top-2 md:left-2 right-2`}
               />
-              <Header />
+              {/* <Header /> */}
               {children}
             </main>
           </div>

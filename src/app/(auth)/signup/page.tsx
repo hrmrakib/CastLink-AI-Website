@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -9,18 +10,24 @@ import { Button } from "@/components/ui/button";
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     agencyName: "",
-    websiteUrl: "",
-    phoneNumber: "",
     email: "",
+    companyName: "",
+    websiteUrl: "",
+    country: "",
+    city: "",
+    phoneNumber: "",
     password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     agencyName: "",
-    websiteUrl: "",
-    phoneNumber: "",
     email: "",
+    companyName: "",
+    websiteUrl: "",
+    country: "",
+    city: "",
+    phoneNumber: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -29,9 +36,12 @@ export default function SignupPage() {
   const validateForm = () => {
     const newErrors = {
       agencyName: "",
-      websiteUrl: "",
-      phoneNumber: "",
       email: "",
+      companyName: "",
+      websiteUrl: "",
+      country: "",
+      city: "",
+      phoneNumber: "",
       password: "",
     };
 
@@ -120,13 +130,17 @@ export default function SignupPage() {
       setSuccessMessage("Account created successfully! Redirecting...");
       setFormData({
         agencyName: "",
-        websiteUrl: "",
-        phoneNumber: "",
         email: "",
+        companyName: "",
+        websiteUrl: "",
+        country: "",
+        city: "",
+        phoneNumber: "",
         password: "",
       });
       // In a real app, you'd redirect or handle authentication here
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error);
       setErrors((prev) => ({
         ...prev,
         email: "Account creation failed. Please try again.",
@@ -143,7 +157,7 @@ export default function SignupPage() {
         <div className='bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-10'>
           {/* Header */}
           <div className='text-center mb-8'>
-            <h1 className='text-3xl sm:text-4xl font-bold text-gray-900 mb-2 text-balance'>
+            <h1 className='text-3xl sm:text-4xl font-bold text-[#1B1B1D] mb-2 text-balance'>
               Create Your Account
             </h1>
           </div>
@@ -163,9 +177,9 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor='agencyName'
-                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
               >
-                Agency Name
+                Name <span className='text-red-500'>*</span>
               </label>
               <input
                 id='agencyName'
@@ -174,7 +188,7 @@ export default function SignupPage() {
                 placeholder='Enter your agency name'
                 value={formData.agencyName}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.agencyName
                     ? "border-red-500"
                     : "border-gray-200 hover:border-gray-300"
@@ -186,11 +200,67 @@ export default function SignupPage() {
               )}
             </div>
 
+            {/* Email Field */}
+            <div>
+              <label
+                htmlFor='email'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
+              >
+                Email <span className='text-red-500'>*</span>
+              </label>
+              <input
+                id='email'
+                name='email'
+                type='email'
+                placeholder='you@gmail.com'
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+                disabled={isLoading}
+              />
+              {errors.email && (
+                <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
+              )}
+            </div>
+
+            {/* Company Name Field */}
+            <div>
+              <label
+                htmlFor='companyName'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
+              >
+                Company
+              </label>
+              <input
+                id='companyName'
+                name='companyName'
+                type='text'
+                placeholder='Enter your agency name'
+                value={formData.companyName}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.companyName
+                    ? "border-red-500"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+                disabled={isLoading}
+              />
+              {errors.companyName && (
+                <p className='mt-2 text-sm text-red-600'>
+                  {errors.companyName}
+                </p>
+              )}
+            </div>
+
             {/* Website URL Field */}
             <div>
               <label
                 htmlFor='websiteUrl'
-                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
               >
                 Website URL <span className='text-sm'>(Optional)</span>
               </label>
@@ -201,7 +271,7 @@ export default function SignupPage() {
                 placeholder='https://example.com'
                 value={formData.websiteUrl}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.websiteUrl
                     ? "border-red-500"
                     : "border-gray-200 hover:border-gray-300"
@@ -213,11 +283,66 @@ export default function SignupPage() {
               )}
             </div>
 
+            {/* Country and City Fields */}
+            <div className='grid grid-cols-2 gap-4'>
+              <div>
+                <label
+                  htmlFor='country'
+                  className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
+                >
+                  Company
+                </label>
+                <input
+                  id='country'
+                  name='country'
+                  type='text'
+                  placeholder='Enter your country'
+                  value={formData.country}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.country
+                      ? "border-red-500"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  disabled={isLoading}
+                />
+                {errors.country && (
+                  <p className='mt-2 text-sm text-red-600'>{errors.country}</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor='city'
+                  className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
+                >
+                  City
+                </label>
+                <input
+                  id='city'
+                  name='city'
+                  type='text'
+                  placeholder='Enter your city'
+                  value={formData.city}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.city
+                      ? "border-red-500"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  disabled={isLoading}
+                />
+                {errors.city && (
+                  <p className='mt-2 text-sm text-red-600'>{errors.city}</p>
+                )}
+              </div>
+            </div>
+
             {/* Phone Number Field */}
             <div>
               <label
                 htmlFor='phoneNumber'
-                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
               >
                 Phone Number
               </label>
@@ -228,7 +353,7 @@ export default function SignupPage() {
                 placeholder='+1 (555) 000-0000'
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.phoneNumber
                     ? "border-red-500"
                     : "border-gray-200 hover:border-gray-300"
@@ -242,38 +367,11 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Email Field */}
-            <div>
-              <label
-                htmlFor='email'
-                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
-              >
-                Email
-              </label>
-              <input
-                id='email'
-                name='email'
-                type='email'
-                placeholder='you@gmail.com'
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email
-                    ? "border-red-500"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
-              )}
-            </div>
-
             {/* Password Field */}
             <div>
               <label
                 htmlFor='password'
-                className='block text-base lg:text-xl font-medium text-gray-900 mb-2'
+                className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
               >
                 Password
               </label>
@@ -285,7 +383,7 @@ export default function SignupPage() {
                   placeholder='Create a strong password'
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.password
                       ? "border-red-500"
                       : "border-gray-200 hover:border-gray-300"

@@ -240,7 +240,12 @@ export default function Page() {
                 >
                   View AI Result
                 </button>
-                <button className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'>
+                <button
+                  onClick={() =>
+                    router.push(`/dashboard/client/active-jobs/video/${job.id}`)
+                  }
+                  className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                >
                   E-Casting Room
                 </button>
                 <button className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'>
