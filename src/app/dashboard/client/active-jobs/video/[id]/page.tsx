@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, X } from "lucide-react";
+import Image from "next/image";
 
 const Page = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -322,9 +323,11 @@ const Page = () => {
           <div className='space-y-6'>
             {/* Profile Card */}
             <div className='bg-white rounded-lg overflow-hidden shadow'>
-              <img
+              <Image
                 src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=300&fit=crop'
                 alt={actorData.name}
+                width={400}
+                height={300}
                 className='w-full h-48 object-cover'
               />
               <div className='p-4'>
