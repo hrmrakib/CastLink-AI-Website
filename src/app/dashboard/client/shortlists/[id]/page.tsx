@@ -135,13 +135,13 @@ export default function ShortlistDetailPage() {
 
           {/* Action Buttons */}
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            <button
+            {/* <button
               onClick={handleFilter}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
               <Filter size={18} />
               Filter
-            </button>
+            </button> */}
             <button
               onClick={handleShareLink}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'

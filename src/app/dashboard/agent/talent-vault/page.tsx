@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronDown, Grid3x3, Grid2X2 as Grid4x4 } from "lucide-react";
+import { Grid3x3, Grid2X2 as Grid4x4 } from "lucide-react";
 import Image from "next/image";
 
 import {
@@ -140,7 +140,7 @@ export default function TalentVault() {
     <main className='min-h-screen bg-white rounded-xl!'>
       {/* Header Section */}
       <div className='bg-card rounded-xl!'>
-        <div className='mx-auto container px-4 pt-6 sm:px-6 lg:px-8'>
+        <div className='mx-auto container pt-6'>
           <div className='mb-8'>
             <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
               Talent vault
@@ -246,16 +246,16 @@ export default function TalentVault() {
       </div>
 
       {/* Grid Section */}
-      <div className='mx-auto container px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto container py-8'>
         <div
           className={`grid gap-4 transition-all duration-300 sm:gap-6 ${
             gridColumns === 1
-              ? "grid-cols-1"
+              ? "grid-cols-1 sm:grid-cols-8"
               : gridColumns === 2
-              ? "grid-cols-1 sm:grid-cols-2"
+              ? "grid-cols-2 sm:grid-cols-6"
               : gridColumns === 3
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+              ? "grid-cols-2 sm:grid-cols-5 lg:grid-cols-5"
+              : "grid-cols-2 sm:grid-cols-5 lg:grid-cols-4"
           }`}
         >
           {filteredTalents.map((talent) => (

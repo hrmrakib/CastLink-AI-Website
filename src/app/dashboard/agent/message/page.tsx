@@ -190,7 +190,7 @@ export default function MessagingPage() {
   };
 
   return (
-    <div className='h-[80vh] bg-background flex flex-col lg:flex-row overflow-hidden'>
+    <div className='h-[80vh] bg-transparent flex flex-col lg:flex-row overflow-hidden'>
       {/* Sidebar - Conversations List */}
       <div className='w-full lg:w-96 border-r border-border flex flex-col bg-background'>
         {/* Search */}
