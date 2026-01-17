@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { FileText, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export interface Job {
   id: string;
@@ -69,6 +70,7 @@ function JobCard({
 }
 
 export default function DraftJobsPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([
     {
       id: "1",
@@ -131,7 +133,10 @@ export default function DraftJobsPage() {
               Continue working on your saved job postings
             </p>
           </div>
-          <button className='flex items-center gap-2 rounded-lg bg-[#2563EB] px-6 py-3 font-semibold text-white transition-all hover:bg-blue-700 active:scale-95'>
+          <button
+            onClick={() => router.push("/dashboard/client/ai-chat")}
+            className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
+          >
             <Sparkles className='w-6 h-6 text-[#ffffff]' strokeWidth={1.2} />
             Create New Job
           </button>

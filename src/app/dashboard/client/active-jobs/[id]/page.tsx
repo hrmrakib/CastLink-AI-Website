@@ -59,7 +59,7 @@ export default function Page() {
   };
 
   const handleWatch = (id: string) => {
-    alert(`Watching submission ${id}`);
+    router.push(`/dashboard/client/active-jobs/video/${id}`)
   };
 
   const handleSelect = (id: string) => {

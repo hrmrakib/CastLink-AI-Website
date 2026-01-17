@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
-import useHideNavFooter from "@/components/utils/NavFooterNone";
 import getGreeting from "@/components/utils/getGreeting";
+import useDashboardHeader from "@/components/utils/hideDashboardHeader";
 
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathname = usePathname();
   const [hasToken, setHasToken] = useState(false);
+  const hideThing = useDashboardHeader();
 
   useEffect(() => {
     setHasToken(!!localStorage?.getItem("access_token"));
@@ -22,10 +23,7 @@ const Header = () => {
     setHeaderTitle(role);
   }, [role]);
 
-  if (
-    pathname === "/dashboard/client/ai-chat" ||
-    pathname === "/dashboard/client/jobs"
-  ) {
+  if (hideThing) {
     return null;
   }
 

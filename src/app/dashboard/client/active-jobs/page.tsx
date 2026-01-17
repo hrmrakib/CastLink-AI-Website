@@ -234,7 +234,7 @@ export default function Page() {
               <div className='flex flex-col sm:flex-row gap-2'>
                 <button
                   onClick={() =>
-                    router.push(`/dashboard/client/active-jobs/${job.id}`)
+                    router.push(`/dashboard/client/ai-chat/${job.id}`)
                   }
                   className='flex-1 bg-[#F6F7F9] border border-[#91979F] text-[#000000] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
                 >
@@ -248,7 +248,12 @@ export default function Page() {
                 >
                   E-Casting Room
                 </button>
-                <button className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'>
+                <button
+                  onClick={() =>
+                    router.push(`/dashboard/client/active-jobs/${job.id}`)
+                  }
+                  className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                >
                   Selftapes
                 </button>
               </div>

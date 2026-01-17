@@ -7,11 +7,13 @@ import {
   SparklesIcon,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type JobStatus =
   | "all"
@@ -102,6 +104,7 @@ const STATUS_COLORS = {
 };
 
 export default function JobsPageClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<JobStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
@@ -228,10 +231,16 @@ export default function JobsPageClient() {
               </Button>
 
               {/* Create Job Button */}
-              <Button className='h-11! w-full sm:w-auto gap-2 button'>
-                <SparklesIcon className='h-4 w-4' />
-                Create Job with AI
-              </Button>
+              <button
+                onClick={() => router.push("/dashboard/client/ai-chat")}
+                className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
+              >
+                <Sparkles
+                  className='w-6 h-6 text-[#ffffff]'
+                  strokeWidth={1.2}
+                />
+                Create New Job
+              </button>
             </div>
           </div>
         </div>

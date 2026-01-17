@@ -159,18 +159,20 @@ const Page = () => {
   }, [isPlaying, isFullscreen, isMuted]);
 
   return (
-    <div className='min-h-screen bg-gray-100'>
+    <div className='min-h-screen bg-transparent'>
       {/* Header */}
       <header className='bg-transparent'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
           <div className='flex items-center justify-between'>
-            <button
-              onClick={() => router.back()}
-              className='items-center gap-2 bg-white inline-flex mx-auto px-3 py-2.5 border rounded-xl! text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
-            >
-              <ArrowLeft className='w-5 h-5' />
-              Back
-            </button>
+            <div>
+              <button
+                onClick={() => router.back()}
+                className='items-center gap-2 bg-white inline-flex mx-auto px-3 py-2.5 border rounded-xl! text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
+              >
+                <ArrowLeft className='w-5 h-5' />
+                Back
+              </button>
+            </div>
             <div className='text-center'>
               <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
                 E-Casting Room
@@ -185,10 +187,10 @@ const Page = () => {
       </header>
 
       {/* Main Content */}
-      <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'>
+      <main className='container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
           {/* Video Player Section */}
-          <div className='lg:col-span-2'>
+          <div className='bg-white lg:col-span-2 p-4 rounded-xl'>
             <div
               ref={containerRef}
               className={`relative bg-black rounded-lg overflow-hidden group ${
@@ -202,7 +204,7 @@ const Page = () => {
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={() => setIsPlaying(false)}
                 className={`w-full ${
-                  isFullscreen ? "h-screen" : "h-100"
+                  isFullscreen ? "h-screen" : "h-120"
                 } object-cover`}
                 src='/video.mp4'
               />
@@ -298,23 +300,24 @@ const Page = () => {
               </div>
             </div>
 
-            {/* Actor Info Below Video */}
-            <div className='mt-6 bg-white rounded-lg p-4 sm:p-6'>
-              <h3 className='text-lg sm:text-xl font-bold text-gray-900 mb-4'>
-                {actorData.name}
-              </h3>
-              <div className='flex flex-wrap gap-4 sm:gap-6 text-sm sm:text-base'>
-                <div className='flex items-center gap-2 text-gray-600'>
-                  <span>📍</span> {actorData.location}
-                </div>
-                <div className='flex items-center gap-2 text-gray-600'>
-                  <span>📏</span> {actorData.height}&apos;
-                </div>
-                <div className='flex items-center gap-2 text-gray-600'>
-                  <span>👤</span> {actorData.gender} {actorData.age}
+            <div className='bg-white flex items-center justify-between'>
+              {/* Actor Info Below Video */}
+              <div className='mt-6  rounded-lg p-4 sm:p-6'>
+                <h3 className='text-lg sm:text-xl font-bold text-gray-900 mb-4'>
+                  {actorData.name}
+                </h3>
+                <div className='flex flex-wrap gap-4 sm:gap-6 text-sm sm:text-base'>
+                  <div className='flex items-center gap-2 text-gray-600'>
+                    <span>📍</span> {actorData.location}
+                  </div>
+                  <div className='flex items-center gap-2 text-gray-600'>
+                    <span>📏</span> {actorData.height}&apos;
+                  </div>
+                  <div className='flex items-center gap-2 text-gray-600'>
+                    <span>👤</span> {actorData.gender} {actorData.age}
+                  </div>
                 </div>
               </div>
-
               {/* Action Buttons */}
               <div className='flex flex-col sm:flex-row gap-3 mt-6'>
                 <button
