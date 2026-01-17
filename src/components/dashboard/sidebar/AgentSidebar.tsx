@@ -39,12 +39,12 @@ const AgentSidebar = () => {
         />
 
         <NavItem
-          href='/dashboard/agent/talent-vault'
+          href='/dashboard/agent/talent-pool'
           icon={Medal}
-          label='Talent Vault'
+          label='Talent Pool'
           active={
-            pathname === "/dashboard/agent/talent-vault" ||
-            pathname.startsWith("/dashboard/agent/talent-vault/")
+            pathname === "/dashboard/agent/talent-pool" ||
+            pathname.startsWith("/dashboard/agent/talent-pool/")
           }
         />
 
@@ -58,7 +58,7 @@ const AgentSidebar = () => {
           }
         />
 
-        <NavItem
+        {/* <NavItem
           href='/dashboard/agent/calendar'
           icon={FolderKanban}
           label='Calendar'
@@ -66,7 +66,7 @@ const AgentSidebar = () => {
             pathname === "/dashboard/agent/calendar" ||
             pathname.startsWith("/dashboard/agent/calendar/")
           }
-        />
+        /> */}
         <NavItem
           href='/dashboard/agent/message'
           icon={FolderKanban}

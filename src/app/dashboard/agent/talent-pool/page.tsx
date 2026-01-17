@@ -143,7 +143,7 @@ export default function TalentVault() {
         <div className='mx-auto container pt-6'>
           <div className='mb-8'>
             <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
-              Talent vault
+              Talent Pool
             </h1>
             <p className='mt-2 text-base text-[#404145]'>
               Visual overview of agency talent
@@ -188,7 +188,7 @@ export default function TalentVault() {
               {/* Grid view toggles */}
               <div className='hidden gap-2 sm:flex'>
                 <button
-                  onClick={() => setGridColumns(3)}
+                  onClick={() => setGridColumns(1)}
                   className='rounded-md border border-border bg-background p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
                   aria-label='3 column grid'
                 >

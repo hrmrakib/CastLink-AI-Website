@@ -13,7 +13,21 @@ import {
   CalendarMinus2,
   UserRound,
 } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 interface Talent {
   id: string;
   name: string;
@@ -135,6 +149,21 @@ export default function ShortlistDetailPage() {
 
           {/* Action Buttons */}
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+                >
+                  {" "}
+                  <Filter size={18} /> Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-36' align='start'>
+                <DropdownMenuLabel>1st Option</DropdownMenuLabel>
+                <DropdownMenuLabel>2nd Option</DropdownMenuLabel>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* <button
               onClick={handleFilter}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
@@ -178,7 +207,7 @@ export default function ShortlistDetailPage() {
               </div>
 
               {/* Avatar Icon */}
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white shrink-0'>
+              <div className='flex h-12! w-12! items-center justify-center rounded-lg bg-[#2563EB] text-white shrink-0'>
                 <UserRoundPlus />
               </div>
 
@@ -187,6 +216,17 @@ export default function ShortlistDetailPage() {
                 <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
                   {talent.name}
                 </h3>
+                <div className='flex items-center gap-5 flex-wrap'>
+                  <p className='text-[#2563EB] text-sm'>
+                    1st option : 12.2.2026
+                  </p>
+                  <p className='text-[#AFA100] text-sm'>
+                    2nd option : 12.2.2026
+                  </p>
+                  <p className='text-[#CD0000] text-sm'>
+                    No Available : 12.2.2026
+                  </p>
+                </div>
                 <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
                   <span className='flex items-center gap-1'>
                     <MapPin size={14} />

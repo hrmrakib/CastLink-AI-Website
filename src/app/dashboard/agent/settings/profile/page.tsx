@@ -12,6 +12,8 @@ interface UserProfile {
   email: string;
   avatar_url: string | null;
   role: string;
+  phone: string;
+  address: string;
 }
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -19,6 +21,8 @@ const DEFAULT_PROFILE: UserProfile = {
   email: "name@gmail.com",
   avatar_url: null,
   role: "Admin",
+  phone: "+98562547454",
+  address: "Dhaka",
 };
 
 export default function PersonalInformationPage() {
@@ -30,6 +34,8 @@ export default function PersonalInformationPage() {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
+    phone: "",
+    address: "",
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,12 +54,16 @@ export default function PersonalInformationPage() {
         setFormData({
           full_name: parsedProfile.full_name,
           email: parsedProfile.email,
+          phone: parsedProfile.phone,
+          address: parsedProfile.address,
         });
       } else {
         setProfile(DEFAULT_PROFILE);
         setFormData({
           full_name: DEFAULT_PROFILE.full_name,
           email: DEFAULT_PROFILE.email,
+          phone: DEFAULT_PROFILE.phone,
+          address: DEFAULT_PROFILE.address,
         });
         localStorage.setItem("userProfile", JSON.stringify(DEFAULT_PROFILE));
       }
@@ -120,6 +130,8 @@ export default function PersonalInformationPage() {
     setFormData({
       full_name: profile.full_name,
       email: profile.email,
+      phone: profile.phone,
+      address: profile.address,
     });
     setIsEditing(false);
   };
@@ -258,6 +270,31 @@ export default function PersonalInformationPage() {
                     </div>
                   )}
                 </div>
+
+                {/* <div>
+                  <Label
+                    htmlFor='phone'
+                    className='text-sm font-medium text-gray-700 mb-2 block'
+                  >
+                    Phone
+                  </Label>
+                  {isEditing ? (
+                    <Input
+                      id='phone'
+                      type='text'
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                      placeholder='Enter your phone'
+                    />
+                  ) : (
+                    <div className='px-4 py-3 bg-gray-50 rounded-lg text-gray-900'>
+                      {profile?.phone || "Not set"}
+                    </div>
+                  )}
+                </div> */}
 
                 {!isEditing ? (
                   <Button
