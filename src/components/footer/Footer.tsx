@@ -35,14 +35,17 @@ export default function Footer() {
   };
 
   return (
-    <footer className='w-full bg-gray-50 border-t border-gray-200'>
-      <div className='mx-auto max-w-7xl px-4 pt-10 pb-6 sm:px-6 lg:px-8'>
+    <footer className='w-full bg-gray-50'>
+      <div className='mx-auto container px-4 pt-10 pb-6'>
         {/* Footer Content Grid */}
-        <div className='grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4'>
+        <div
+          className='pl-6 sm:pl-0 sm:flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap space-y-8 sm:space-y-0'
+          // className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
+        >
           {/* Brand Column */}
           <div className='space-y-4'>
             <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3>
-            <p className='text-sm leading-relaxed text-[#404145]'>
+            <p className='max-w-80 text-base leading-relaxed text-[#404145]'>
               AI-powered casting platform connecting clients, agents, and
               talents seamlessly.
             </p>
@@ -61,7 +64,7 @@ export default function Footer() {
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
-                        ? "text-blue-600 font-medium"
+                        ? "text-[#2563EB] font-medium"
                         : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >
@@ -85,7 +88,7 @@ export default function Footer() {
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
-                        ? "text-blue-600 font-medium"
+                        ? "text-[#2563EB] font-medium"
                         : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >
@@ -109,7 +112,7 @@ export default function Footer() {
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`text-sm transition-colors duration-200 ${
                       hoveredLink === link.label
-                        ? "text-blue-600 font-medium"
+                        ? "text-[#2563EB] font-medium"
                         : "text-[#404145] hover:text-[#404148]"
                     }`}
                   >

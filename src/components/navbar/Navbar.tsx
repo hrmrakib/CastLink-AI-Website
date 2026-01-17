@@ -56,7 +56,7 @@ export default function Navbar() {
               Login
             </Link>
             <Link
-              href='/signup'
+              href='/role'
               className='bg-[#2563EB] hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors'
             >
               Sign Up

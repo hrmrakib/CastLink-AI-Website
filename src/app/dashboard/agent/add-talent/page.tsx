@@ -1,7 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -218,6 +221,12 @@ function SuccessMessage({
   );
 }
 
+interface ImageItem {
+  id: string;
+  url: string;
+  name: string;
+}
+
 // Main Page Component
 export default function AddTalentPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -240,6 +249,12 @@ export default function AddTalentPage() {
     fullLengthImages: [],
     cvFile: null,
   });
+  const [images, setImages] = useState<ImageItem[]>([
+    // { id: "1", url: "", name: "" },
+  ]);
+
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -335,6 +350,39 @@ export default function AddTalentPage() {
     setErrors({});
   };
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            const newImage: ImageItem = {
+              id: Date.now().toString() + i,
+              url: e.target.result as string,
+              name: file.name,
+            };
+            setImages((prev) => [...prev, newImage]);
+            setSelectedFile(file.name);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+    if (images.length === 1) {
+      setSelectedFile(null);
+    }
+  };
+
+  const handleChooseFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleReset = () => {
     setSubmitted(false);
     setTalentData(null);
@@ -343,7 +391,7 @@ export default function AddTalentPage() {
 
   if (submitted && talentData) {
     return (
-      <main className='min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
+      <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
         <div className='container mx-auto px-4 py-8 md:py-12'>
           <SuccessMessage data={talentData} onReset={handleReset} />
         </div>
@@ -352,7 +400,7 @@ export default function AddTalentPage() {
   }
 
   return (
-    <main className='min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
+    <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
       <div className='container mx-auto px-4 py-8 md:py-12'>
         <div className='mx-auto max-w-2xl'>
           <div className='mb-8'>
@@ -509,8 +557,81 @@ export default function AddTalentPage() {
             </div>
 
             {/* File Uploads */}
+
+            <div className='w-full rounded-lg border border-border bg-card p-4 md:p-6'>
+              {/* Image Gallery */}
+              <div className='mb-6'>
+                <h2 className='text-sm font-semibold text-foreground mb-4'>
+                  Images
+                </h2>
+
+                {images.length > 0 ? (
+                  <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4'>
+                    {images.map((image) => (
+                      <div
+                        key={image.id}
+                        className='group relative aspect-square rounded-lg overflow-hidden bg-muted'
+                      >
+                        <Image
+                          src={image.url || "/placeholder.svg"}
+                          alt={image.name}
+                          width={100}
+                          height={100}
+                          className='w-full h-full object-cover'
+                        />
+                        <button
+                          onClick={() => handleRemoveImage(image.id)}
+                          className='absolute top-2 right-1 p-1 rounded-full bg-white/80 hover:bg-white text-foreground transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary'
+                          aria-label={`Remove ${image.name}`}
+                        >
+                          <X className='w-4 h-4 md:w-5 md:h-5' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-border bg-muted/30'>
+                    <p className='text-sm text-muted-foreground'>
+                      No images selected
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* File Upload Section */}
+              <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4'>
+                <input
+                  ref={fileInputRef}
+                  type='file'
+                  multiple
+                  accept='image/*'
+                  onChange={handleFileSelect}
+                  className='hidden'
+                  aria-label='File input'
+                />
+
+                <Button
+                  onClick={handleChooseFileClick}
+                  className='px-4 py-2 md:px-6 md:py-2 bg-[#E9EFFD] hover:bg-[#d4dff8] text-[#2563EB]'
+                >
+                  Choose File
+                </Button>
+
+                <span className='text-sm text-[#404145]'>
+                  {selectedFile ? selectedFile : "No file chosen"}
+                </span>
+              </div>
+
+              {/* Image Count */}
+              {images.length > 0 && (
+                <p className='text-xs text-muted-foreground mt-4'>
+                  {images.length} image{images.length !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </div>
+
             <div className='space-y-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              {/* <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <FileUploadField
                   label='Upload Headshot Images'
                   fieldName='headshotImages'
@@ -526,9 +647,9 @@ export default function AddTalentPage() {
                   onChange={handleFilesChange}
                   multiple
                 />
-              </div>
+              </div> */}
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              {/* <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <FileUploadField
                   label='Upload Full Length Images'
                   fieldName='fullLengthImages'
@@ -543,7 +664,7 @@ export default function AddTalentPage() {
                   onChange={handleFilesChange}
                   multiple={false}
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Action Buttons */}

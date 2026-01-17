@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { ArrowRight, Briefcase, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Role = "client" | "agent";
 
@@ -30,11 +31,18 @@ const roleCards: RoleCard[] = [
 ];
 
 export default function RoleSelection() {
+  const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>("client");
 
   const handleRoleSelect = (role: Role) => {
     setSelectedRole(role);
     console.log(`Selected role: ${role}`);
+
+    if (role === "client") {
+      router.push("/signup");
+    } else if (role === "agent") {
+      router.push("/signup");
+    }
   };
 
   const handleProceed = (role: Role) => {

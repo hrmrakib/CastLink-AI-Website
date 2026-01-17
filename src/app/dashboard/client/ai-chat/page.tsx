@@ -95,7 +95,7 @@ export default function Page() {
               <button
                 type='submit'
                 disabled={!description.trim() || isGenerating}
-                className='absolute bottom-3 right-3 h-11! bg-[#2563EB] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg p-3 flex items-center justify-center transition shrink-0'
+                className='absolute bottom-3 right-3 lg:h-11! bg-[#2563EB] hover:bg-[#2563EB] disabled:opacity-50 cursor-pointer  disabled:cursor-not-allowed text-white rounded-lg p-2 lg:p-3 flex items-center justify-center transition shrink-0'
               >
                 <ArrowRight className='w-5 h-5' />
               </button>

@@ -41,7 +41,7 @@ const mockJobs: Job[] = Array.from({ length: 12 }, (_, i) => ({
   jobName: "Senior UX Designer",
   talent: {
     name: "Alex Johnson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" + i,
+    avatar: "/man.png",
   },
   clientCompany: "Tech Solutions Inc.",
   status: i % 3 === 0 ? "Pending" : "Active",
