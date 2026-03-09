@@ -39,9 +39,9 @@ export default function RoleSelection() {
     console.log(`Selected role: ${role}`);
 
     if (role === "client") {
-      router.push("/signup");
+      router.push("/signup?role=Client");
     } else if (role === "agent") {
-      router.push("/signup");
+      router.push("/signup?role=Agent");
     }
   };
 

@@ -6,14 +6,21 @@ import { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { setUser, userTrack } from "@/redux/features/auth/authSlice";
+import { useDispatch } from "react-redux";
+import { saveTokens } from "@/service/authService";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -48,8 +55,31 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSuccessMessage("Login successful! Redirecting...");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res?.ok) {
+        dispatch(userTrack());
+        dispatch(
+          setUser({
+            user: data?.data?.user,
+            token: data?.data?.accessToken,
+          }),
+        );
+        await saveTokens(data?.data?.accessToken);
+        localStorage.setItem("accessToken", data?.data?.accessToken);
+        router.push("/");
+      } else {
+        toast.error(data?.message);
+      }
+
       setEmail("");
       setPassword("");
       // In a real app, you'd redirect or handle authentication here

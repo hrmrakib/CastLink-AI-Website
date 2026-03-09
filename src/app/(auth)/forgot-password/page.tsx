@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useForgotPasswordMutation } from "@/redux/features/auth/authAPI";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function ForgotPasswordPage() {
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [forgotPasswordMutation] = useForgotPasswordMutation();
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -40,11 +43,11 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSuccessMessage("Login successful! Redirecting...");
-      setEmail("");
-      router.push("/verify-otp");
+      const res = await forgotPasswordMutation({ email }).unwrap();
+      if (res?.message) {
+        toast.success(res?.message);
+        router.push("/verify-otp?email=" + email);
+      }
       // In a real app, you'd redirect or handle authentication here
     } catch (error) {
       setErrors({ ...errors, email: "Login failed. Please try again." });

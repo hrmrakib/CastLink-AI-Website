@@ -6,24 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
-// import localFont from "next/font/local";
-
-// export const arial = localFont({
-//   src: [
-//     {
-//       path: "../public/fonts/Arial-Regular.ttf",
-//       weight: "400",
-//       style: "normal",
-//     },
-//     {
-//       path: "../public/fonts/Arial-Bold.ttf",
-//       weight: "700",
-//       style: "normal",
-//     },
-//   ],
-//   variable: "--font-arial",
-//   display: "swap",
-// });
+import Providers from "@/redux/features/Providers";
 
 const arial = Geist({
   variable: "--font-arial",
@@ -55,9 +38,11 @@ export default function RootLayout({
       <body
         className={`${arial.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <Providers>
+          <Navbar />
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
