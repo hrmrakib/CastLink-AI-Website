@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Quill from "quill";
-// @ts-expect-error
-import "quill/dist/quill.snow.css";
+import type Quill from "quill";
 import { Button } from "@/components/ui/button";
-// import {
-//   useGetTermsAndConditionsQuery,
-//   useSetTermsAndConditionsMutation,
-// } from "@/redux/feature/settingAPI";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Loading from "@/components/loading/Loading";
 
 const EditAboutUs = () => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -19,14 +12,8 @@ const EditAboutUs = () => {
   const [content, setContent] = useState<string>("");
   const router = useRouter();
 
-  //   const { data: terms, isLoading } = useGetTermsAndConditionsQuery({});
-
-  //   const [setTermsAndConditions, { isLoading: isSaving }] =
-  //     useSetTermsAndConditionsMutation();
-
   const terms = {
-    description:
-      "<div><p>Lorem ipsum dolor sit amet consectetur. Fringilla a cras vitae orci. Egestas duis id nisl sed ante congue scelerisque. Eleifend facilisis aliquet tempus morbi leo sagittis. Pellentesque odio amet turpis habitant. Imperdiet tincidunt nisl consectetur hendrerit accumsan vehicula imperdiet mattis. Neque a vitae diam pharetra duis habitasse convallis luctus pulvinar. Pharetra nunc morbi elementum nisl magnis convallis arcu enim tortor. Cursus a sed tortor enim mi imperdiet massa donec mauris. Sem morbi morbi posuere faucibus. Cras risus ultrices duis pharetra sit porttitor elementum sagittis elementum. Ut vitae blandit pulvinar fermentum in id sed. At pellentesque non semper eget egestas vulputate id volutpat quis. Dolor etiam sodales at elementum mattis nibh quam placerat ut. Suspendisse est adipiscing proin et. Leo nisi bibendum donec ac non eget euismod suscipit. At ultricies nullam ipsum tellus. Non dictum orci at tortor convallis tortor suspendisse. Ac duis senectus arcu nullam in suspendisse vitae. Tellus interdum enim lorem vel morbi lectus.</p> <br /> <p>Lorem ipsum dolor sit amet consectetur. Fringilla a cras vitae orci. Egestas duis id nisl sed ante congue scelerisque. Eleifend facilisis aliquet tempus morbi leo sagittis. Pellentesque odio amet turpis habitant. Imperdiet tincidunt nisl consectetur hendrerit accumsan vehicula imperdiet mattis. Neque a vitae diam pharetra duis habitasse convallis luctus pulvinar. Pharetra nunc morbi elementum nisl magnis convallis arcu enim tortor. Cursus a sed tortor enim mi imperdiet massa donec mauris. Sem morbi morbi posuere faucibus. Cras risus ultrices duis pharetra sit porttitor elementum sagittis elementum. Ut vitae blandit pulvinar fermentum in id sed. At pellentesque non semper eget egestas vulputate id volutpat quis. Dolor etiam sodales at elementum mattis nibh quam placerat ut. Suspendisse est adipiscing proin et. Leo nisi bibendum donec ac non eget euismod suscipit. At ultricies nullam ipsum tellus. Non dictum orci at tortor convallis tortor suspendisse. Ac duis senectus arcu nullam in suspendisse vitae. Tellus interdum enim lorem vel morbi lectus.</p></div>",
+    description: "<p>Lorem ipsum...</p>",
   };
 
   useEffect(() => {
@@ -36,12 +23,12 @@ const EditAboutUs = () => {
       if (initialized || quillRef.current) return;
       initialized = true;
 
-      const Quill = (await import("quill")).default;
-
+      const { default: Quill } = await import("quill");
+      await import("quill/dist/quill.snow.css");
       if (editorRef.current && !editorRef.current.querySelector(".ql-editor")) {
         const quill = new Quill(editorRef.current, {
           theme: "snow",
-          placeholder: "Enter your Terms and Conditions...",
+          placeholder: "Enter your About Us content...",
         });
 
         quillRef.current = quill;
@@ -66,19 +53,10 @@ const EditAboutUs = () => {
     };
   }, [terms?.description]);
 
-  //   if (isLoading && !terms && !quillRef.current) return <Loading />;
-
   const handleSubmit = async () => {
     try {
-      //   const res = await setTermsAndConditions({
-      //     description: content,
-      //   }).unwrap();
-      //   if (res?.description) {
-      //     toast.success("Terms and Conditions saved successfully!");
-      //     router.push("/setting/terms-condition");
-      //   } else {
-      //     toast.error("Failed to save.");
-      //   }
+      // your API call here
+      toast.success("Saved successfully!");
     } catch {
       toast.error("Save failed.");
     }
@@ -97,12 +75,7 @@ const EditAboutUs = () => {
       </div>
 
       <div className='flex justify-end'>
-        <Button
-          onClick={handleSubmit}
-          //   disabled={isSaving}
-          className='bg-primary hover:bg-teal-700'
-        >
-          {/* {isSaving ? "Saving..." : "Save Content"} */}
+        <Button onClick={handleSubmit} className='bg-primary hover:bg-teal-700'>
           Save
         </Button>
       </div>

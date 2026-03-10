@@ -23,12 +23,12 @@ export default function AvailabilityPage() {
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
-    0
+    0,
   ).getDate();
   const firstDay = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth(),
-    1
+    1,
   ).getDay();
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -36,20 +36,20 @@ export default function AvailabilityPage() {
     const prevDate = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      0
+      0,
     );
     return prevDate.getDate() - firstDay + i + 1;
   });
 
   const handlePrevMonth = () => {
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1),
     );
   };
 
   const handleNextMonth = () => {
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1),
     );
   };
 
@@ -57,7 +57,7 @@ export default function AvailabilityPage() {
     setSelectedDates((prev) =>
       prev.includes(date)
         ? prev.filter((d) => d !== date)
-        : [...prev, date].sort((a, b) => a - b)
+        : [...prev, date].sort((a, b) => a - b),
     );
   };
 
@@ -191,7 +191,7 @@ export default function AvailabilityPage() {
             <Checkbox
               id='repeat-weekly'
               checked={repeatWeekly}
-              onCheckedChange={setRepeatWeekly}
+              onCheckedChange={(checked) => setRepeatWeekly(checked === true)}
               className='w-5 h-5'
             />
             <label
