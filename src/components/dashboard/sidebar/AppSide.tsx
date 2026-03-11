@@ -29,7 +29,7 @@ import ClientSidebar from "./ClientSidebar";
 export default function DashboardSidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"agent" | "client" | string>(
-    "agent"
+    "agent",
   );
   const router = useRouter();
   const pathname = usePathname();
@@ -42,7 +42,7 @@ export default function DashboardSidebar() {
 
   const handleLogout = async () => {
     // await logout();
-    localStorage?.removeItem("access_token");
+    localStorage?.removeItem("accessToken");
     localStorage?.removeItem("refresh_token");
     router.push("/login");
   };

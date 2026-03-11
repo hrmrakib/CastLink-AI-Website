@@ -13,7 +13,7 @@ const Header = () => {
   const hideThing = useDashboardHeader();
 
   useEffect(() => {
-    setHasToken(!!localStorage?.getItem("access_token"));
+    setHasToken(!!localStorage?.getItem("accessToken"));
   }, []);
 
   const segments = pathname.split("/");

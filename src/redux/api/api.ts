@@ -41,28 +41,70 @@ const customBaseQuery: BaseQueryFn<
 
   const pathname = window?.location?.pathname || "";
 
-  if (result.error && result.error.status === 401) {
-    if (!isLoggingOut && pathname !== "/login") {
-      isLoggingOut = true;
-      localStorage?.removeItem("accessToken");
+  if (result.error) {
+    const status = result.error.status;
 
-      toast.error("Session expired. Please login again.");
+    if (status === 401) {
+      if (!isLoggingOut && pathname !== "/login") {
+        isLoggingOut = true;
+        localStorage?.removeItem("accessToken");
+        toast.error("Session expired. Please login again.");
 
-      if (window?.location?.replace) {
         setTimeout(() => {
           isLoggingOut = false;
           window.location.replace("/login");
         }, 400);
       }
+    } else if (status === 403) {
+      toast.error("You need to verify your email to use this feature.");
+      window.location.href = "/profile";
+    } else if (status === 402) {
+      toast.error("You need to upgrade your plan to use this feature.");
+      window.location.href = "/#upgrade-plan";
     }
-  } else if (result.error && result.error.status === 403) {
-    alert("You need to verify your email to use this feature.");
-    if (window?.location?.href) window.location.href = "/profile";
-  } else if (result.error && result.error.status === 402) {
-    alert("You need to upgrade your plan to use this feature.");
-    if (window?.location?.href) window.location.href = "/#upgrade-plan";
+
+    return result;
   }
 
+  const data = result.data as any;
+
+  if (data && data.status === false) {
+    const appStatus = data.status_code as number;
+
+    if (appStatus === 401) {
+      if (!isLoggingOut && pathname !== "/login") {
+        isLoggingOut = true;
+        localStorage?.removeItem("accessToken");
+        toast.error(data.message || "Session expired. Please login again.");
+
+        setTimeout(() => {
+          isLoggingOut = false;
+          window.location.replace("/login");
+        }, 400);
+      }
+    } else if (appStatus === 403) {
+      toast.error(
+        data.message || "You need to verify your email to use this feature.",
+      );
+      window.location.href = "/profile";
+    } else if (appStatus === 402) {
+      toast.error(
+        data.message || "You need to upgrade your plan to use this feature.",
+      );
+      window.location.href = "/#upgrade-plan";
+    } else {
+      toast.error(data.message || "Something went wrong.");
+    }
+
+    return {
+      error: {
+        status: appStatus,
+        data: data,
+      } as FetchBaseQueryError,
+    };
+  }
+
+  console.log({ result });
   return result;
 };
 

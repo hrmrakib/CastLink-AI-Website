@@ -55,13 +55,16 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       // Simulate API call
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/accounts/login/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
         },
-        body: JSON.stringify({ email, password }),
-      });
+      );
 
       const data = await res.json();
 
@@ -73,8 +76,10 @@ export default function LoginPage() {
             token: data?.data?.accessToken,
           }),
         );
+
+        console.log(data);
         await saveTokens(data?.data?.accessToken);
-        localStorage.setItem("accessToken", data?.data?.accessToken);
+        localStorage.setItem("access_token", data?.data?.accessToken);
         router.push("/");
       } else {
         toast.error(data?.message);
@@ -106,13 +111,15 @@ export default function LoginPage() {
           </div>
 
           {/* Success Message */}
-          {successMessage && (
-            <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-              <p className='text-green-700 text-sm font-medium'>
-                {successMessage}
-              </p>
-            </div>
-          )}
+          <div>
+            {successMessage && (
+              <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
+                <p className='text-green-700 text-sm font-medium'>
+                  {successMessage}
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className='space-y-6'>
@@ -140,9 +147,11 @@ export default function LoginPage() {
                 }`}
                 disabled={isLoading}
               />
-              {errors.email && (
-                <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
-              )}
+              <div className='min-h-5 mt-2'>
+                {errors.email && (
+                  <p className='text-sm text-red-600'>{errors.email}</p>
+                )}
+              </div>
             </div>
 
             {/* Password Field */}
@@ -180,9 +189,11 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className='mt-2 text-sm text-red-600'>{errors.password}</p>
-              )}
+              <div className='min-h-5 mt-2'>
+                {errors.password && (
+                  <p className='text-sm text-red-600'>{errors.password}</p>
+                )}
+              </div>
             </div>
 
             {/* Forgot Password Link */}
@@ -219,7 +230,7 @@ export default function LoginPage() {
             <p className='text-[]'>
               Don&apos;t have an account?{" "}
               <Link
-                href='/signup'
+                href='/role'
                 className='font-semibold text-[#2563EB] hover:text-blue-700 transition-colors'
               >
                 Sign Up

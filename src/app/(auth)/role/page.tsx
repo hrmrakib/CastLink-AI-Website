@@ -64,7 +64,7 @@ export default function RoleSelection() {
           {roleCards.map((card) => {
             const isSelected = selectedRole === card.id;
             return (
-              <button
+              <div
                 key={card.id}
                 onClick={() => handleRoleSelect(card.id)}
                 className={`group relative p-8 md:p-10 rounded-2xl transition-all duration-300 ease-out text-left ${
@@ -101,7 +101,7 @@ export default function RoleSelection() {
                 >
                   <ArrowRight className='w-5 h-5' />
                 </button>
-              </button>
+              </div>
             );
           })}
         </div>

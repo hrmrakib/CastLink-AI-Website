@@ -2,17 +2,9 @@ import baseAPI from "@/redux/api/api";
 
 const AuthenticationAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (body) => ({
-        url: "/auth/login",
-        method: "POST",
-        body,
-      }),
-    }),
-
     createAccount: builder.mutation({
       query: (data) => ({
-        url: "/user/create-user",
+        url: "/accounts/register/",
         method: "POST",
         body: data,
       }),
@@ -20,15 +12,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     verifyOtp: builder.mutation({
       query: (body) => ({
-        url: "/accounts/verify-otp/",
-        method: "POST",
-        body,
-      }),
-    }),
-
-    sendOtp: builder.mutation({
-      query: (body) => ({
-        url: "/auth/send-otp",
+        url: "/accounts/verify_otp/",
         method: "POST",
         body,
       }),
@@ -36,7 +20,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     resendOtp: builder.mutation({
       query: (body) => ({
-        url: "/auth/resend-otp",
+        url: "/accounts/send_otp/",
         method: "POST",
         body,
       }),
@@ -44,7 +28,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     forgotPassword: builder.mutation({
       query: (body) => ({
-        url: "/auth/forgot-password",
+        url: "/accounts/send_otp/",
         method: "POST",
         body,
       }),
@@ -52,15 +36,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     resetPassword: builder.mutation({
       query: (body) => ({
-        url: "/auth/reset-password",
-        method: "POST",
-        body,
-      }),
-    }),
-
-    verifyForgetPasswordOtp: builder.mutation({
-      query: (body) => ({
-        url: "/auth/forgot-password/otp-verify",
+        url: "/accounts/reset-password/",
         method: "POST",
         body,
       }),
@@ -69,13 +45,10 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 });
 
 export const {
-  useLoginMutation,
   useCreateAccountMutation,
   useVerifyOtpMutation,
-  useSendOtpMutation,
   useResendOtpMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
-  useVerifyForgetPasswordOtpMutation,
 } = AuthenticationAPI;
 export default AuthenticationAPI;

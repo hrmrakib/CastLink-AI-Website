@@ -14,8 +14,6 @@ export default function SignupComponent() {
   const params = useSearchParams();
   const role = params.get("role");
 
-  console.log({ role });
-
   const router = useRouter();
   const [formData, setFormData] = useState({
     agencyName: "",
@@ -94,17 +92,18 @@ export default function SignupComponent() {
     // Password validation
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    } else if (!/(?=.*[a-z])/.test(formData.password)) {
-      newErrors.password =
-        "Password must contain at least one lowercase letter";
-    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
-      newErrors.password =
-        "Password must contain at least one uppercase letter";
-    } else if (!/(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "Password must contain at least one number";
     }
+    // else if (formData.password.length < 6) {
+    //   newErrors.password = "Password must be at least 6 characters";
+    // } else if (!/(?=.*[a-z])/.test(formData.password)) {
+    //   newErrors.password =
+    //     "Password must contain at least one lowercase letter";
+    // } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+    //   newErrors.password =
+    //     "Password must contain at least one uppercase letter";
+    // } else if (!/(?=.*\d)/.test(formData.password)) {
+    //   newErrors.password = "Password must contain at least one number";
+    // }
 
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error);
@@ -151,6 +150,7 @@ export default function SignupComponent() {
 
       if (res?.success) {
         toast.success(res?.message);
+        const email = formData.email;
         setFormData({
           agencyName: "",
           email: "",
@@ -161,7 +161,7 @@ export default function SignupComponent() {
           phoneNumber: "",
           password: "",
         });
-        router.push("/verify-otp?email=" + formData.email);
+        router.push("/verify-otp?email=" + email);
       }
     } catch (error: any) {
       console.log(error);
@@ -417,7 +417,10 @@ export default function SignupComponent() {
                 />
                 <button
                   type='button'
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPassword(!showPassword);
+                  }}
                   className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
                   disabled={isLoading}
                   aria-label={showPassword ? "Hide password" : "Show password"}

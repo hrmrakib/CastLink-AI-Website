@@ -1,61 +1,70 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useResetPasswordMutation } from "@/redux/features/auth/authAPI";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ChangePasswordPage() {
-  const [email, setEmail] = useState("");
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({ password: "", confirmPassword: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [resetPasswordMutation] = useResetPasswordMutation();
 
   const validateForm = () => {
-    const newErrors = { email: "", password: "" };
+    const newErrors = { password: "", confirmPassword: "" };
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!emailRegex.test(email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    // Password validation
     if (!password.trim()) {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
     setErrors(newErrors);
-    return !newErrors.email && !newErrors.password;
+    return !newErrors.password && !newErrors.confirmPassword;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage("");
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSuccessMessage("Login successful! Redirecting...");
-      setEmail("");
-      setPassword("");
-      // In a real app, you'd redirect or handle authentication here
+      const res = await resetPasswordMutation({
+        new_password: password,
+        confirm_password: confirmPassword,
+      }).unwrap();
+
+      if (res?.status) {
+        toast.success(res?.message);
+        setSuccessMessage(res?.message);
+        setPassword("");
+        setConfirmPassword("");
+        router.push("/login");
+      }
     } catch (error) {
-      setErrors({ ...errors, email: "Login failed. Please try again." });
+      // ✅ Functional updater avoids stale closure
+      setErrors((prev) => ({
+        ...prev,
+        password: "Reset failed. Please try again.",
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -64,29 +73,28 @@ export default function ChangePasswordPage() {
   return (
     <div className='min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:px-6 lg:px-8'>
       <div className='w-full max-w-xl'>
-        {/* Card Container */}
         <div className='bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-10'>
-          {/* Header */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl sm:text-4xl font-bold text-[#1B1B1D] mb-2 text-balance'>
-              Welcome Back
+              Create New Password
             </h1>
-            <p className='text-[] text-base sm:text-lg'>
-              Sign in to your account
+            <p className='text-[#707270] text-sm sm:text-base'>
+              Set a new password to protect your account.
             </p>
           </div>
 
-          {/* Success Message */}
-          {successMessage && (
-            <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-              <p className='text-green-700 text-sm font-medium'>
-                {successMessage}
-              </p>
-            </div>
-          )}
+          {/* ✅ Always-rendered wrapper prevents DOM mismatch */}
+          <div className='min-h-[0px]'>
+            {successMessage && (
+              <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
+                <p className='text-green-700 text-sm font-medium'>
+                  {successMessage}
+                </p>
+              </div>
+            )}
+          </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className='space-y-6'>
+          <form onSubmit={handleSubmit} autoComplete='on' className='space-y-6'>
             {/* Password Field */}
             <div>
               <label
@@ -101,9 +109,11 @@ export default function ChangePasswordPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder='Enter your password'
                   value={password}
+                  autoComplete='new-password'
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    if (errors.password) setErrors({ ...errors, password: "" });
+                    if (errors.password)
+                      setErrors((prev) => ({ ...prev, password: "" }));
                   }}
                   className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.password
@@ -115,22 +125,24 @@ export default function ChangePasswordPage() {
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[] transition-colors'
+                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
                   disabled={isLoading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className='mt-2 text-sm text-red-600'>{errors.password}</p>
-              )}
+              <div className='min-h-5 mt-2'>
+                {errors.password && (
+                  <p className='text-sm text-red-600'>{errors.password}</p>
+                )}
+              </div>
             </div>
 
             {/* Confirm Password Field */}
             <div>
               <label
-                htmlFor='password'
+                htmlFor='confirm-password'
                 className='block text-base lg:text-xl font-medium text-[#1B1B1D] mb-2'
               >
                 Confirm Password
@@ -138,15 +150,17 @@ export default function ChangePasswordPage() {
               <div className='relative'>
                 <input
                   id='confirm-password'
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder='Enter your confirm password'
-                  value={password}
+                  value={confirmPassword}
+                  autoComplete='new-password'
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
-                    if (errors.password) setErrors({ ...errors, password: "" });
+                    if (errors.confirmPassword)
+                      setErrors((prev) => ({ ...prev, confirmPassword: "" }));
                   }}
                   className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password
+                    errors.confirmPassword
                       ? "border-red-500"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
@@ -154,20 +168,29 @@ export default function ChangePasswordPage() {
                 />
                 <button
                   type='button'
-                  onClick={() => setShowPassword(!showPassword)}
-                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[] transition-colors'
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
                   disabled={isLoading}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
                 </button>
               </div>
-              {errors.password && (
-                <p className='mt-2 text-sm text-red-600'>{errors.password}</p>
-              )}
+              <div className='min-h-5 mt-2'>
+                {errors.confirmPassword && (
+                  <p className='text-sm text-red-600'>
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* Forgot Password Link */}
             <div className='flex justify-end'>
               <Link
                 href='/forgot-password'
@@ -177,7 +200,6 @@ export default function ChangePasswordPage() {
               </Link>
             </div>
 
-            {/* Sign In Button */}
             <Button
               type='submit'
               disabled={isLoading}
@@ -186,19 +208,16 @@ export default function ChangePasswordPage() {
               {isLoading ? (
                 <>
                   <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
-                  Signing in...
+                  Resetting...
                 </>
               ) : (
-                <>
-                  Sign In <ArrowRight size={18} />
-                </>
+                "Reset Password"
               )}
             </Button>
           </form>
 
-          {/* Sign Up Link */}
           <div className='mt-8 text-center'>
-            <p className='text-[]'>
+            <p className='text-[#404145]'>
               Don&apos;t have an account?{" "}
               <Link
                 href='/signup'
@@ -210,7 +229,6 @@ export default function ChangePasswordPage() {
           </div>
         </div>
 
-        {/* Footer Info */}
         <p className='text-center text-[#404145] text-xs mt-6'>
           Protected by industry-standard encryption
         </p>

@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useForgotPasswordMutation } from "@/redux/features/auth/authAPI";
@@ -44,13 +43,15 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       const res = await forgotPasswordMutation({ email }).unwrap();
-      if (res?.message) {
+
+      if (res?.status) {
         toast.success(res?.message);
-        router.push("/verify-otp?email=" + email);
+        router.push("/verify-otp?email=" + email + "&type=forgot-password");
       }
       // In a real app, you'd redirect or handle authentication here
     } catch (error) {
-      setErrors({ ...errors, email: "Login failed. Please try again." });
+      toast.error("Login failed. Please try again.");
+      // setErrors({ ...errors, email: "Login failed. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -64,21 +65,23 @@ export default function ForgotPasswordPage() {
           {/* Header */}
           <div className='text-center mb-8'>
             <h1 className='text-3xl sm:text-4xl font-bold text-[#1B1B1D] mb-2 text-balance'>
-              Welcome Back
+              Forget Password
             </h1>
-            <p className='text-[] text-base sm:text-lg'>
-              Sign in to your account
+            <p className='max-w-72 mx-auto text-[#404145] text-sm sm:text-base'>
+              No worries! Reset your password and get back in quickly.
             </p>
           </div>
 
           {/* Success Message */}
-          {successMessage && (
-            <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-              <p className='text-green-700 text-sm font-medium'>
-                {successMessage}
-              </p>
-            </div>
-          )}
+          <div>
+            {successMessage && (
+              <div className='mb-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
+                <p className='text-green-700 text-sm font-medium'>
+                  {successMessage}
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className='space-y-6'>
@@ -106,9 +109,11 @@ export default function ForgotPasswordPage() {
                 }`}
                 disabled={isLoading}
               />
-              {errors.email && (
-                <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
-              )}
+              <div className='min-h-5 mt-2'>
+                {errors.email && (
+                  <p className='mt-2 text-sm text-red-600'>{errors.email}</p>
+                )}
+              </div>
             </div>
 
             {/* Sign In Button */}
@@ -129,19 +134,6 @@ export default function ForgotPasswordPage() {
               )}
             </Button>
           </form>
-
-          {/* Sign Up Link */}
-          <div className='mt-8 text-center'>
-            <p className='text-[]'>
-              Don&apos;t have an account?{" "}
-              <Link
-                href='/signup'
-                className='font-semibold text-[#2563EB] hover:text-blue-700 transition-colors'
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
         </div>
 
         {/* Footer Info */}
