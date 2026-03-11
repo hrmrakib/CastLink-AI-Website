@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetTalentQuery } from "@/redux/features/talent/talentAPI";
 
 // Mock talent data
 const TALENTS = [
@@ -126,6 +127,10 @@ export default function TalentVault() {
   const [gridColumns, setGridColumns] = useState(4);
   const [availability, setAvailability] = useState("all");
   const [role, setRole] = useState("all");
+
+  const { data } = useGetTalentQuery({});
+
+  console.log(data?.data);
 
   // Filter talents based on selected filters
   const filteredTalents = useMemo(() => {
@@ -252,10 +257,10 @@ export default function TalentVault() {
             gridColumns === 1
               ? "grid-cols-1 sm:grid-cols-8"
               : gridColumns === 2
-              ? "grid-cols-2 sm:grid-cols-6"
-              : gridColumns === 3
-              ? "grid-cols-2 sm:grid-cols-5 lg:grid-cols-5"
-              : "grid-cols-2 sm:grid-cols-5 lg:grid-cols-4"
+                ? "grid-cols-2 sm:grid-cols-6"
+                : gridColumns === 3
+                  ? "grid-cols-2 sm:grid-cols-5 lg:grid-cols-5"
+                  : "grid-cols-2 sm:grid-cols-5 lg:grid-cols-4"
           }`}
         >
           {filteredTalents.map((talent) => (

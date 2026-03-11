@@ -4,7 +4,7 @@ const talentAPI = baseAPI.injectEndpoints({
   endpoints: (build) => ({
     getTalent: build.query({
       query: () => ({
-        url: "/talent/",
+        url: "/agent/talents/",
       }),
     }),
 
