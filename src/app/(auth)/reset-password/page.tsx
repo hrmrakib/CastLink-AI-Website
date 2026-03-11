@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -59,7 +60,8 @@ export default function ChangePasswordPage() {
         setConfirmPassword("");
         router.push("/login");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error?.data?.message);
       // ✅ Functional updater avoids stale closure
       setErrors((prev) => ({
         ...prev,

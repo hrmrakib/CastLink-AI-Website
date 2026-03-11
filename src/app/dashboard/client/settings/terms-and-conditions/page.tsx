@@ -30,7 +30,7 @@ export default function TermsConditionPage() {
                 href='/dashboard/client/settings/terms-and-conditions/edit'
                 className='inline-flex items-center bg-[#2563EB] text-white rounded-md px-4 py-1.5'
               >
-                <span className='text-xl font-semibold'>Edit</span>
+                <span className='text-base font-medium'>Edit</span>
               </Link>
             </div>
 

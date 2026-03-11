@@ -5,12 +5,20 @@ import type Quill from "quill";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  useGetTermsAndConditionsQuery,
+  useUpdateTermsAndConditionsMutation,
+} from "@/redux/features/setting/settingAPI";
 
 const EditAboutUs = () => {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
   const [content, setContent] = useState<string>("");
   const router = useRouter();
+
+  const { data } = useGetTermsAndConditionsQuery({});
+  const [updateTermsAndConditionsMutation] =
+    useUpdateTermsAndConditionsMutation();
 
   const terms = {
     description: "<p>Lorem ipsum...</p>",

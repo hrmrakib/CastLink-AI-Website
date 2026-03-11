@@ -2,30 +2,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 type TUser = {
-  location: {
-    type: "Point";
-    coordinates: [number, number];
-  };
-  googleId: string;
-  appleId: string;
-  stripeAccountId: string;
-  isStripeConnected: boolean;
-  _id: string;
-  name: string;
+  user_id: number;
+  full_name: string;
   email: string;
-  address: string;
   phone: string;
-  bio: string;
-  post: number;
-  interested: any[];
-  role: "USER" | "ADMIN" | string;
-  image: string;
-  follower: number;
-  following: number;
-  isDeleted: boolean;
-  verified: boolean;
-  paypalAccount: string;
-  income: number;
+  profile_pic: string;
+  role: string;
+  bio: string | null;
+  agency_name: string | null;
+  company: string;
+  website: string;
+  is_active: boolean;
+  date_joined: string;
 };
 
 type TAuthState = {

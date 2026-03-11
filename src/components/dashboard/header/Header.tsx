@@ -5,12 +5,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import getGreeting from "@/components/utils/getGreeting";
 import useDashboardHeader from "@/components/utils/hideDashboardHeader";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathname = usePathname();
   const [hasToken, setHasToken] = useState(false);
   const hideThing = useDashboardHeader();
+
+  const { user } = useAuth();
+
+  console.log({ user });
+
+  const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
 
   useEffect(() => {
     setHasToken(!!localStorage?.getItem("access_token"));
@@ -49,22 +56,25 @@ const Header = () => {
             </Button> */}
             <div className='flex items-center gap-3'>
               <Avatar className='h-12 w-12 rounded-full!'>
-                <AvatarImage
-                  className='h-12 w-12 rounded-full!'
-                  width={55}
-                  height={55}
-                  src={"/man.png"}
-                  alt='Daissy'
-                />
+                {user?.profile_pic && (
+                  <AvatarImage
+                    className='h-12 w-12 rounded-full!'
+                    width={55}
+                    height={55}
+                    src={image_url! + user?.profile_pic}
+                    alt='Daissy'
+                  />
+                )}
                 <AvatarFallback>Abul</AvatarFallback>
               </Avatar>
               <div className='hidden sm:block'>
                 <p className='text-base font-medium text-[#1E1E1E]'>
-                  Sharif Ois
+                  {user?.full_name}
                 </p>
                 <p className='text-sm text-[#606060]'>
-                  Jamai
-                  <span className='text-[#606060] font-medium'>(Admin)</span>
+                  <span className='text-[#606060] font-medium'>
+                    ({user?.role})
+                  </span>
                 </p>
               </div>
             </div>

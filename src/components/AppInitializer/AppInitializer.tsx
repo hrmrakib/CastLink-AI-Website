@@ -15,8 +15,6 @@ export default function AppInitializer({
 
   const { data, isLoading } = useGetUserProfileQuery({}, { skip: !token });
 
-  console.log({ token, data });
-
   useEffect(() => {
     dispatch(setProfileLoading(isLoading));
   }, [isLoading, dispatch]);

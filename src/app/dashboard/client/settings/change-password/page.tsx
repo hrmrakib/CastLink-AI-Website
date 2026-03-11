@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useChangePasswordMutation } from "@/redux/features/auth/authAPI";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function ChangePasswordPage() {
+  const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,6 +19,7 @@ export default function ChangePasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [changePasswordMutation] = useChangePasswordMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +30,8 @@ export default function ChangePasswordPage() {
       return setError("All fields are required.");
     }
 
-    if (newPassword.length < 8) {
-      return setError("New password must be at least 8 characters.");
+    if (newPassword.length < 6) {
+      return setError("New password must be at least 6 characters.");
     }
 
     if (newPassword !== confirmPassword) {
@@ -36,25 +41,17 @@ export default function ChangePasswordPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
-      });
+      const res = await changePasswordMutation({
+        old_password: currentPassword,
+        new_password: newPassword,
+      }).unwrap();
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to change password");
+      if (res?.status) {
+        setSuccess("Password changed successfully.");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
       }
-
-      setSuccess("Password changed successfully.");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -64,7 +61,14 @@ export default function ChangePasswordPage() {
 
   return (
     <div className='h-[76vh] flex items-center justify-center bg-gray-50 px-4'>
-      <div className='w-full max-w-md bg-white rounded-xl shadow-md p-6 sm:p-8'>
+      <div className='relative w-full max-w-md bg-white rounded-xl shadow-md p-6 sm:p-8'>
+        <button
+          className='absolute p-2 hover:bg-gray-200 rounded-lg transition-colors'
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className='w-5 h-5 sm:w-6 sm:h-6' />
+        </button>
+
         <h1 className='text-2xl font-semibold text-gray-900 text-center'>
           Change Password
         </h1>
@@ -160,7 +164,7 @@ export default function ChangePasswordPage() {
           <button
             type='submit'
             disabled={loading}
-            className='w-full h-11! button'
+            className='w-full h-11! button text-base! font-medium!'
           >
             {loading ? "Updating..." : "Change Password"}
           </button>

@@ -7,8 +7,16 @@ const userAPI = baseAPI.injectEndpoints({
         url: "/accounts/user/profile/",
       }),
     }),
+
+    updateProfile: build.mutation({
+      query: (data) => ({
+        url: "/accounts/user/profile/",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useGetUserProfileQuery } = userAPI;
+export const { useGetUserProfileQuery, useUpdateProfileMutation } = userAPI;
 export default userAPI;
