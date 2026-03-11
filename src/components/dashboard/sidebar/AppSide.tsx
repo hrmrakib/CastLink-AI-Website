@@ -42,7 +42,7 @@ export default function DashboardSidebar() {
 
   const handleLogout = async () => {
     // await logout();
-    localStorage?.removeItem("accessToken");
+    localStorage?.removeItem("access_token");
     localStorage?.removeItem("refresh_token");
     router.push("/login");
   };

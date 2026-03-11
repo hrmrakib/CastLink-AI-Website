@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserProfile {
   full_name: string;
@@ -32,6 +33,10 @@ export default function PersonalInformationPage() {
     email: "",
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { user } = useAuth();
+
+  console.log({ user });
 
   useEffect(() => {
     loadProfile();

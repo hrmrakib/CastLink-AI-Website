@@ -119,7 +119,7 @@ function OTPVerifyComponent() {
 
       if (res?.status) {
         toast.success(res?.message);
-        localStorage.setItem("accessToken", res?.access_token);
+        localStorage.setItem("access_token", res?.access_token);
 
         setOtp(["", "", "", "", "", ""]);
 

@@ -72,14 +72,13 @@ export default function LoginPage() {
         dispatch(userTrack());
         dispatch(
           setUser({
-            user: data?.data?.user,
-            token: data?.data?.accessToken,
+            user: data?.user,
+            token: data?.access_token,
           }),
         );
 
-        console.log(data);
-        await saveTokens(data?.data?.accessToken);
-        localStorage.setItem("access_token", data?.data?.accessToken);
+        await saveTokens(data?.access_token);
+        localStorage.setItem("access_token", data?.access_token); // also fixed key to match baseAPI
         router.push("/");
       } else {
         toast.error(data?.message);
@@ -87,9 +86,11 @@ export default function LoginPage() {
 
       setEmail("");
       setPassword("");
-      // In a real app, you'd redirect or handle authentication here
     } catch (error) {
-      setErrors({ ...errors, email: "Login failed. Please try again." });
+      setErrors((prev) => ({
+        ...prev,
+        email: "Login failed. Please try again.",
+      }));
     } finally {
       setIsLoading(false);
     }

@@ -17,7 +17,7 @@ const baseQuery = fetchBaseQuery({
     console.log("Preparing headers for API request", window?.location?.href);
 
     if (typeof window !== "undefined") {
-      const token = localStorage?.getItem("accessToken");
+      const token = localStorage?.getItem("access_token");
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
@@ -47,7 +47,7 @@ const customBaseQuery: BaseQueryFn<
     if (status === 401) {
       if (!isLoggingOut && pathname !== "/login") {
         isLoggingOut = true;
-        localStorage?.removeItem("accessToken");
+        localStorage?.removeItem("access_token");
         toast.error("Session expired. Please login again.");
 
         setTimeout(() => {
@@ -74,7 +74,7 @@ const customBaseQuery: BaseQueryFn<
     if (appStatus === 401) {
       if (!isLoggingOut && pathname !== "/login") {
         isLoggingOut = true;
-        localStorage?.removeItem("accessToken");
+        localStorage?.removeItem("access_token");
         toast.error(data.message || "Session expired. Please login again.");
 
         setTimeout(() => {

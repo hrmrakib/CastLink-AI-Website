@@ -7,6 +7,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import Providers from "@/redux/features/Providers";
+import AppInitializer from "@/components/AppInitializer/AppInitializer";
 
 const arial = Geist({
   variable: "--font-arial",
@@ -34,14 +35,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={`${arial.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
-          {children}
-          <Footer />
+          <AppInitializer>
+            <Navbar />
+            {children}
+            <Footer />
+          </AppInitializer>
         </Providers>
       </body>
     </html>
