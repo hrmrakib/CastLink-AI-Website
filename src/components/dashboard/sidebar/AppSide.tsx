@@ -38,7 +38,7 @@ export default function DashboardSidebar() {
     setSidebarView(pathname.split("/")[2]);
   }, [pathname]);
 
-  console.log({ sidebarView });
+  // console.log({ sidebarView });
 
   const handleLogout = async () => {
     // await logout();

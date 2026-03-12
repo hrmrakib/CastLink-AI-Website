@@ -6,14 +6,16 @@ const settingAPI = baseAPI.injectEndpoints({
       query: () => ({
         url: "/settings/terms_conditions/",
       }),
+      providesTags: ["Settings"],
     }),
 
     updateTermsAndConditions: builder.mutation({
       query: (data) => ({
         url: "/settings/terms_conditions/",
-        method: "PATCH",
+        method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Settings"],
     }),
   }),
 });

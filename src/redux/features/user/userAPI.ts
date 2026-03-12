@@ -6,6 +6,7 @@ const userAPI = baseAPI.injectEndpoints({
       query: () => ({
         url: "/accounts/user/profile/",
       }),
+      providesTags: ["Profile"],
     }),
 
     updateProfile: build.mutation({
@@ -14,6 +15,7 @@ const userAPI = baseAPI.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      invalidatesTags: ["Profile"],
     }),
   }),
 });

@@ -175,7 +175,7 @@ export default function TalentVault() {
 
               {/* Role Dropdown */}
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className='w-[180px]'>
+                <SelectTrigger className='w-45'>
                   <SelectValue placeholder='All Roles' />
                 </SelectTrigger>
 
