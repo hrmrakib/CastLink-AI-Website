@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AgentSidebar from "./AgentSidebar";
 import ClientSidebar from "./ClientSidebar";
+import AdminSidebar from "./AdminSidebar";
 
 // import { logout } from "@/service/authService";
 
@@ -58,9 +59,6 @@ export default function DashboardSidebar() {
     return null;
   }
 
-  console.log(pathname);
-  console.log(sidebarView);
-
   return (
     <>
       <div className='bg-sidebar-bg! md:bg-sidebar-bg!'>
@@ -73,6 +71,7 @@ export default function DashboardSidebar() {
               <h2 className='text-2xl font-bold text-[#000000]'>Poolio</h2>
             </Link>
 
+            {sidebarView === "admin" && <AdminSidebar />}
             {sidebarView === "agent" && <AgentSidebar />}
             {sidebarView === "client" && <ClientSidebar />}
           </SidebarContent>

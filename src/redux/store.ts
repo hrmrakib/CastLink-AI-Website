@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import baseAPI from "./api/api";
 import authReducer from "./features/auth/authSlice";
+import { aiBaseAPI } from "./features/ai-chat/aiChatAPI";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     [baseAPI.reducerPath]: baseAPI.reducer,
+    [aiBaseAPI.reducerPath]: aiBaseAPI.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
