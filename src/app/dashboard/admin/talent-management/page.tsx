@@ -233,19 +233,19 @@ export default function TalentManagement() {
             <table className='w-full'>
               <thead>
                 <tr className='bg-[#2563EB] text-white'>
-                  <th className='px-4 py-4 text-left font-semibold text-sm'>
+                  <th className='px-4 py-4 text-left font-semibold text-lg'>
                     Name
                   </th>
-                  <th className='px-4 py-4 text-left font-semibold text-sm'>
+                  <th className='px-4 py-4 text-left font-semibold text-lg'>
                     Skills
                   </th>
-                  <th className='px-4 py-4 text-left font-semibold text-sm'>
+                  <th className='px-4 py-4 text-left font-semibold text-lg'>
                     Agent
                   </th>
-                  <th className='px-4 py-4 text-left font-semibold text-sm'>
+                  <th className='px-4 py-4 text-left font-semibold text-lg'>
                     Created Date
                   </th>
-                  <th className='px-4 py-4 text-left font-semibold text-sm'>
+                  <th className='px-4 py-4 text-left font-semibold text-lg'>
                     Action
                   </th>
                 </tr>
@@ -258,18 +258,18 @@ export default function TalentManagement() {
                       idx % 2 === 0 ? "bg-white" : "bg-gray-50"
                     }`}
                   >
-                    <td className='px-4 py-4 text-sm font-medium text-gray-900'>
+                    <td className='px-4 py-4 text-lg font-medium text-gray-900'>
                       {talent.name}
                     </td>
-                    <td className='px-4 py-4 text-sm text-gray-700'>
+                    <td className='px-4 py-4 text-lg text-gray-700'>
                       <div className='line-clamp-2'>
                         {talent.skills.join(", ")}
                       </div>
                     </td>
-                    <td className='px-4 py-4 text-sm text-gray-700'>
+                    <td className='px-4 py-4 text-lg text-gray-700'>
                       {talent.agent}
                     </td>
-                    <td className='px-4 py-4 text-sm text-gray-700'>
+                    <td className='px-4 py-4 text-lg text-gray-700'>
                       {talent.createdDate}
                     </td>
                     <td className='px-4 py-4'>
@@ -329,7 +329,7 @@ export default function TalentManagement() {
 
             <div className='p-6 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-96 md:max-h-96 overflow-y-auto'>
               {/* Left Column - Details */}
-              <div className='space-y-4 text-sm'>
+              <div className='space-y-4 text-lg'>
                 <div className='flex justify-between'>
                   <span className='font-semibold text-gray-700'>Name:</span>
                   <span className='text-gray-600'>{selectedTalent.name}</span>
@@ -484,13 +484,13 @@ export default function TalentManagement() {
 
             <div className='p-6 space-y-4'>
               <div>
-                <label className='block text-sm font-semibold text-gray-700 mb-2'>
+                <label className='block text-lg font-semibold text-gray-700 mb-2'>
                   To: {selectedTalent.name}
                 </label>
               </div>
 
               <div>
-                <label className='block text-sm font-semibold text-gray-700 mb-2'>
+                <label className='block text-lg font-semibold text-gray-700 mb-2'>
                   Subject:
                 </label>
                 <input
@@ -505,7 +505,7 @@ export default function TalentManagement() {
               </div>
 
               <div>
-                <label className='block text-sm font-semibold text-gray-700 mb-2'>
+                <label className='block text-lg font-semibold text-gray-700 mb-2'>
                   Body:
                 </label>
                 <textarea

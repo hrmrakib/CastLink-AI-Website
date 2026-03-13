@@ -144,19 +144,19 @@ export default function DashboardPage() {
           <table className='w-full'>
             <thead>
               <tr className='bg-[#2563EB] text-white'>
-                <th className='px-6 py-4 text-left text-sm font-semibold  rounded-tl-2xl'>
+                <th className='px-6 py-4 text-left text-lg font-semibold  rounded-tl-2xl'>
                   Role
                 </th>
-                <th className='px-6 py-4 text-left text-sm font-semibold'>
+                <th className='px-6 py-4 text-left text-lg font-semibold'>
                   User Name
                 </th>
-                <th className='px-6 py-4 text-left text-sm font-semibold'>
+                <th className='px-6 py-4 text-left text-lg font-semibold'>
                   Email
                 </th>
-                <th className='px-6 py-4 text-left text-sm font-semibold'>
+                <th className='px-6 py-4 text-left text-lg font-semibold'>
                   Join Date
                 </th>
-                <th className='px-6 py-4 text-center text-sm font-semibold rounded-tr-2xl'>
+                <th className='px-6 py-4 text-center text-lg font-semibold rounded-tr-2xl'>
                   Action
                 </th>
               </tr>
@@ -167,10 +167,10 @@ export default function DashboardPage() {
                   key={user.id}
                   className='hover:bg-gray-50 transition-colors'
                 >
-                  <td className='px-6 py-4 text-gray-700'>{user.role}</td>
-                  <td className='px-6 py-4 text-gray-700'>{user.name}</td>
-                  <td className='px-6 py-4 text-gray-700'>{user.email}</td>
-                  <td className='px-6 py-4 text-gray-700'>{user.joinDate}</td>
+                  <td className='px-6 py-4 text-[#404145] text-lg'>{user.role}</td>
+                  <td className='px-6 py-4 text-[#404145] text-lg'>{user.name}</td>
+                  <td className='px-6 py-4 text-[#404145] text-lg'>{user.email}</td>
+                  <td className='px-6 py-4 text-[#404145] text-lg'>{user.joinDate}</td>
                   <td className='px-6 py-4'>
                     <div className='flex justify-center gap-3'>
                       <button
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             <Card key={user.id} className='border border-gray-200 p-4'>
               <div className='mb-3 flex items-start justify-between'>
                 <div>
-                  <span className='inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700'>
+                  <span className='inline-block rounded-full bg-blue-100 px-3 py-1 text-lg font-semibold text-blue-700'>
                     {user.role}
                   </span>
                 </div>
@@ -257,25 +257,25 @@ export default function DashboardPage() {
           {selectedUser && (
             <div className='space-y-4 py-4'>
               <div className='grid gap-2'>
-                <label className='text-sm font-semibold text-[#707270]'>
+                <label className='text-lg font-semibold text-[#707270]'>
                   Role
                 </label>
                 <p className='text-[#1A1A1A]'>{selectedUser.role}</p>
               </div>
               <div className='grid gap-2'>
-                <label className='text-sm font-semibold text-[#707270]'>
+                <label className='text-lg font-semibold text-[#707270]'>
                   Name
                 </label>
                 <p className='text-[#1A1A1A]'>{selectedUser.name}</p>
               </div>
               <div className='grid gap-2'>
-                <label className='text-sm font-semibold text-[#707270]'>
+                <label className='text-lg font-semibold text-[#707270]'>
                   Email
                 </label>
                 <p className='break-all text-[#1A1A1A]'>{selectedUser.email}</p>
               </div>
               <div className='grid gap-2'>
-                <label className='text-sm font-semibold text-[#707270]'>
+                <label className='text-lg font-semibold text-[#707270]'>
                   Join Date
                 </label>
                 <p className='text-[#1A1A1A]'>{selectedUser.joinDate}</p>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
 function StatCard({ title, value }: { title: string; value: string }) {
   return (
     <Card className='border-0 bg-white p-6 shadow-sm hover:shadow-md transition-shadow'>
-      <p className='mb-2 text-sm font-medium text-[#707270]'>{title}</p>
+      <p className='mb-2 text-lg font-medium text-[#707270]'>{title}</p>
       <p className='text-3xl font-bold text-[#1A1A1A]'>{value}</p>
     </Card>
   );

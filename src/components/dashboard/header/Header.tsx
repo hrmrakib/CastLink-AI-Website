@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/useAuth";
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathname = usePathname();
-  const [hasToken, setHasToken] = useState(false);
   const hideThing = useDashboardHeader();
 
   const { user } = useAuth();
@@ -18,10 +17,6 @@ const Header = () => {
   console.log({ user });
 
   const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
-
-  useEffect(() => {
-    setHasToken(!!localStorage?.getItem("access_token"));
-  }, []);
 
   const segments = pathname.split("/");
   const role = segments[2];

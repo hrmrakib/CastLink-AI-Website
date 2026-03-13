@@ -32,7 +32,7 @@ export function NavItem({
         >
           <Icon size={18} />
           <span
-            className={`text-base text-nowrap ${
+            className={`text-lg text-nowrap ${
               active ? "text-sidebarActiveColor" : ""
             }`}
           >

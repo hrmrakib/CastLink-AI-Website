@@ -125,7 +125,7 @@ export default function UserManagement() {
         <div className='mb-6 flex gap-4'>
           <button
             onClick={() => setActiveTab("Client")}
-            className={`px-6 py-2.5 font-medium transition-colors ${
+            className={`px-6 py-2.5 font-medium text-lg transition-colors ${
               activeTab === "Client"
                 ? "bg-white text-[#2563EB] rounded-md shadow-sm"
                 : "text-[#2563EB] hover:text-[#084bdb]"
@@ -135,7 +135,7 @@ export default function UserManagement() {
           </button>
           <button
             onClick={() => setActiveTab("Agent")}
-            className={`px-6 py-2.5 font-medium transition-colors ${
+            className={`px-6 py-2.5 font-medium text-lg transition-colors ${
               activeTab === "Agent"
                 ? "bg-white text-[#2563EB] rounded-md shadow-sm"
                 : "text-[#2563EB] hover:text-[#084bdb]"
