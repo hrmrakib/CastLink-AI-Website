@@ -11,12 +11,11 @@ export default function HeroSection() {
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
 
   const handleCreateJob = () => {
-    
     router.push("/dashboard/client/ai-chat");
   };
 
   const handleJoinAgent = () => {
-    router.push("/signup");
+    router.push("/signup?role=Agent");
   };
 
   const talentImages = [

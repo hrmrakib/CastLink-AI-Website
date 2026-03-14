@@ -104,7 +104,6 @@ const customBaseQuery: BaseQueryFn<
     };
   }
 
-  console.log({ result });
   return result;
 };
 

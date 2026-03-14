@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setProfileLoading, setUser } from "@/redux/features/auth/authSlice";
@@ -16,8 +17,13 @@ export default function AppInitializer({
   const { data, isLoading } = useGetUserProfileQuery({}, { skip: !token });
 
   useEffect(() => {
+    if (!token) {
+      dispatch(setProfileLoading(false));
+      return;
+    }
+
     dispatch(setProfileLoading(isLoading));
-  }, [isLoading, dispatch]);
+  }, [isLoading, token, dispatch]);
 
   useEffect(() => {
     if (data?.data) {

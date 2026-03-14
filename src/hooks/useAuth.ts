@@ -13,7 +13,7 @@ export function useAuth() {
     token,
     profileLoading,
     isLoggedIn: !!user,
-    userLat: user?.location?.coordinates[1],
-    userLng: user?.location?.coordinates[0],
+    // userLat: user?.location?.coordinates[1],
+    // userLng: user?.location?.coordinates[0],
   };
 }

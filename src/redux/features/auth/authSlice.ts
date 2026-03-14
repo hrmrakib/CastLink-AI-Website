@@ -27,7 +27,7 @@ const initialState: TAuthState = {
   userToggle: false,
   user: null,
   token: null,
-  profileLoading: false,
+  profileLoading: true,
 };
 
 const authSlice = createSlice({
