@@ -8,6 +8,12 @@ const talentAPI = baseAPI.injectEndpoints({
       }),
     }),
 
+    getTalentById: build.query({
+      query: (id) => ({
+        url: `/agent/talents/${id}/`,
+      }),
+    }),
+
     createTalent: build.mutation({
       query: (data) => ({
         url: "/agent/talents/create/",
@@ -15,8 +21,21 @@ const talentAPI = baseAPI.injectEndpoints({
         body: data,
       }),
     }),
+
+    updateTalent: build.mutation({
+      query: ({ id, data }) => ({
+        url: `/agent/talents/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useGetTalentQuery, useCreateTalentMutation } = talentAPI;
+export const {
+  useGetTalentQuery,
+  useGetTalentByIdQuery,
+  useCreateTalentMutation,
+  useUpdateTalentMutation,
+} = talentAPI;
 export default talentAPI;

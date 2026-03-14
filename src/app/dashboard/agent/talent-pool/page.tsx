@@ -2,7 +2,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Grid3x3, Grid2X2 as Grid4x4 } from "lucide-react";
+import {
+  BookmarkPlus,
+  Grid3x3,
+  Grid2X2 as Grid4x4,
+  Heart,
+  MoreVertical,
+  Pencil,
+  Trash,
+  UserPlus,
+} from "lucide-react";
 import Image from "next/image";
 
 import {
@@ -14,6 +23,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetTalentQuery } from "@/redux/features/talent/talentAPI";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 // Mock talent data
 const TALENTS = [
@@ -222,28 +241,18 @@ export default function TalentVault() {
                     }%, #e5e7eb ${((gridColumns - 1) / 3) * 100}%)`,
                   }}
                   className='h-2 w-32 cursor-pointer appearance-none rounded-lg
-             [&::-webkit-slider-thumb]:appearance-none
-             [&::-webkit-slider-thumb]:h-5
-             [&::-webkit-slider-thumb]:w-5
-             [&::-webkit-slider-thumb]:rounded-full
-             [&::-webkit-slider-thumb]:bg-blue-600
-             [&::-webkit-slider-thumb]:border-2
-             [&::-webkit-slider-thumb]:border-white
-             [&::-moz-range-thumb]:h-5
-             [&::-moz-range-thumb]:w-5
-             [&::-moz-range-thumb]:rounded-full
-             [&::-moz-range-thumb]:bg-blue-600'
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:h-5
+                    [&::-webkit-slider-thumb]:w-5
+                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:bg-blue-600
+                    [&::-webkit-slider-thumb]:border-2
+                    [&::-webkit-slider-thumb]:border-white
+                    [&::-moz-range-thumb]:h-5
+                    [&::-moz-range-thumb]:w-5
+                    [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:bg-blue-600'
                 />
-                {/* <input
-                  type='range'
-                  min='1'
-                  max='4'
-                  value={gridColumns}
-                  onChange={(e) =>
-                    setGridColumns(Number.parseInt(e.target.value))
-                  }
-                  className='h-2 w-32 cursor-pointer appearance-none rounded-lg bg-muted accent-primary'
-                /> */}
               </div>
             </div>
           </div>
@@ -293,6 +302,35 @@ export default function TalentVault() {
                   <p className='text-sm opacity-75'>Hair: {talent.hair}</p>
                   <p className='text-sm opacity-75'>Eyes: {talent.eyes}</p>
                 </div>
+              </div>
+
+              <div className='absolute top-2 right-2 z-50'>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className='w-8 h-8 rounded-full flex items-center justify-center bg-neutral-800/90 backdrop-blur-md border border-white/10 hover:scale-110 transition-transform outline-none'>
+                      <MoreVertical size={14} stroke='white' strokeWidth={2} />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    align='end'
+                    className='w-48 rounded-xl border border-white/10 bg-neutral-900 text-white shadow-2xl p-1'
+                  >
+                    <DropdownMenuLabel className='text-[10px] tracking-[0.15em] uppercase text-white/30 px-3 py-1.5'>
+                      Actions
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuItem className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'>
+                      <Pencil size={13} className='text-blue-400 shrink-0' />
+                      Edit Talent Details
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'>
+                      <Trash size={13} className='text-rose-400 shrink-0' />
+                      Delete Talent
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ))}

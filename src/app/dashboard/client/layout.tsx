@@ -5,5 +5,11 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <RoleRedirect allowedRole='CLIENT'>{children}</RoleRedirect>;
+  return (
+    <>
+      {/* <RoleRedirect allowedRole='CLIENT'> */}
+      {children}
+    </>
+  );
+  // </RoleRedirect>;
 }
