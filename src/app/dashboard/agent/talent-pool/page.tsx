@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 // Mock talent data
 const TALENTS = [
@@ -143,6 +144,7 @@ const TALENTS = [
 ];
 
 export default function TalentVault() {
+  const router = useRouter();
   const [gridColumns, setGridColumns] = useState(4);
   const [availability, setAvailability] = useState("all");
   const [role, setRole] = useState("all");
@@ -320,7 +322,14 @@ export default function TalentVault() {
                       Actions
                     </DropdownMenuLabel>
 
-                    <DropdownMenuItem className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/agent/update-talent/${talent.id}`,
+                        )
+                      }
+                      className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'
+                    >
                       <Pencil size={13} className='text-blue-400 shrink-0' />
                       Edit Talent Details
                     </DropdownMenuItem>

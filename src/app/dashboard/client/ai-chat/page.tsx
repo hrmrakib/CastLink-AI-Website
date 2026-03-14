@@ -273,7 +273,7 @@ function DateCalendarModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Page() {
   const [jobModal, setJobModal] = useState(false);
-  const [description, setDescription] = useState("");
+  const [message, setMessage] = useState("");
   const [location, setLocation] = useState("New York");
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [budget, setBudget] = useState("$10,000");
@@ -281,22 +281,27 @@ export default function Page() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [jobSaving, setJobSaving] = useState(false);
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim()) return;
+    if (!message.trim()) return;
     setIsGenerating(true);
 
     try {
       const res = await aiChatCreateMutation({
-        message: "hello",
         session_id: "",
-        location: "",
-        shoot_dates: [""],
-        budget_range: "",
-        job_type: "",
+        message: "any",
+        location: "Dhaka",
+        shoot_dates: ["2026-01-01"],
+        budget_range: "8004",
+        job_type: "Dahynce",
+        title: "Dance Club",
+        description: "This is a dance club sample",
         save_as_draft: false,
         generate_job: false,
       }).unwrap();
@@ -306,20 +311,23 @@ export default function Page() {
     } catch (error) {
       console.error(error);
     }
-
-    // setTimeout(() => {
-    //   setIsGenerating(false);
-    //   setShowSuccess(true);
-    //   setTimeout(() => setShowSuccess(false), 3000);
-    //   router.push(
-    //     "/dashboard/client/ai-chat/1kdpopere43-3kjf-ewnfsnfdper834fn",
-    //   );
-    // }, 1500);
   };
 
   const handleSaveDraft = () => {
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const handleJobSave = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setJobSaving(true);
+
+    const timer = setTimeout(() => {
+      setJobSaving(false);
+      setJobModal(false);
+    }, 750);
+    return () => clearTimeout(timer);
   };
 
   return (
@@ -360,15 +368,15 @@ export default function Page() {
             {/* Main Input */}
             <div className='relative bg-white rounded-xl border border-gray-200 p-4 md:p-6 flex gap-3 items-stretch'>
               <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
                 className='flex-1 bg-transparent text-[#000000] placeholder-[#404145] resize-none focus:outline-none text-base leading-relaxed'
                 rows={3}
               />
               <button
                 type='submit'
-                disabled={!description.trim() || isGenerating}
+                disabled={!message.trim() || isGenerating}
                 className='absolute bottom-3 right-3 lg:h-11 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg p-2 lg:p-3 flex items-center justify-center transition shrink-0'
               >
                 <ArrowRight className='w-5 h-5' />
@@ -387,7 +395,7 @@ export default function Page() {
                     onClick={() => setJobModal(true)}
                     className='bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-4 py-2 font-medium transition flex items-center justify-center gap-2'
                   >
-                    Job Title
+                    Create Job
                   </button>
                 </div>
               </div>
@@ -497,7 +505,7 @@ export default function Page() {
               </button>
               <button
                 type='submit'
-                disabled={!description.trim() || isGenerating}
+                disabled={!message.trim() || isGenerating}
                 className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
               >
                 <Sparkles className='w-4 h-4' />
@@ -518,45 +526,62 @@ export default function Page() {
 
       {/* Job title & description modal */}
       <Dialog open={jobModal} onOpenChange={setJobModal}>
-        <form>
-          <DialogTrigger asChild>
-            <Button variant='outline'>Open Dialog</Button>
-          </DialogTrigger>
-          <DialogContent className='sm:max-w-xl'>
-            <DialogHeader>
-              <DialogTitle>Job Info</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className='sm:max-w-xl'>
+          <DialogHeader>
+            <DialogTitle>Add Job Info</DialogTitle>
+            <DialogDescription>
+              Enter the job title and description, then click Save to continue.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className='space-y-4'>
             <FieldGroup>
               <Field>
-                <Label htmlFor='title'>Name</Label>
+                <Label htmlFor='title' className='text-sm font-semibold'>
+                  Job Title
+                </Label>
                 <Input
                   id='title'
                   name='title'
-                  defaultValue='Job Title'
-                  className='border border-gray-300'
+                  placeholder='e.g. Senior Fashion Model'
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                  className='h-11 border border-gray-300'
                 />
               </Field>
+
               <Field>
-                <Label htmlFor='job-description'>Job Description</Label>
+                <Label
+                  htmlFor='job-description'
+                  className='text-sm font-semibold'
+                >
+                  Job Description
+                </Label>
                 <Textarea
                   id='job-description'
-                  placeholder='Job Description'
-                  className='min-h-30 border border-gray-300'
+                  name='description'
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder='Describe the job requirements, expectations, and any relevant details...'
+                  required
+                  className='min-h-32 border border-gray-300 resize-none'
                 />
               </Field>
             </FieldGroup>
-            <DialogFooter>
+
+            <DialogFooter className='pt-2'>
               <DialogClose asChild>
-                <Button variant='outline'>Cancel</Button>
+                <Button type='button' variant='outline'>
+                  Cancel
+                </Button>
               </DialogClose>
-              <Button type='submit'>Save</Button>
+              <Button onClick={handleJobSave}>
+                {jobSaving ? "Saving..." : "Save"}
+              </Button>
             </DialogFooter>
-          </DialogContent>
-        </form>
+          </form>
+        </DialogContent>
       </Dialog>
 
       {/* Success Toast */}

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import getGreeting from "@/components/utils/getGreeting";
 import useDashboardHeader from "@/components/utils/hideDashboardHeader";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
@@ -38,16 +39,10 @@ const Header = () => {
             <p className='text-sm text-[#606060]'>{getGreeting()}</p>
           </div>
           <div className='flex items-center gap-4'>
-            {/* <Button variant='ghost' size='icon' className='relative'>
-              <Image
-                src='/notification.svg'
-                alt='Admin'
-                width={55}
-                height={55}
-              />
-              <span className='absolute -top-1 -right-1 h-3 w-3 bg-red-500 shadow rounded-full'></span>
-            </Button> */}
-            <div className='flex items-center gap-3'>
+            <Link
+              href={`/dashboard/${user?.role.toLowerCase()}/settings/profile`}
+              className='flex items-center gap-3'
+            >
               <Avatar className='h-12 w-12 rounded-full!'>
                 {user?.profile_pic && (
                   <AvatarImage
@@ -70,7 +65,7 @@ const Header = () => {
                   </span>
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
