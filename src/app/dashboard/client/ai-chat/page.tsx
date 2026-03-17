@@ -23,14 +23,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
+
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS = [
   "January",
@@ -278,6 +279,7 @@ export default function Page() {
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [budget, setBudget] = useState("$10,000");
   const [jobType, setJobType] = useState("Summary Fashion");
+  const [saveAsDraft, setSaveAsDraft] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -287,22 +289,50 @@ export default function Page() {
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!message.trim()) return;
+  //   setIsGenerating(true);
+
+  //   try {
+  //     const res = await aiChatCreateMutation({
+  //       session_id: "",
+  //       message: "any",
+  //       location: "Dhaka",
+  //       shoot_dates: ["2026-01-01"],
+  //       budget_range: "8004",
+  //       job_type: "Dahynce",
+  //       title: "Dance Club",
+  //       description: "This is a dance club sample",
+  //       save_as_draft: false,
+  //       generate_job: false,
+  //     }).unwrap();
+
+  //     if (res?.session_id) {
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!message.trim()) return;
     setIsGenerating(true);
 
+    setSaveAsDraft(true);
     try {
       const res = await aiChatCreateMutation({
         session_id: "",
-        message: "any",
-        location: "Dhaka",
-        shoot_dates: ["2026-01-01"],
-        budget_range: "8004",
-        job_type: "Dahynce",
-        title: "Dance Club",
-        description: "This is a dance club sample",
-        save_as_draft: false,
+        message,
+        location,
+        shoot_dates: shootDates,
+        budget_range: budget,
+        job_type: jobType,
+        title: jobTitle,
+        description: jobDescription,
+        save_as_draft: true,
         generate_job: false,
       }).unwrap();
 
@@ -310,12 +340,9 @@ export default function Page() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsGenerating(false);
     }
-  };
-
-  const handleSaveDraft = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const handleJobSave = (e: React.FormEvent) => {
@@ -328,6 +355,70 @@ export default function Page() {
       setJobModal(false);
     }, 750);
     return () => clearTimeout(timer);
+  };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!message.trim()) return;
+    setIsGenerating(true);
+    try {
+      const res = await aiChatCreateMutation({
+        session_id: "",
+        message,
+        location,
+        shoot_dates: shootDates,
+        budget_range: budget,
+        job_type: jobType,
+        title: jobTitle,
+        description: jobDescription,
+        save_as_draft: false,
+        generate_job: false,
+      }).unwrap();
+
+      if (res?.session_id) {
+        router.push(`/dashboard/client/ai-chat/${res.session_id}`);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateCasting = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!message.trim()) return;
+    if (jobTitle === "" || jobDescription === "") {
+      toast.error("Please enter job title and description");
+      setJobModal(true);
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const res = await aiChatCreateMutation({
+        session_id: "",
+        message,
+        location,
+        shoot_dates: shootDates,
+        budget_range: budget,
+        job_type: jobType,
+        title: jobTitle,
+        description: jobDescription,
+        save_as_draft: false,
+        generate_job: true,
+      }).unwrap();
+
+      if (res?.session_id) {
+        router.push(`/dashboard/client/ai-chat/${res.session_id}`);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -364,7 +455,7 @@ export default function Page() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className='space-y-8'>
+          <form className='space-y-8'>
             {/* Main Input */}
             <div className='relative bg-white rounded-xl border border-gray-200 p-4 md:p-6 flex gap-3 items-stretch'>
               <textarea
@@ -376,6 +467,7 @@ export default function Page() {
               />
               <button
                 type='submit'
+                onClick={handleChatSubmit}
                 disabled={!message.trim() || isGenerating}
                 className='absolute bottom-3 right-3 lg:h-11 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg p-2 lg:p-3 flex items-center justify-center transition shrink-0'
               >
@@ -392,6 +484,7 @@ export default function Page() {
 
                 <div>
                   <button
+                    type='button'
                     onClick={() => setJobModal(true)}
                     className='bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-4 py-2 font-medium transition flex items-center justify-center gap-2'
                   >
@@ -499,12 +592,14 @@ export default function Page() {
               <button
                 type='button'
                 onClick={handleSaveDraft}
-                className='order-2 md:order-1 border border-gray-300 text-[#404145] hover:bg-gray-50 rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2 cursor-pointer'
+                className={`${saveAsDraft ? "bg-gray-200 font-semibold" : ""}
+                   order-2 md:order-1 border border-gray-300 text-[#404145] hover:bg-gray-50 rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2 cursor-pointer`}
               >
-                Save as Draft
+                {saveAsDraft ? "Saved as Draft" : "Save as Draft"}
               </button>
               <button
                 type='submit'
+                onClick={handleGenerateCasting}
                 disabled={!message.trim() || isGenerating}
                 className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
               >
@@ -576,7 +671,7 @@ export default function Page() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button onClick={handleJobSave}>
+              <Button onClick={handleJobSave} disabled={jobSaving || !jobTitle}>
                 {jobSaving ? "Saving..." : "Save"}
               </Button>
             </DialogFooter>
