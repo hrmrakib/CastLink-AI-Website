@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -11,6 +12,7 @@ import {
   Briefcase,
   ArrowRight,
   X,
+  Loader2,
 } from "lucide-react";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useRouter } from "next/navigation";
@@ -286,6 +288,9 @@ export default function Page() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [jobSaving, setJobSaving] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [generatingCastingLoading, setGeneratingCastingLoading] =
+    useState(false);
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
 
@@ -361,7 +366,8 @@ export default function Page() {
     e.preventDefault();
 
     if (!message.trim()) return;
-    setIsGenerating(true);
+    setChatLoading(true);
+
     try {
       const res = await aiChatCreateMutation({
         session_id: "",
@@ -461,6 +467,12 @@ export default function Page() {
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleChatSubmit(e as any);
+                  }
+                }}
                 placeholder="I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
                 className='flex-1 bg-transparent text-[#000000] placeholder-[#404145] resize-none focus:outline-none text-base leading-relaxed'
                 rows={3}
@@ -468,10 +480,14 @@ export default function Page() {
               <button
                 type='submit'
                 onClick={handleChatSubmit}
-                disabled={!message.trim() || isGenerating}
+                disabled={!message.trim() || chatLoading}
                 className='absolute bottom-3 right-3 lg:h-11 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg p-2 lg:p-3 flex items-center justify-center transition shrink-0'
               >
-                <ArrowRight className='w-5 h-5' />
+                {chatLoading ? (
+                  <Loader2 className='w-5 h-5 animate-spin' />
+                ) : (
+                  <ArrowRight className='w-5 h-5' />
+                )}
               </button>
             </div>
 
