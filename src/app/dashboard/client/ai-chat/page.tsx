@@ -301,32 +301,6 @@ export default function Page() {
 
   console.log({ aiChat });
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!message.trim()) return;
-  //   setIsGenerating(true);
-
-  //   try {
-  //     const res = await aiChatCreateMutation({
-  //       session_id: "",
-  //       message: "any",
-  //       location: "Dhaka",
-  //       shoot_dates: ["2026-01-01"],
-  //       budget_range: "8004",
-  //       job_type: "Dahynce",
-  //       title: "Dance Club",
-  //       description: "This is a dance club sample",
-  //       save_as_draft: false,
-  //       generate_job: false,
-  //     }).unwrap();
-
-  //     if (res?.session_id) {
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -393,7 +367,7 @@ export default function Page() {
 
       if (res?.session_id) {
         dispatch(addMessageResponse(res));
-        // router.push(`/dashboard/client/ai-chat/${res.session_id}`);
+        router.push(`/dashboard/client/ai-chat/${res?.session_id}`);
       }
     } catch (error) {
       console.error(error);
@@ -427,11 +401,7 @@ export default function Page() {
         generate_job: true,
       }).unwrap();
 
-      console.log({ res });
-
       if (res?.detail) {
-        console.log("insider", res);
-
         toast.success(res?.detail || "Job created successfully!");
         // dispatch(addMessageResponse(res));
         // router.push(`/dashboard/client/ai-chat/${res.session_id}`);
