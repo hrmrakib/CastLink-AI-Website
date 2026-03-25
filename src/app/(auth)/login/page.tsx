@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -36,10 +35,9 @@ export default function LoginPage() {
     // Password validation
     if (!password.trim()) {
       newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
-    // else if (password.length < 6) {
-    //   newErrors.password = "Password must be at least 6 characters";
-    // }
 
     setErrors(newErrors);
     return !newErrors.email && !newErrors.password;
@@ -54,6 +52,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+
     try {
       // Simulate API call
       const res = await fetch(
@@ -149,7 +148,7 @@ export default function LoginPage() {
                 }`}
                 disabled={isLoading}
               />
-              <div className='min-h-5 mt-2'>
+              <div className='min-h-auto mt-2'>
                 {errors.email && (
                   <p className='text-sm text-red-600'>{errors.email}</p>
                 )}
@@ -164,6 +163,7 @@ export default function LoginPage() {
               >
                 Password
               </label>
+
               <div className='relative'>
                 <input
                   id='password'
@@ -191,7 +191,8 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <div className='min-h-5 mt-2'>
+
+              <div className='min-h-auto mt-2'>
                 {errors.password && (
                   <p className='text-sm text-red-600'>{errors.password}</p>
                 )}

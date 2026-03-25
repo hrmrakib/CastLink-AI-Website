@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -5,6 +6,9 @@ import { Send, Heart, Calendar, Camera, Phone, Check } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useDispatch, useSelector } from "react-redux";
+import { useAiChatCreateMutation } from "@/redux/features/ai-chat/aiChatAPI";
+import { addMessageResponse } from "@/redux/features/ai-chat/aiChatSlice";
 
 interface Message {
   id: number;
@@ -58,12 +62,16 @@ export default function Home() {
     },
   ]);
 
-  const [inputValue, setInputValue] = useState(
-    "I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
-  );
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messagess = useSelector((state: any) => state.aiChat);
+  const [aiChatCreateMutation] = useAiChatCreateMutation();
+  const dispatch = useDispatch();
+  const resData = useSelector((state: any) => state.aiChat);
+
+  console.log({ resData, messagess });
 
   const contentItems: ContentItem[] = [
     {
@@ -122,6 +130,22 @@ export default function Home() {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
+
+    try {
+      // setGeneratingCastingLoading(true);
+      const res = await aiChatCreateMutation({
+        // session_id: sessionId,
+        message: inputValue,
+      }).unwrap();
+
+      if (res?.session_id) {
+        dispatch(addMessageResponse(res));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setGeneratingCastingLoading(false);
+    }
 
     const userMessage: Message = {
       id: messages.length + 1,

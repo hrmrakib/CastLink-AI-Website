@@ -30,6 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useDispatch, useSelector } from "react-redux";
+import { addMessageResponse } from "@/redux/features/ai-chat/aiChatSlice";
 import { toast } from "sonner";
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
@@ -287,12 +289,17 @@ export default function Page() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [isSkipping, setIsSkipping] = useState(false);
   const [jobSaving, setJobSaving] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [generatingCastingLoading, setGeneratingCastingLoading] =
     useState(false);
+  const dispatch = useDispatch();
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
+  const aiChat = useSelector((state: any) => state.aiChat);
+
+  console.log({ aiChat });
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -346,7 +353,7 @@ export default function Page() {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsGenerating(false);
+      setSaveAsDraft(false);
     }
   };
 
@@ -382,13 +389,16 @@ export default function Page() {
         generate_job: false,
       }).unwrap();
 
+      console.log({ res });
+
       if (res?.session_id) {
-        router.push(`/dashboard/client/ai-chat/${res.session_id}`);
+        dispatch(addMessageResponse(res));
+        // router.push(`/dashboard/client/ai-chat/${res.session_id}`);
       }
     } catch (error) {
       console.error(error);
     } finally {
-      setIsGenerating(false);
+      setChatLoading(false);
     }
   };
 
@@ -396,14 +406,14 @@ export default function Page() {
     e.preventDefault();
 
     if (!message.trim()) return;
-    if (jobTitle === "" || jobDescription === "") {
-      toast.error("Please enter job title and description");
+    if (!isSkipping && (jobTitle === "" || jobDescription === "")) {
       setJobModal(true);
+      setGeneratingCastingLoading(false);
       return;
     }
 
-    setIsGenerating(true);
     try {
+      setGeneratingCastingLoading(true);
       const res = await aiChatCreateMutation({
         session_id: "",
         message,
@@ -417,13 +427,19 @@ export default function Page() {
         generate_job: true,
       }).unwrap();
 
-      if (res?.session_id) {
-        router.push(`/dashboard/client/ai-chat/${res.session_id}`);
+      console.log({ res });
+
+      if (res?.detail) {
+        console.log("insider", res);
+
+        toast.success(res?.detail || "Job created successfully!");
+        // dispatch(addMessageResponse(res));
+        // router.push(`/dashboard/client/ai-chat/${res.session_id}`);
       }
     } catch (error) {
       console.error(error);
     } finally {
-      setIsGenerating(false);
+      setGeneratingCastingLoading(false);
     }
   };
 
@@ -498,7 +514,7 @@ export default function Page() {
                   Optional Details
                 </h2>
 
-                <div>
+                {/* <div>
                   <button
                     type='button'
                     onClick={() => setJobModal(true)}
@@ -506,7 +522,7 @@ export default function Page() {
                   >
                     Create Job
                   </button>
-                </div>
+                </div> */}
               </div>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 {/* Location */}
@@ -616,11 +632,13 @@ export default function Page() {
               <button
                 type='submit'
                 onClick={handleGenerateCasting}
-                disabled={!message.trim() || isGenerating}
+                disabled={!message.trim() || generatingCastingLoading}
                 className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
               >
                 <Sparkles className='w-4 h-4' />
-                {isGenerating ? "Generating..." : "Generate Casting"}
+                {generatingCastingLoading
+                  ? "Generating..."
+                  : "Generate Casting"}
               </button>
             </div>
           </form>
@@ -682,8 +700,26 @@ export default function Page() {
             </FieldGroup>
 
             <DialogFooter className='pt-2'>
+              <Button
+                type='button'
+                variant='outline'
+                className='mr-5'
+                onClick={() => {
+                  setIsSkipping(true);
+                  setJobModal(false);
+                }}
+              >
+                Skip
+              </Button>
               <DialogClose asChild>
-                <Button type='button' variant='outline'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => {
+                    setJobTitle("");
+                    setJobDescription("");
+                  }}
+                >
                   Cancel
                 </Button>
               </DialogClose>

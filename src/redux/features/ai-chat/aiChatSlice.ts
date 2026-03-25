@@ -42,6 +42,7 @@ interface ChatMessage {
 interface AiChatState {
   sessionId: string | null;
   messages: ChatMessage[]; // full history, each with its own conversation + talents
+  stateOn: string; // "user" or "assistant" - who is currently typing?
 }
 
 // ── Initial State ─────────────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ interface AiChatState {
 const initialState: AiChatState = {
   sessionId: null,
   messages: [],
+  stateOn: "static state", // default to "static state" when no one is typing
 };
 
 // ── Raw API response shape (what comes back from the server) ──────────────────
@@ -69,7 +71,7 @@ const aiChatSlice = createSlice({
   initialState,
   reducers: {
     // Flatten the API response into a ChatMessage and push it onto messages[]
-    addMessage(state, action: PayloadAction<AiChatApiResponse>) {
+    addMessageResponse(state, action: PayloadAction<AiChatApiResponse>) {
       const {
         session_id,
         timestamp,
@@ -99,6 +101,6 @@ const aiChatSlice = createSlice({
   },
 });
 
-export const { addMessage, resetChat } = aiChatSlice.actions;
+export const { addMessageResponse, resetChat } = aiChatSlice.actions;
 
 export default aiChatSlice.reducer;

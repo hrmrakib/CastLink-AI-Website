@@ -65,7 +65,7 @@ export default function RolesSection() {
         "Easy self-tape submissions",
         "Booking management",
       ],
-      buttonText: "Get Started as Talent",
+      buttonText: "Casting Directors",
       buttonAction: () => console.log("Director signup clicked"),
       badge: "D",
     },
