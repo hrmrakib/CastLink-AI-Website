@@ -36,8 +36,27 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         body,
       }),
     }),
+
+    getDeaftJobs: builder.query({
+      query: ({ search }) => ({
+        url: `/api/chat/drafts`,
+        method: "GET",
+      }),
+    }),
+
+    deleteDraftJob: builder.mutation({
+      query: (draft_id) => ({
+        url: `/api/chat/delete-draft-id?draft_id=${draft_id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetAIResponseMutation, useAiChatCreateMutation } = aiChatAPI;
+export const {
+  useGetAIResponseMutation,
+  useAiChatCreateMutation,
+  useGetDeaftJobsQuery,
+  useDeleteDraftJobMutation,
+} = aiChatAPI;
 export default aiChatAPI;
