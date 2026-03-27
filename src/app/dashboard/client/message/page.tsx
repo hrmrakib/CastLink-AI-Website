@@ -158,6 +158,8 @@ function MessagingComponent() {
           body: formData,
         }).unwrap();
 
+        console.log(res);
+
         if (res?.status) {
           refetchMessages();
           toast.success("Message sent successfully!");
@@ -228,8 +230,6 @@ function MessagingComponent() {
     const filePath = path.startsWith("/") ? path : `/${path}`;
     return `${base}${filePath}`;
   };
-
-  console.log(process.env.NEXT_PUBLIC_IMAGE_URL);
 
   return (
     <div className='h-[80vh] bg-background flex flex-col lg:flex-row overflow-hidden'>
@@ -386,7 +386,7 @@ function MessagingComponent() {
                 const isImage = message.message_type === "image";
                 const isFile = message.message_type === "file";
                 const attachmentUrl = message.attachment_url
-                  ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${message.attachment_url}`
+                  ? getImageUrl(message.attachment_url)
                   : null;
 
                 return (
@@ -599,7 +599,7 @@ function MessagingComponent() {
                 const isImage = message.message_type === "image";
                 const isFile = message.message_type === "file";
                 const attachmentUrl = message.attachment_url
-                  ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${message.attachment_url}`
+                  ? getImageUrl(message.attachment_url)
                   : null;
 
                 return (
