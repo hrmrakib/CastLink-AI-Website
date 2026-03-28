@@ -2,13 +2,14 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Sparkles, Trash2 } from "lucide-react";
+import { FileText, Search, Sparkles, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   useDeleteDraftJobMutation,
   useGetDeaftJobsQuery,
 } from "@/redux/features/ai-chat/aiChatAPI";
+import useDebounce from "@/hooks/useDebounce";
 
 export interface DraftJob {
   draft_id: number;
@@ -132,7 +133,12 @@ function JobCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function DraftJobsPage() {
   const router = useRouter();
-  const { data, isLoading, isError } = useGetDeaftJobsQuery({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
+
+  const { data, isLoading, isError } = useGetDeaftJobsQuery({
+    search: debouncedSearch,
+  });
   const [deleteDraftJobMutation] = useDeleteDraftJobMutation();
   const draftJobs: DraftJob[] = data ?? [];
 
@@ -184,13 +190,28 @@ export default function DraftJobsPage() {
                 Continue working on your saved job postings
               </p>
             </div>
-            <button
-              onClick={() => router.push("/dashboard/client/ai-chat")}
-              className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
-            >
-              <Sparkles className='w-6 h-6 text-[#ffffff]' strokeWidth={1.2} />
-              Create New Job
-            </button>
+            <div className='flex items-center gap-3'>
+              <div className='relative flex-1 sm:flex-none sm:w-64'>
+                <Search className='absolute left-3 top-3 w-5 h-5 text-gray-400' />
+                <input
+                  type='text'
+                  placeholder='Search Jobs'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className='w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent'
+                />
+              </div>
+              <button
+                onClick={() => router.push("/dashboard/client/ai-chat")}
+                className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
+              >
+                <Sparkles
+                  className='w-6 h-6 text-[#ffffff]'
+                  strokeWidth={1.2}
+                />
+                Create New Job
+              </button>
+            </div>
           </div>
 
           {/* Loading State */}

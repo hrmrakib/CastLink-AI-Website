@@ -39,7 +39,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
 
     getDeaftJobs: builder.query({
       query: ({ search }) => ({
-        url: `/api/chat/drafts`,
+        url: `/api/chat/drafts?search=${search || ""}`,
         method: "GET",
       }),
     }),

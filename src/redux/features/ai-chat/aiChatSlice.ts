@@ -5,6 +5,7 @@ interface Talent {
   images: string[];
   is_active: boolean;
   name: string;
+  agent_id?: number;
   agent_name: string;
   date_of_birth: string;
   gender: string;
@@ -31,6 +32,8 @@ interface Pagination {
 }
 
 interface ChatMessage {
+  content: string;
+  type: "user" | "ai";
   session_id: string;
   timestamp: string;
   conversation: string;
@@ -42,7 +45,6 @@ interface ChatMessage {
 interface AiChatState {
   sessionId: string | null;
   messages: ChatMessage[]; // full history, each with its own conversation + talents
-  stateOn: string; // "user" or "assistant" - who is currently typing?
 }
 
 // ── Initial State ─────────────────────────────────────────────────────────────
@@ -50,12 +52,13 @@ interface AiChatState {
 const initialState: AiChatState = {
   sessionId: null,
   messages: [],
-  stateOn: "static state", // default to "static state" when no one is typing
 };
 
 // ── Raw API response shape (what comes back from the server) ──────────────────
 
 interface AiChatApiResponse {
+  content: string;
+  type: "user" | "ai";
   session_id: string;
   timestamp: string;
   conversation: string;
@@ -73,6 +76,8 @@ const aiChatSlice = createSlice({
     // Flatten the API response into a ChatMessage and push it onto messages[]
     addMessageResponse(state, action: PayloadAction<AiChatApiResponse>) {
       const {
+        content,
+        type,
         session_id,
         timestamp,
         conversation,
@@ -85,6 +90,8 @@ const aiChatSlice = createSlice({
 
       // Each message stores its own conversation text and its own talents list
       state.messages.push({
+        content,
+        type,
         session_id,
         timestamp,
         conversation,
