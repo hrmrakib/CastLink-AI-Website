@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   ArrowLeft,
   Sparkles,
@@ -15,8 +16,11 @@ import {
   Loader2,
 } from "lucide-react";
 import { Field, FieldGroup } from "@/components/ui/field";
-import { useRouter } from "next/navigation";
-import { useAiChatCreateMutation } from "@/redux/features/ai-chat/aiChatAPI";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  useAiChatCreateMutation,
+  useContinueDraftJobQuery,
+} from "@/redux/features/ai-chat/aiChatAPI";
 import {
   Dialog,
   DialogClose,
@@ -83,6 +87,12 @@ function DateCalendarModal({
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDates, setSelectedDates] = useState<string[]>(initialDates);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedDates(initialDates);
+    }
+  }, [open, initialDates]);
 
   if (!open) return null;
 
@@ -276,13 +286,13 @@ function DateCalendarModal({
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function Page() {
+export default function AIChat() {
   const [jobModal, setJobModal] = useState(false);
   const [message, setMessage] = useState("");
-  const [location, setLocation] = useState("New York");
+  const [location, setLocation] = useState("");
   const [shootDates, setShootDates] = useState<string[]>([]);
-  const [budget, setBudget] = useState("$10,000");
-  const [jobType, setJobType] = useState("Summary Fashion");
+  const [budget, setBudget] = useState("");
+  const [jobType, setJobType] = useState("");
   const [saveAsDraft, setSaveAsDraft] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -298,6 +308,32 @@ export default function Page() {
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const aiChat = useSelector((state: any) => state.aiChat);
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get("draft_id");
+
+  console.log({ draftId }, "draftId");
+
+  const { data: continueDraftJob } = useContinueDraftJobQuery(
+    {
+      draft_id: draftId,
+    },
+    {
+      skip: !draftId,
+    },
+  );
+  console.log(continueDraftJob);
+
+  useEffect(() => {
+    if (continueDraftJob) {
+      setMessage(continueDraftJob?.messages[0]?.content);
+      setJobTitle(continueDraftJob?.saved_filters?.title);
+      setJobDescription(continueDraftJob?.saved_filters?.description);
+      setJobType(continueDraftJob?.saved_filters?.job_type);
+      setBudget(continueDraftJob?.saved_filters?.budget);
+      setLocation(continueDraftJob?.saved_filters?.location);
+      setShootDates(continueDraftJob?.saved_filters?.shoot_date ?? []);
+    }
+  }, [continueDraftJob]);
 
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -710,3 +746,9 @@ export default function Page() {
     </main>
   );
 }
+
+// export default function AIChatPage() {
+//   <Suspense fallback={<div>Loading...</div>}>
+//     <AIChat />
+//   </Suspense>;
+// }

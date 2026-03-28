@@ -50,6 +50,13 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "DELETE",
       }),
     }),
+
+    continueDraftJob: builder.query({
+      query: ({ draft_id }) => ({
+        url: `/api/chat/continue-draft-id?draft_id=${draft_id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -58,5 +65,6 @@ export const {
   useAiChatCreateMutation,
   useGetDeaftJobsQuery,
   useDeleteDraftJobMutation,
+  useContinueDraftJobQuery,
 } = aiChatAPI;
 export default aiChatAPI;
