@@ -34,7 +34,7 @@ const Header = () => {
         <div className='flex items-center justify-between py-2'>
           <div>
             <h1 className='text-2xl font-medium text-[#222222] capitalize'>
-              Welcome, Sidney
+              Welcome, {user?.full_name?.split(" ")?.slice(0, 2)?.join(" ")}
             </h1>
             <p className='text-sm text-[#606060]'>{getGreeting()}</p>
           </div>

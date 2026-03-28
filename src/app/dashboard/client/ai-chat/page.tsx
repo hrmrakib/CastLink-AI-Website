@@ -299,8 +299,6 @@ export default function Page() {
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const aiChat = useSelector((state: any) => state.aiChat);
 
-  console.log({ aiChat });
-
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -602,7 +600,9 @@ export default function Page() {
               <button
                 type='submit'
                 onClick={handleGenerateCasting}
-                disabled={!message.trim() || generatingCastingLoading}
+                disabled={
+                  !message.trim() || generatingCastingLoading || chatLoading
+                }
                 className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
               >
                 <Sparkles className='w-4 h-4' />
