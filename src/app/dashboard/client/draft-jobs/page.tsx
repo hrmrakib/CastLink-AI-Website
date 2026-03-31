@@ -136,7 +136,7 @@ export default function DraftJobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  const { data, isLoading, isError } = useGetDeaftJobsQuery({
+  const { data, isLoading, isError, refetch } = useGetDeaftJobsQuery({
     search: debouncedSearch,
   });
   const [deleteDraftJobMutation] = useDeleteDraftJobMutation();
@@ -157,8 +157,7 @@ export default function DraftJobsPage() {
   const handleConfirmDelete = async () => {
     if (pendingDeleteId !== null) {
       try {
-        const res = await deleteDraftJobMutation(pendingDeleteId);
-        console.log(res);
+        const res = await deleteDraftJobMutation(pendingDeleteId).unwrap();
       } catch (error) {
         console.error("Error deleting draft job:", error);
       } finally {

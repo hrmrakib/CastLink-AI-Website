@@ -8,12 +8,16 @@ import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSelector } from "react-redux";
-import { useAiChatCreateMutation } from "@/redux/features/ai-chat/aiChatAPI";
+import {
+  useAiChatCreateMutation,
+  useGetChatBySessionIdQuery,
+} from "@/redux/features/ai-chat/aiChatAPI";
 import { useAuth } from "@/hooks/useAuth";
+import { useParams } from "next/navigation";
 
 interface Message {
   id: number;
-  type: "ai" | "user";
+  sender: "ai" | "user";
   content: string;
   avatar?: string;
   talents?: TalentProfile[];
@@ -48,6 +52,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 const MAX_VISIBLE_TALENTS = 3;
 
 export default function AIDynamicPage() {
+  const params = useParams();
+  const id = params.id;
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<TalentProfile | null>(
     null,
@@ -61,18 +67,15 @@ export default function AIDynamicPage() {
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const sessionId = useSelector((state: any) => state.aiChat.sessionId);
   // FIX 1: read the full slice so we can react to changes
-  const resData = useSelector((state: any) => state.aiChat);
   const { user } = useAuth();
-
-  console.log("resData", resData);
-  console.log("messages", messages);
+  const { data } = useGetChatBySessionIdQuery(id);
 
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
-    if (resData?.messages) {
-      setMessages(resData.messages);
+    if (data?.messages) {
+      setMessages(data?.messages);
     }
-  }, [resData]);
+  }, [data?.messages, id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -97,7 +100,7 @@ export default function AIDynamicPage() {
     // FIX 3: use Date.now() for unique IDs instead of array-length-based IDs
     const userMessage: Message = {
       id: Date.now(),
-      type: "user",
+      sender: "user",
       content: inputValue,
     };
     setMessages((prev) => [...prev, userMessage]);
@@ -110,14 +113,14 @@ export default function AIDynamicPage() {
     try {
       setIsLoading(true);
       const res = await aiChatCreateMutation({
-        session_id: sessionId,
+        session_id: sessionId ?? id,
         message: inputValue,
       }).unwrap();
 
       if (res?.session_id) {
         const aiMessage: Message = {
           id: Date.now() + 1, // FIX 3 continued
-          type: "ai",
+          sender: "ai",
           content: res.conversation ?? "Here are the results I found.",
           avatar: "/man.png",
           talents: res.data?.talents ?? [],
@@ -128,7 +131,7 @@ export default function AIDynamicPage() {
       console.error(error);
       const errorMessage: Message = {
         id: Date.now() + 1, // FIX 3 continued
-        type: "ai",
+        sender: "ai",
         content: "Something went wrong. Please try again.",
         avatar: "/man.png",
       };
@@ -156,9 +159,9 @@ export default function AIDynamicPage() {
           messages?.map((message) => (
             <div key={message.id} className='flex flex-col space-y-6'>
               {/* Message bubble */}
-              {message.type === "user" ? (
+              {message.sender === "user" ? (
                 <div className='flex gap-3 justify-end items-start'>
-                  <div className='bg-[#2563EB] text-white rounded-3xl px-4 py-3 max-w-xs sm:max-w-md text-sm sm:text-base shadow-sm'>
+                  <div className='bg-[#2563EB] text-white rounded-3xl px-4 py-2 max-w-xs sm:max-w-md text-sm sm:text-base shadow-sm'>
                     {message.content}
                   </div>
                   {/* FIX 4: null-guard on profile_pic; fallback to placeholder */}
@@ -192,7 +195,7 @@ export default function AIDynamicPage() {
               )}
 
               {/* Talent Profiles Grid — only for AI messages with talents */}
-              {message.type === "ai" &&
+              {message.sender === "ai" &&
                 message.talents &&
                 message.talents.length > 0 && (
                   <div className='md:col-span-3'>
@@ -325,13 +328,12 @@ export default function AIDynamicPage() {
               value={inputValue}
               onChange={handleInput}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey && !isLoading) {
                   e.preventDefault();
                   handleSendMessage();
                 }
               }}
               placeholder="I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
-              // disabled={isLoading}
               className='
                 w-full resize-none overflow-hidden
                 bg-white border border-gray-300 rounded-3xl

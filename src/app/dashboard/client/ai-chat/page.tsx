@@ -384,7 +384,7 @@ function AIChatInner() {
       data: null,
     };
 
-    dispatch(addMessageResponse(userMessage));
+    // dispatch(addMessageResponse(userMessage));
 
     try {
       const res = await aiChatCreateMutation({
@@ -415,7 +415,7 @@ function AIChatInner() {
           data: res.data,
         };
 
-        dispatch(addMessageResponse(aiMessage));
+        // dispatch(addMessageResponse(aiMessage));
         router.push(`/dashboard/client/ai-chat/${res?.session_id}`);
       }
     } catch (error) {

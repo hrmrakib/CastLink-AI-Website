@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -117,10 +118,9 @@ export default function ChatModalDetail({ talent }: ChatModalDetailProps) {
           <div className='flex flex-col gap-4'>
             {/* Main Image */}
             <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
-              <Image
+              <img
                 src={galleryImages[currentImageIndex]}
                 alt={talent.name}
-                fill
                 className='object-cover'
               />
             </div>
@@ -138,7 +138,7 @@ export default function ChatModalDetail({ talent }: ChatModalDetailProps) {
                         : "opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <Image
+                    <img
                       src={img || "/placeholder.svg"}
                       alt={`Gallery ${index}`}
                       width={80}

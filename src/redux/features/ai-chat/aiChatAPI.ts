@@ -21,6 +21,13 @@ export const aiBaseAPI = createApi({
 
 const aiChatAPI = aiBaseAPI.injectEndpoints({
   endpoints: (builder) => ({
+    getChatBySessionId: builder.query({
+      query: (session_id) => ({
+        url: `/api/chat/session-id?session_id=${session_id}`,
+        method: "GET",
+      }),
+    }),
+
     getAIResponse: builder.mutation({
       query: (body) => ({
         url: "/openai/generate_response/",
@@ -57,14 +64,60 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    selfTapRequest: builder.mutation({
+      query: (body) => ({
+        url: "/api/jobs/request-selftape",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    eCastingRequest: builder.mutation({
+      query: (body) => ({
+        url: "/api/jobs/request-ecasting",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    shortlistTalent: builder.mutation({
+      query: (body) => ({
+        url: "/api/talents/shortlist",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    bookTalent: builder.mutation({
+      query: (body) => ({
+        url: "/api/talents/book",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    polasRequest: builder.mutation({
+      query: (body) => ({
+        url: "/api/jobs/request-polas",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
 export const {
+  useGetChatBySessionIdQuery,
   useGetAIResponseMutation,
   useAiChatCreateMutation,
   useGetDeaftJobsQuery,
   useDeleteDraftJobMutation,
   useContinueDraftJobQuery,
+  useSelfTapRequestMutation,
+  useECastingRequestMutation,
+  useShortlistTalentMutation,
+  useBookTalentMutation,
+  usePolasRequestMutation,
 } = aiChatAPI;
 export default aiChatAPI;
