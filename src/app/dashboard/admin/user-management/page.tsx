@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Trash2, UserPlus } from "lucide-react";
-import { useGetUserByRoleQuery } from "@/redux/features/admin/adminAPI";
+import { BadgeCheck, Info, Trash2, X } from "lucide-react";
+import {
+  useApproveOrRejectAgentMutation,
+  useDeleteUserMutation,
+  useGetUserByRoleQuery,
+} from "@/redux/features/admin/adminAPI";
+import { toast } from "sonner";
 
 interface ApiUser {
   user_id: number;
@@ -12,6 +17,7 @@ interface ApiUser {
   role: string;
   profile_pic: string;
   is_active: boolean;
+  is_verified: boolean;
   date_joined: string;
 }
 
@@ -66,24 +72,91 @@ function MobileCardSkeleton() {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+const TAB_LABELS: Record<"Client" | "Agent" | "Pending", string> = {
+  Client: "Clients",
+  Agent: "Agents",
+  Pending: "Pending",
+};
+
 export default function UserManagement() {
-  const [activeTab, setActiveTab] = useState<"Client" | "Agent">("Agent");
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [emailForm, setEmailForm] = useState({ body: "" });
+  const [activeTab, setActiveTab] = useState<"Client" | "Agent" | "Pending">(
+    "Pending",
+  );
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<ApiUser | null>(
     null,
   );
-  const [deletedIds, setDeletedIds] = useState<number[]>([]);
+  const [deletedIds] = useState<number[]>([]);
 
-  const { data, isFetching } = useGetUserByRoleQuery({ role: activeTab });
+  const [approveOrRejectAgentMutation] = useApproveOrRejectAgentMutation();
+  const [deleteUserMutation] = useDeleteUserMutation();
+  const { data, isFetching, refetch } = useGetUserByRoleQuery({
+    role: activeTab === "Pending" ? "Agent" : activeTab,
+    is_verified:
+      activeTab === "Agent"
+        ? true
+        : activeTab === "Pending"
+          ? false
+          : undefined,
+  });
 
   const users: ApiUser[] = (data?.data ?? []).filter(
     (u: ApiUser) => !deletedIds.includes(u.user_id),
   );
 
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (!deleteConfirmUser) return;
-    setDeletedIds((prev) => [...prev, deleteConfirmUser.user_id]);
-    setDeleteConfirmUser(null);
+
+    try {
+      const res = await deleteUserMutation(
+        deleteConfirmUser?.user_id ?? 0,
+      ).unwrap();
+      console.log(res);
+
+      if (res?.status) {
+        toast.success("Deleted successfully!");
+        refetch();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setDeleteConfirmUser(null);
+    }
+  };
+
+  const handleAcceptOrReject = async (
+    id: number,
+    action: string,
+    message?: string,
+  ) => {
+    try {
+      const res = await approveOrRejectAgentMutation({
+        agent_id: id,
+        action, //reject
+        message,
+      }).unwrap();
+
+      console.log({ res });
+
+      if (res?.status) {
+        toast.success(res?.message);
+        refetch();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailForm.body || !selectedUser) return;
+
+    await handleAcceptOrReject(selectedUser.user_id, "reject", emailForm.body);
+
+    setShowEmailForm(false);
+    setEmailForm({ body: "" });
+    setSelectedUser(null);
   };
 
   return (
@@ -92,26 +165,21 @@ export default function UserManagement() {
         {/* Header */}
         <div className='mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
           <h1 className='text-2xl font-bold text-gray-900'>Recent Users</h1>
-          <button className='flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-white transition-colors hover:bg-blue-700'>
-            <UserPlus size={20} />
-            <span className='hidden sm:inline'>Add User</span>
-            <span className='sm:hidden'>Add</span>
-          </button>
         </div>
 
         {/* Tabs */}
         <div className='mb-6 flex gap-4'>
-          {(["Client", "Agent"] as const).map((tab) => (
+          {(["Client", "Agent", "Pending"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 font-medium text-lg transition-colors ${
+              className={`relative px-6 py-2.5 font-medium text-lg transition-colors ${
                 activeTab === tab
                   ? "bg-white text-[#2563EB] rounded-md shadow-sm"
                   : "text-[#2563EB] hover:text-[#084bdb]"
               }`}
             >
-              {tab === "Client" ? "Clients" : "Agents"}
+              {TAB_LABELS[tab]}
             </button>
           ))}
         </div>
@@ -153,8 +221,13 @@ export default function UserManagement() {
                     <td className='px-6 py-4 text-lg text-gray-900'>
                       {user.role}
                     </td>
-                    <td className='px-6 py-4 text-lg text-gray-900'>
-                      {user.full_name}
+                    <td className='flex items-center gap-1 px-6 py-4 text-lg text-gray-900'>
+                      {user.full_name}{" "}
+                      <span title='Verified'>
+                        {user.is_verified && (
+                          <BadgeCheck className='text-green-500' size={20} />
+                        )}
+                      </span>
                     </td>
                     <td className='px-6 py-4 text-lg text-gray-900'>
                       {user.email}
@@ -260,7 +333,14 @@ export default function UserManagement() {
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto'>
           <div className='w-full max-w-md rounded-xl bg-white shadow-lg overflow-hidden'>
             {/* Modal header */}
-            <div className='bg-[#2563EB] px-6 py-5 text-white text-center'>
+            <div className='relative bg-[#2563EB] px-6 py-5 text-white text-center'>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className='absolute top-3 right-3 p-1.5 rounded-full hover:bg-white/20 transition-colors'
+                aria-label='Close'
+              >
+                <X size={20} />
+              </button>
               <div className='mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl font-bold'>
                 {selectedUser.full_name.charAt(0).toUpperCase()}
               </div>
@@ -295,11 +375,7 @@ export default function UserManagement() {
                   </span>
                   {badge ? (
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-600"
-                      }`}
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}
                     >
                       {value}
                     </span>
@@ -312,12 +388,93 @@ export default function UserManagement() {
               ))}
             </div>
 
-            <div className='px-6 pb-6 pt-2'>
+            {/* Action buttons — only for Pending tab */}
+            {activeTab === "Pending" ? (
+              <div className='p-6 border-t bg-gray-50 grid grid-cols-2 gap-3'>
+                <button
+                  onClick={() =>
+                    handleAcceptOrReject(selectedUser?.user_id, "approve")
+                  }
+                  className='py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => setShowEmailForm(true)}
+                  className='py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors'
+                >
+                  Reject
+                </button>
+              </div>
+            ) : (
+              <div className='px-6 pb-6 pt-4'>
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className='w-full rounded-full bg-[#2563EB] py-2.5 font-semibold text-white transition-colors hover:bg-blue-700'
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Email Form Modal */}
+      {selectedUser && showEmailForm && (
+        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-white rounded-lg max-w-md w-full'>
+            <div className='flex justify-between items-center p-6 border-b'>
+              <h2 className='text-xl font-bold text-gray-900'>
+                Rejection Reason
+              </h2>
               <button
-                onClick={() => setSelectedUser(null)}
-                className='w-full rounded-full bg-[#2563EB] py-2.5 font-semibold text-white transition-colors hover:bg-blue-700'
+                onClick={() => {
+                  setShowEmailForm(false);
+                  setEmailForm({ body: "" });
+                }}
+                className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
               >
-                Close
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className='p-6 space-y-4'>
+              <label className='block text-lg font-semibold text-gray-700'>
+                To: {selectedUser.full_name}
+              </label>
+
+              <div>
+                <label className='block text-lg font-semibold text-gray-700 mb-2'>
+                  Body:
+                </label>
+                <textarea
+                  value={emailForm.body}
+                  onChange={(e) =>
+                    setEmailForm({ ...emailForm, body: e.target.value })
+                  }
+                  placeholder='Enter reason for rejection'
+                  rows={6}
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none'
+                />
+              </div>
+            </div>
+
+            <div className='p-6 border-t bg-gray-50 flex gap-3'>
+              <button
+                onClick={() => {
+                  setShowEmailForm(false);
+                  setEmailForm({ body: "" });
+                }}
+                className='flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendEmail}
+                className='flex-1 px-4 py-2 bg-[#2563EB] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors'
+              >
+                Reject
               </button>
             </div>
           </div>

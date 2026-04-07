@@ -8,98 +8,108 @@ import {
   DollarSign,
   Users,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
 
 interface Job {
-  id: string;
+  job_id: string;
+  job_created_by_id: number;
+  session_id: string;
   title: string;
   description: string;
-  status: "Active" | "Closed";
   location: string;
-  date: string;
-  budget: string;
-  applicants: number;
-  shortlisted: number;
-  selftapes: number;
-  applicantProgress: number;
+  budget_min: string;
+  budget_max: string;
+  job_type: string;
+  applicants_count: number;
+  shortlisted_count: number;
+  selftapes_count: number;
+  ecastings_count: number;
+  polas_count: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
-const mockJobs: Job[] = [
-  {
-    id: "1",
-    title: "Summer Fashion Campaign",
-    description:
-      "Looking for 4 African male models aged 25-35 for summer fashion campaign. Must have experience in editorial work.",
-    status: "Active",
-    location: "New York, NY",
-    date: "Jan 20, 2026",
-    budget: "$5000-$6000",
-    applicants: 24,
-    shortlisted: 5,
-    selftapes: 2,
-    applicantProgress: 60,
-  },
-  {
-    id: "2",
-    title: "Summer Fashion Campaign",
-    description:
-      "Looking for 4 African male models aged 25-35 for summer fashion campaign. Must have experience in editorial work.",
-    status: "Active",
-    location: "New York, NY",
-    date: "Jan 20, 2026",
-    budget: "$5000-$6000",
-    applicants: 24,
-    shortlisted: 5,
-    selftapes: 2,
-    applicantProgress: 60,
-  },
-  {
-    id: "3",
-    title: "Summer Fashion Campaign",
-    description:
-      "Looking for 4 African male models aged 25-35 for summer fashion campaign. Must have experience in editorial work.",
-    status: "Active",
-    location: "New York, NY",
-    date: "Jan 20, 2026",
-    budget: "$5000-$6000",
-    applicants: 24,
-    shortlisted: 5,
-    selftapes: 2,
-    applicantProgress: 50,
-  },
-  {
-    id: "4",
-    title: "Summer Fashion Campaign",
-    description:
-      "Looking for 4 African male models aged 25-35 for summer fashion campaign. Must have experience in editorial work.",
-    status: "Active",
-    location: "New York, NY",
-    date: "Jan 20, 2026",
-    budget: "$5000-$6000",
-    applicants: 24,
-    shortlisted: 5,
-    selftapes: 2,
-    applicantProgress: 45,
-  },
-];
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+function formatBudget(min: string, max: string): string {
+  const minVal = parseFloat(min);
+  const maxVal = parseFloat(max);
+  if (minVal === maxVal) return `$${minVal.toLocaleString()}`;
+  return `$${minVal.toLocaleString()}-$${maxVal.toLocaleString()}`;
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getApplicantProgress(job: Job): number {
+  const total =
+    job.applicants_count +
+    job.shortlisted_count +
+    job.selftapes_count +
+    job.ecastings_count;
+  if (total === 0) return 0;
+  const progress =
+    ((job.shortlisted_count + job.selftapes_count) / Math.max(total, 1)) * 100;
+  return Math.min(Math.round(progress), 100);
+}
 
 export default function Page() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredJobs = mockJobs.filter((job) => {
+  const { data, isLoading, isFetching } = useGetActiveJobsQuery({
+    page: currentPage,
+    limit: 10,
+  });
+
+  const activeJobs: Job[] = data?.data || [];
+  const pagination: Pagination = data?.pagination || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 1,
+  };
+
+  const filteredJobs = activeJobs.filter((job) => {
     const matchesSearch = job.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     if (selectedFilter === "All") return matchesSearch;
     if (selectedFilter === "Urgent")
-      return matchesSearch && job.applicantProgress < 50;
-    if (selectedFilter === "This Week") return matchesSearch;
+      return matchesSearch && getApplicantProgress(job) < 50;
+    if (selectedFilter === "This Week") {
+      const jobDate = new Date(job.created_at);
+      const now = new Date();
+      const diffDays =
+        (now.getTime() - jobDate.getTime()) / (1000 * 60 * 60 * 24);
+      return matchesSearch && diffDays <= 7;
+    }
     return matchesSearch;
   });
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > pagination.total_pages) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <main className='min-h-screen bg-transparent'>
@@ -143,13 +153,16 @@ export default function Page() {
       </div>
 
       {/* Filter Tabs */}
-      <div className='bg-transparent sticky top-20 z-30'>
+      {/* <div className='bg-transparent sticky top-20 z-30'>
         <div className='container mx-auto px-4'>
           <div className='flex gap-2 overflow-x-auto py-4'>
             {["All", "Urgent", "This Week"].map((filter) => (
               <button
                 key={filter}
-                onClick={() => setSelectedFilter(filter)}
+                onClick={() => {
+                  setSelectedFilter(filter);
+                  setCurrentPage(1);
+                }}
                 className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
                   selectedFilter === filter
                     ? "bg-[#2563EB] text-white"
@@ -161,152 +174,236 @@ export default function Page() {
             ))}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Job Cards Grid */}
       <div className='container mx-auto px-4 py-8'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {filteredJobs.map((job) => (
-            <div
-              key={job.id}
-              className='bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition'
-            >
-              {/* Title and Description */}
-              <h3 className='text-lg font-bold text-[#000000] mb-2'>
-                {job.title}
-              </h3>
-              <p className='text-[#404145] text-sm mb-4 line-clamp-2'>
-                {job.description}
-              </p>
-
-              {/* Status Badge */}
-              <div className='mb-4'>
-                <span className='inline-block bg-[#E7F8F2] text-[#009F91] px-3 py-1 rounded-full text-sm font-medium'>
-                  {job.status}
-                </span>
-              </div>
-
-              {/* Details */}
-              <div className='space-y-3 mb-4 text-sm'>
-                <div className='flex items-center gap-2 text-[#404145]'>
-                  <MapPin className='w-4 h-4 text-[#404145]' />
-                  {job.location}
+        {/* Loading State */}
+        {(isLoading || isFetching) && (
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className='bg-white rounded-lg border border-gray-200 p-6 animate-pulse'
+              >
+                <div className='h-5 bg-gray-200 rounded w-3/4 mb-3' />
+                <div className='h-4 bg-gray-100 rounded w-full mb-2' />
+                <div className='h-4 bg-gray-100 rounded w-5/6 mb-4' />
+                <div className='h-6 bg-gray-100 rounded w-20 mb-4' />
+                <div className='space-y-2 mb-4'>
+                  <div className='h-4 bg-gray-100 rounded w-1/2' />
+                  <div className='h-4 bg-gray-100 rounded w-1/3' />
+                  <div className='h-4 bg-gray-100 rounded w-2/5' />
                 </div>
-                <div className='flex items-center gap-2 text-gray-700'>
-                  <Calendar className='w-4 h-4 text-[#404145]' />
-                  {job.date}
-                </div>
-                <div className='flex items-center gap-2 text-gray-700'>
-                  <DollarSign className='w-4 h-4 text-[#404145]' />
-                  {job.budget}
+                <div className='h-2 bg-gray-200 rounded-full mb-6' />
+                <div className='flex gap-2'>
+                  <div className='flex-1 h-9 bg-gray-100 rounded-lg' />
+                  <div className='flex-1 h-9 bg-gray-200 rounded-lg' />
+                  <div className='flex-1 h-9 bg-gray-200 rounded-lg' />
                 </div>
               </div>
-
-              {/* Applicant Stats */}
-              <div className='mb-4 pb-4 border-b border-gray-200'>
-                <div className='flex gap-4 text-sm'>
-                  <div className='flex items-center gap-1'>
-                    <Users className='w-4 h-4 text-[#404145]' />
-                    <span className='text-gray-700'>
-                      <strong>{job.applicants}</strong> Applicants
-                    </span>
-                  </div>
-                  <span className='text-gray-700'>
-                    <strong>{job.shortlisted}</strong> Shortlisted
-                  </span>
-                  <span className='text-gray-700'>
-                    <strong>{job.selftapes}</strong> Self-tapes
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className='mb-6'>
-                <div className='w-full bg-gray-200 rounded-full h-2'>
-                  <div
-                    className='bg-[#2563EB] h-2 rounded-full transition-all'
-                    style={{ width: `${job.applicantProgress}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className='flex flex-col sm:flex-row gap-2'>
-                <button
-                  onClick={() =>
-                    router.push(`/dashboard/client/ai-chat/${job.id}`)
-                  }
-                  className='flex-1 bg-[#F6F7F9] border border-[#91979F] text-[#000000] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
-                >
-                  View AI Result
-                </button>
-                <button
-                  onClick={() =>
-                    router.push(`/dashboard/client/active-jobs/video/${job.id}`)
-                  }
-                  className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
-                >
-                  E-Casting Room
-                </button>
-                <button
-                  onClick={() =>
-                    router.push(`/dashboard/client/active-jobs/${job.id}`)
-                  }
-                  className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
-                >
-                  Selftapes
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredJobs.length === 0 && (
-          <div className='text-center py-16'>
-            <p className='text-gray-600 text-lg'>
-              No jobs found matching your search.
-            </p>
+            ))}
           </div>
         )}
-      </div>
 
-      {/* Create Job Modal */}
-      {showCreateModal && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-          <div className='bg-white rounded-lg max-w-md w-full p-6'>
-            <h2 className='text-xl font-bold text-gray-900 mb-4'>
-              Create New Job
-            </h2>
-            <div className='space-y-4'>
-              <input
-                type='text'
-                placeholder='Job Title'
-                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB]'
-              />
-              <textarea
-                placeholder='Job Description'
-                rows={4}
-                className='w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none'
-              />
-              <div className='flex gap-2 justify-end pt-4'>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium'
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-600 transition font-medium'
-                >
-                  Create
-                </button>
-              </div>
+        {/* Job Cards */}
+        {!isLoading && !isFetching && (
+          <>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              {filteredJobs.map((job) => {
+                const progress = getApplicantProgress(job);
+                const budget = formatBudget(job.budget_min, job.budget_max);
+                const date = formatDate(job.created_at);
+
+                return (
+                  <div
+                    key={job.job_id}
+                    className='bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition'
+                  >
+                    {/* Title and Description */}
+                    <h3 className='text-lg font-bold text-[#000000] mb-2'>
+                      {job.title}
+                    </h3>
+                    <p className='text-[#404145] text-sm mb-4 line-clamp-2'>
+                      {job.description}
+                    </p>
+
+                    {/* Status Badge */}
+                    <div className='mb-4'>
+                      <span className='inline-block bg-[#E7F8F2] text-[#009F91] px-3 py-1 rounded-full text-sm font-medium capitalize'>
+                        {job.status}
+                      </span>
+                    </div>
+
+                    {/* Details */}
+                    <div className='space-y-3 mb-4 text-sm'>
+                      <div className='flex items-center gap-2 text-[#404145]'>
+                        <MapPin className='w-4 h-4 text-[#404145]' />
+                        {job.location}
+                      </div>
+                      <div className='flex items-center gap-2 text-gray-700'>
+                        <Calendar className='w-4 h-4 text-[#404145]' />
+                        {date}
+                      </div>
+                      <div className='flex items-center gap-2 text-gray-700'>
+                        <DollarSign className='w-4 h-4 text-[#404145]' />
+                        {budget}
+                      </div>
+                    </div>
+
+                    {/* Applicant Stats */}
+                    <div className='mb-4 pb-4 border-b border-gray-200'>
+                      <div className='flex gap-4 text-sm'>
+                        <div className='flex items-center gap-1'>
+                          <Users className='w-4 h-4 text-[#404145]' />
+                          <span className='text-gray-700'>
+                            <strong>{job.applicants_count}</strong> Applicants
+                          </span>
+                        </div>
+                        <span className='text-gray-700'>
+                          <strong>{job.shortlisted_count}</strong> Shortlisted
+                        </span>
+                        <span className='text-gray-700'>
+                          <strong>{job.selftapes_count}</strong> Self-tapes
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className='mb-6'>
+                      <div className='w-full bg-gray-200 rounded-full h-2'>
+                        <div
+                          className='bg-[#2563EB] h-2 rounded-full transition-all'
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className='flex flex-col sm:flex-row gap-2'>
+                      <button
+                        onClick={() =>
+                          router.push(`/dashboard/client/ai-chat/${job.job_id}`)
+                        }
+                        className='flex-1 bg-[#F6F7F9] border border-[#91979F] text-[#000000] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                      >
+                        View AI Result
+                      </button>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/client/active-jobs/video/${job.job_id}`,
+                          )
+                        }
+                        className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                      >
+                        E-Casting Room
+                      </button>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/client/active-jobs/${job.job_id}`,
+                          )
+                        }
+                        className='flex-1 bg-[#1A46A7] hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
+                      >
+                        Selftapes
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Empty State */}
+            {filteredJobs.length === 0 && (
+              <div className='text-center py-16'>
+                <p className='text-gray-600 text-lg'>
+                  No jobs found matching your search.
+                </p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+              <div className='flex items-center justify-between mt-10'>
+                <p className='text-sm text-gray-500'>
+                  Showing{" "}
+                  <strong>
+                    {(pagination.page - 1) * pagination.limit + 1}–
+                    {Math.min(
+                      pagination.page * pagination.limit,
+                      pagination.total,
+                    )}
+                  </strong>{" "}
+                  of <strong>{pagination.total}</strong> jobs
+                </p>
+
+                <div className='flex items-center gap-1'>
+                  {/* Prev */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className='p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition'
+                  >
+                    <ChevronLeft className='w-4 h-4' />
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from(
+                    { length: pagination.total_pages },
+                    (_, i) => i + 1,
+                  )
+                    .filter(
+                      (page) =>
+                        page === 1 ||
+                        page === pagination.total_pages ||
+                        Math.abs(page - currentPage) <= 1,
+                    )
+                    .reduce<(number | "...")[]>((acc, page, idx, arr) => {
+                      if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
+                        acc.push("...");
+                      }
+                      acc.push(page);
+                      return acc;
+                    }, [])
+                    .map((item, idx) =>
+                      item === "..." ? (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className='px-2 text-gray-400 text-sm'
+                        >
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={item}
+                          onClick={() => handlePageChange(item as number)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
+                            currentPage === item
+                              ? "bg-[#2563EB] text-white"
+                              : "border border-gray-200 text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {item}
+                        </button>
+                      ),
+                    )}
+
+                  {/* Next */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === pagination.total_pages}
+                    className='p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition'
+                  >
+                    <ChevronRight className='w-4 h-4' />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </main>
   );
 }

@@ -6,19 +6,52 @@ const adminAPI = baseAPI.injectEndpoints({
       query: () => ({
         url: "/accounts/dashboard/",
       }),
+      providesTags: ["Users", "Jobs"],
     }),
 
     getUserByRole: builder.query({
-      query: ({ role }) => ({
-        url: `/accounts/user/user_list?role=${role}`,
+      query: ({ role, is_verified }) => ({
+        url: `/accounts/user/user_list`,
+        params: {
+          role,
+          ...(is_verified !== undefined && { is_verified }),
+        },
       }),
+      providesTags: ["Users"],
     }),
 
     jobManagement: builder.query({
       query: (params) => ({
-        url: "/jobs/jobs/",
+        url: "/jobs/active_jobs/",
         params,
       }),
+      providesTags: ["Jobs"],
+    }),
+
+    getTalents: builder.query({
+      query: (params) => ({
+        url: "/admin/talents/",
+        params,
+      }),
+      providesTags: ["Users"],
+    }),
+
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `/accounts/user/${userId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
+    approveOrRejectAgent: builder.mutation({
+      query: (body) => ({
+        url: `/accounts/admin/agents/action/`,
+        method: "PATCH",
+        body,
+      }),
+
+      invalidatesTags: ["Users"],
     }),
   }),
 });
@@ -27,5 +60,8 @@ export const {
   useGetOverviewQuery,
   useGetUserByRoleQuery,
   useJobManagementQuery,
+  useGetTalentsQuery,
+  useDeleteUserMutation,
+  useApproveOrRejectAgentMutation,
 } = adminAPI;
 export default adminAPI;

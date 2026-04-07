@@ -226,13 +226,6 @@ export default function DashboardPage() {
                           >
                             <Info size={20} />
                           </button>
-                          <button
-                            onClick={() => handleDeleteClick(user)}
-                            className='rounded-full p-2 text-[#707270] hover:bg-red-50 hover:text-red-600 transition-colors'
-                            aria-label='Delete user'
-                          >
-                            <Trash2 size={20} />
-                          </button>
                         </div>
                       </td>
                     </tr>

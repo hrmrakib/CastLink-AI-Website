@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Info, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useJobManagementQuery } from "@/redux/features/admin/adminAPI";
 
@@ -60,7 +61,7 @@ interface Job {
   updated_at: string;
 }
 
-const STATUS_OPTIONS = ["all", "active", "inactive", "completed", "draft"];
+const STATUS_OPTIONS = ["requested", "accepted", "rejected", "responded"];
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 function formatDate(dateStr: string) {
@@ -140,7 +141,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function JobManagement() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState("requested");
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -150,7 +151,7 @@ export default function JobManagement() {
 
   const queryParams: Record<string, unknown> = { page, limit };
   if (search) queryParams.search = search;
-  if (status !== "all") queryParams.status = status;
+  // if (status !== "all") queryParams.current_status = status;
 
   const { data, isFetching } = useJobManagementQuery(queryParams);
 
@@ -183,17 +184,17 @@ export default function JobManagement() {
         {/* ── Header ── */}
         <div className='mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
           <h1 className='text-2xl font-bold text-gray-900'>Job Management</h1>
-          <div className='text-sm text-gray-500'>
+          <div className='text-sm text-gray-700'>
             {pagination
-              ? `${pagination.total} job${pagination.total !== 1 ? "s" : ""} total`
+              ? `Total job${pagination.total !== 1 ? "s:" : ":"} ${pagination.total}`
               : ""}
           </div>
         </div>
 
         {/* ── Filters ── */}
-        <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center'>
+        <div className='w-1/3 ml-auto mb-6 flex flex-col gap-3 sm:flex-row sm:items-center'>
           {/* Search */}
-          <div className='relative flex-1'>
+          <div className='relative flex-1 items-end'>
             <Search
               size={16}
               className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
@@ -215,7 +216,7 @@ export default function JobManagement() {
           </button>
 
           {/* Status filter */}
-          <select
+          {/* <select
             value={status}
             onChange={(e) => handleStatusChange(e.target.value)}
             className='rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
@@ -225,7 +226,7 @@ export default function JobManagement() {
                 {s === "all" ? "All Statuses" : capitalize(s)}
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
 
         {/* ── Desktop Table ── */}

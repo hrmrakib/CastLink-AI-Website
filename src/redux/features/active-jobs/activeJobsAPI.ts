@@ -3,10 +3,10 @@ import baseAPI from "@/redux/api/api";
 const activeJobsAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
     getActiveJobs: builder.query({
-      query: ({ search, status, page, limit }) => ({
-        url: `/jobs/`,
+      query: (params) => ({
+        url: `/jobs/active_jobs/`,
         method: "GET",
-        params: { search, status, page, limit },
+        params,
       }),
     }),
 
