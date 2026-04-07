@@ -70,12 +70,32 @@ export default function AIDynamicPage() {
   const { user } = useAuth();
   const { data } = useGetChatBySessionIdQuery(id);
 
+  console.log({ messages });
+
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
     if (data?.messages) {
-      setMessages(data?.messages);
+      const rawMessages = data.messages;
+      const talentList = data?.saved_filters?.suggested_talents_list ?? [];
+
+      const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
+        const isLastAi =
+          msg.sender === "ai" &&
+          idx === rawMessages.length - 1 &&
+          talentList.length > 0;
+
+        return {
+          id: idx,
+          sender: msg.sender,
+          content: msg.content,
+          avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
+          talents: isLastAi ? talentList : (msg.talents ?? []),
+        };
+      });
+
+      setMessages(normalized);
     }
-  }, [data?.messages, id]);
+  }, [data?.messages, data?.saved_filters, id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -261,6 +281,7 @@ export default function AIDynamicPage() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
+                                
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Like'
                                   title='Like'

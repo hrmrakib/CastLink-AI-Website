@@ -82,16 +82,19 @@ export default function LoginPage() {
         router.push("/");
       } else {
         toast.error(data?.message);
+        setErrors((prev) => ({
+          ...prev,
+          email: data?.message || "Invalid email or password.",
+        }));
       }
-
-      setEmail("");
-      setPassword("");
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
         email: "Login failed. Please try again.",
       }));
     } finally {
+      // setEmail("");
+      // setPassword("");
       setIsLoading(false);
     }
   };
@@ -123,7 +126,11 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className='space-y-6'>
+          <form
+            onSubmit={handleSubmit}
+            className='space-y-6'
+            suppressHydrationWarning
+          >
             {/* Email Field */}
             <div>
               <label
@@ -136,6 +143,8 @@ export default function LoginPage() {
                 id='email'
                 type='email'
                 placeholder='you@gmail.com'
+                autoComplete='email'
+                suppressHydrationWarning
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -148,7 +157,7 @@ export default function LoginPage() {
                 }`}
                 disabled={isLoading}
               />
-              <div className='min-h-auto mt-2'>
+              <div className='min-h-5 mt-2'>
                 {errors.email && (
                   <p className='text-sm text-red-600'>{errors.email}</p>
                 )}
@@ -169,6 +178,8 @@ export default function LoginPage() {
                   id='password'
                   type={showPassword ? "text" : "password"}
                   placeholder='Enter your password'
+                  autoComplete='current-password'
+                  suppressHydrationWarning
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -192,7 +203,7 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <div className='min-h-auto mt-2'>
+              <div className='min-h-5 mt-2'>
                 {errors.password && (
                   <p className='text-sm text-red-600'>{errors.password}</p>
                 )}

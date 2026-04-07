@@ -62,7 +62,7 @@ const AdminSidebar = () => {
           }
         />
 
-        <NavItem
+        {/* <NavItem
           href='/dashboard/admin/messege-ai-logs'
           icon={MessageCircleMore}
           label='Messege & AI Logs'
@@ -70,7 +70,7 @@ const AdminSidebar = () => {
             pathname === "/dashboard/admin/messege-ai-logs" ||
             pathname.startsWith("/dashboard/admin/messege-ai-logs/")
           }
-        />
+        /> */}
 
         <NavItem
           href='/dashboard/admin/settings'
