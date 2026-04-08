@@ -3,13 +3,14 @@
 import { usePathname } from "next/navigation";
 
 const hiddenRoutePatterns = [
-//   /^\/dashboard(\/.*)?$/,
+  //   /^\/dashboard(\/.*)?$/,
   /^\/dashboard\/client\/ai-chat(\/.*)?$/,
   /^\/dashboard\/client\/active-jobs(\/.*)?$/,
   /^\/dashboard\/client\/active-jobs(\/.*)?$/,
   /^\/dashboard\/client\/draft-jobs(\/.*)?$/,
   /^\/dashboard\/client\/shortlists(\/.*)?$/,
   /^\/dashboard\/client\/jobs(\/.*)?$/,
+  /^\/dashboard\/client\/e-casting-room(\/.*)?$/,
 ];
 
 function useDashboardHeader() {

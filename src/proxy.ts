@@ -14,33 +14,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [ "/profile/:path*",],
+  matcher: ["/profile/:path*"],
 };
-
-// import { NextResponse } from "next/server";
-// import { getCurrentUser } from "./service/authService";
-
-// export async function proxy(request: Request) {
-//   // Fetch current user (authentication token)
-//   const token = await getCurrentUser();
-
-//   // If there's no token, redirect to login page
-//   if (!token) {
-//     return NextResponse.redirect(new URL("/login", request.url));
-//   }
-
-//   // If user is authenticated, proceed with the request
-//   return NextResponse.next();
-// }
-
-// // Define which paths the middleware applies to
-// export const config = {
-//   matcher: [
-//     "dashboard/:path*",
-//     "dashboard/client",
-//     "profile/:path*",
-//     "profile",
-//     "ai-chat/:path*",
-//     "ai-chat",
-//   ],
-// };

@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +31,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
+import { useParams } from "next/navigation";
 
 interface Talent {
   id: string;
@@ -43,6 +44,8 @@ interface Talent {
 }
 
 export default function ShortlistDetailPage() {
+  const params = useParams();
+  const id = Number(params.id);
   const [isOpen, setIsOpen] = useState(false);
   const [talents, setTalents] = useState<Talent[]>([
     {
@@ -94,8 +97,10 @@ export default function ShortlistDetailPage() {
       gender: "Male",
     },
   ]);
-
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+
+  const { data } = useGetSingleShortlistJobQuery(id);
+  console.log({ data });
 
   const handleDragStart = (id: string) => {
     setDraggedItem(id);
@@ -179,7 +184,7 @@ export default function ShortlistDetailPage() {
               Filter
             </button> */}
             <button
-              onClick={handleShareLink}
+              onClick={() => handleShareLink()}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
               <Share2 size={18} />

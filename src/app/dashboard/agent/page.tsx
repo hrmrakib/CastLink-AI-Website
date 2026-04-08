@@ -1,8 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useGetAgentOverviewQuery } from "@/redux/features/agent/overviewAPI";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +45,9 @@ export default function Home() {
       avatar: "/man.png",
     },
   ]);
+  const { data } = useGetAgentOverviewQuery({});
+
+  console.log({ data });
 
   const handleCreateJobWithAI = async () => {
     setIsLoading(true);
@@ -50,7 +55,7 @@ export default function Home() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsLoading(false);
     alert(
-      "AI Job Creation Started! Job description would be generated from your input."
+      "AI Job Creation Started! Job description would be generated from your input.",
     );
   };
 
@@ -61,36 +66,41 @@ export default function Home() {
         {/* Stats Grid */}
         <div className='flex gap-4 md:gap-6 mb-8'>
           {/* Active Jobs Card */}
-          <div className='min-w-sm bg-card rounded-lg border border-border p-6 hover:shadow-sm transition-shadow'>
-            <p className='text-sm text-muted-foreground mb-2'>Active Jobs</p>
-            <p className='text-4xl md:text-5xl font-bold text-foreground'>8</p>
+          <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+            <div>
+              <p className='text-sm text-muted-foreground mb-2'>Active Jobs</p>
+              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+                4
+              </p>
+            </div>
+            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
           </div>
 
           {/* Pending Availability Card */}
-          <div className='min-w-sm bg-card rounded-lg border border-border p-6 hover:shadow-sm transition-shadow'>
-            <p className='text-sm text-muted-foreground mb-2'>
-              Pending Availability
-            </p>
-            <p className='text-4xl md:text-5xl font-bold text-foreground'>15</p>
+          <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+            <div>
+              <p className='text-sm text-muted-foreground mb-2'>
+                Pending Availability
+              </p>
+              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+                15
+              </p>
+            </div>
+            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
           </div>
-        </div>
 
-        {/* AI Section */}
-        <div className='bg-[#2563EB] rounded-2xl p-6 md:p-8 mb-8 text-primary-foreground'>
-          <h2 className='text-2xl md:text-3xl font-bold mb-2'>
-            Find Talent with AI
-          </h2>
-          <p className='text-primary-foreground/90 mb-6'>
-            Describe your needs and let AI do the work.
-          </p>
-          <button
-            onClick={handleCreateJobWithAI}
-            disabled={isLoading}
-            className='bg-primary-foreground text-primary px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:bg-primary-foreground/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed'
-          >
-            <Sparkles size={20} />
-            {isLoading ? "Creating Job..." : "Create Job with AI"}
-          </button>
+          {/* Pending Availability Card */}
+          {/* <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+            <div>
+              <p className='text-sm text-muted-foreground mb-2'>
+                Pending Availability
+              </p>
+              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+                15
+              </p>
+            </div>
+            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
+          </div> */}
         </div>
 
         {/* Activity Feed */}

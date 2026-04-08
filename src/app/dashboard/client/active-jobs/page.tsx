@@ -88,6 +88,8 @@ export default function Page() {
     total_pages: 1,
   };
 
+  console.log({ activeJobs });
+
   const filteredJobs = activeJobs.filter((job) => {
     const matchesSearch = job.title
       .toLowerCase()
@@ -210,7 +212,7 @@ export default function Page() {
         {!isLoading && !isFetching && (
           <>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              {filteredJobs.map((job) => {
+              {activeJobs?.map((job) => {
                 const progress = getApplicantProgress(job);
                 const budget = formatBudget(job.budget_min, job.budget_max);
                 const date = formatDate(job.created_at);
@@ -283,7 +285,9 @@ export default function Page() {
                     <div className='flex flex-col sm:flex-row gap-2'>
                       <button
                         onClick={() =>
-                          router.push(`/dashboard/client/ai-chat/${job.job_id}`)
+                          router.push(
+                            `/dashboard/client/ai-chat/${job.session_id}`,
+                          )
                         }
                         className='flex-1 bg-[#F6F7F9] border border-[#91979F] text-[#000000] hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
                       >
@@ -291,9 +295,7 @@ export default function Page() {
                       </button>
                       <button
                         onClick={() =>
-                          router.push(
-                            `/dashboard/client/active-jobs/video/${job.job_id}`,
-                          )
+                          router.push(`/dashboard/client/active-jobs/e-casting-room/`)
                         }
                         className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
                       >
@@ -316,7 +318,7 @@ export default function Page() {
             </div>
 
             {/* Empty State */}
-            {filteredJobs.length === 0 && (
+            {activeJobs?.length === 0 && (
               <div className='text-center py-16'>
                 <p className='text-gray-600 text-lg'>
                   No jobs found matching your search.

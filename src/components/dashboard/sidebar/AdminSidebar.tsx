@@ -61,6 +61,15 @@ const AdminSidebar = () => {
             pathname.startsWith("/dashboard/admin/talent-management/")
           }
         />
+        <NavItem
+          href='/dashboard/admin/room'
+          icon={Rose}
+          label='Room Management'
+          active={
+            pathname === "/dashboard/admin/room" ||
+            pathname.startsWith("/dashboard/admin/talent-management/")
+          }
+        />
 
         {/* <NavItem
           href='/dashboard/admin/messege-ai-logs'

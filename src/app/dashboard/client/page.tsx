@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useGetClientOverviewQuery } from "@/redux/features/client/clientOverview";
 
 export default function Page() {
   const router = useRouter();
@@ -84,8 +85,10 @@ export default function Page() {
       color: "bg-blue-500",
     },
   ]);
-
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  const { data } = useGetClientOverviewQuery({});
+  console.log({ data });
 
   return (
     <main className='min-h-screen bg-transparent'>

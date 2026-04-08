@@ -257,7 +257,7 @@ export default function JobManagement() {
                 Array.from({ length: 6 }).map((_, i) => (
                   <TableRowSkeleton key={i} />
                 ))
-              ) : jobs.length === 0 ? (
+              ) : jobs?.length === 0 ? (
                 <tr>
                   <td colSpan={7} className='py-16 text-center text-gray-400'>
                     No jobs found.
@@ -269,22 +269,22 @@ export default function JobManagement() {
                     key={job.job_id}
                     className='hover:bg-gray-50 transition-colors'
                   >
-                    <td className='px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate'>
+                    <td className='px-6 py-4 text-lg font-medium text-gray-900 max-w-50 truncate'>
                       {job.title}
                     </td>
-                    <td className='px-6 py-4 text-sm text-gray-700 whitespace-nowrap'>
+                    <td className='px-6 py-4 text-lg text-gray-700 whitespace-nowrap'>
                       {capitalize(job.job_type)}
                     </td>
-                    <td className='px-6 py-4 text-sm text-gray-700 whitespace-nowrap'>
+                    <td className='px-6 py-4 text-lg text-gray-700 whitespace-nowrap'>
                       {job.location}
                     </td>
-                    <td className='px-6 py-4 text-sm text-gray-700 whitespace-nowrap'>
+                    <td className='px-6 py-4 text-lg text-gray-700 whitespace-nowrap'>
                       {formatBudget(job.budget_min, job.budget_max)}
                     </td>
                     <td className='px-6 py-4'>
                       <StatusBadge status={job.status} />
                     </td>
-                    <td className='px-6 py-4 text-sm text-gray-700 whitespace-nowrap'>
+                    <td className='px-6 py-4 text-lg text-gray-700 whitespace-nowrap'>
                       {formatDate(job.created_at)}
                     </td>
                     <td className='px-6 py-4'>
@@ -318,7 +318,7 @@ export default function JobManagement() {
             Array.from({ length: 4 }).map((_, i) => (
               <MobileCardSkeleton key={i} />
             ))
-          ) : jobs.length === 0 ? (
+          ) : jobs?.length === 0 ? (
             <div className='py-16 text-center text-gray-400'>
               No jobs found.
             </div>
@@ -509,7 +509,7 @@ export default function JobManagement() {
                     </p>
 
                     {/* Shoot Dates */}
-                    {selectedJob.ai_result.shoot_dates.length > 0 && (
+                    {selectedJob.ai_result.shoot_dates?.length > 0 && (
                       <div>
                         <p className='text-xs font-semibold text-gray-500 mb-1'>
                           SHOOT DATES
@@ -528,7 +528,7 @@ export default function JobManagement() {
                     )}
 
                     {/* Suggested Talents */}
-                    {selectedJob.ai_result.suggested_talents.length > 0 && (
+                    {selectedJob.ai_result.suggested_talents?.length > 0 && (
                       <div>
                         <p className='text-xs font-semibold text-gray-500 mb-2'>
                           SUGGESTED TALENTS
