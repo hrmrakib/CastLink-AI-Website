@@ -53,6 +53,24 @@ const adminAPI = baseAPI.injectEndpoints({
 
       invalidatesTags: ["Users"],
     }),
+
+    approveOrRejectTalent: builder.mutation({
+      query: (body) => ({
+        url: `/admin/talents/action/`,
+        method: "PATCH",
+        body,
+      }),
+
+      invalidatesTags: ["Users"],
+    }),
+
+    deleteTalent: builder.mutation({
+      query: (talentId) => ({
+        url: `/agent/talents/${talentId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -63,5 +81,7 @@ export const {
   useGetTalentsQuery,
   useDeleteUserMutation,
   useApproveOrRejectAgentMutation,
+  useApproveOrRejectTalentMutation,
+  useDeleteTalentMutation,
 } = adminAPI;
 export default adminAPI;

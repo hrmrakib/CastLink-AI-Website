@@ -2,9 +2,11 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Eye, X } from "lucide-react";
+import { Trash2, Eye, X, Loader2 } from "lucide-react";
 import {
   useApproveOrRejectAgentMutation,
+  useApproveOrRejectTalentMutation,
+  useDeleteTalentMutation,
   useDeleteUserMutation,
   useGetTalentsQuery,
 } from "@/redux/features/admin/adminAPI";
@@ -54,18 +56,21 @@ export default function TalentManagement() {
   const [emailForm, setEmailForm] = useState({ body: "" });
   const [showEmailForm, setShowEmailForm] = useState(false);
 
-  const [approveOrRejectAgentMutation] = useApproveOrRejectAgentMutation();
-  const [deleteUserMutation] = useDeleteUserMutation();
+  const [approveOrRejectTalentMutation, { isLoading: isApproving }] =
+    useApproveOrRejectTalentMutation();
+  const [deleteTalentMutation] = useDeleteTalentMutation();
   const { data, isFetching, refetch } = useGetTalentsQuery({
     approval_status: activeTab,
   });
   const talents: Talent[] = data?.data ?? [];
 
+  console.log({ talents });
+
   const handleDelete = async () => {
     if (!deleteConfirm) return;
 
     try {
-      const res = await deleteUserMutation(deleteConfirm ?? 0).unwrap();
+      const res = await deleteTalentMutation(deleteConfirm ?? 0).unwrap();
       console.log(res);
 
       if (res?.status) {
@@ -85,7 +90,7 @@ export default function TalentManagement() {
     message?: string,
   ) => {
     try {
-      const res = await approveOrRejectAgentMutation({
+      const res = await approveOrRejectTalentMutation({
         agent_id: id,
         action, //reject
         message,
@@ -346,9 +351,10 @@ export default function TalentManagement() {
                   onClick={() =>
                     handleAcceptOrReject(selectedTalent.talent_id, "approve")
                   }
-                  className='py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
+                  className='flex items-center justify-center gap-1.5 py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
                 >
-                  Approve
+                  Approve{" "}
+                  {isApproving ? <Loader2 className='animate-spin' /> : ""}
                 </button>
                 <button
                   onClick={() => setShowEmailForm(true)}
