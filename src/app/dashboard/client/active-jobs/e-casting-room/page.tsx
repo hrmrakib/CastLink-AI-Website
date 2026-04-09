@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
+import { useCreateSessionMutation } from "@/redux/features/e-casting/eCastingRoomAPI";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
@@ -499,13 +500,13 @@ const ScheduleModal = ({
   now.setMinutes(now.getMinutes() + 30);
   const defaultDate = now.toISOString().slice(0, 16);
 
-  const [title, setTitle] = useState(
-    "Tech Startup Commercial - Review Session",
-  );
+  const [title, setTitle] = useState("");
   const [scheduledAt, setScheduledAt] = useState(defaultDate);
   const [participants, setParticipants] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+
+  console.log(title, scheduledAt);
 
   const handleSchedule = () => {
     setSaving(true);
@@ -600,7 +601,7 @@ const ScheduleModal = ({
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className='text-xs font-medium text-slate-500 mb-1.5 block'>
                   Invite Participants{" "}
                   <span className='text-slate-400'>
@@ -613,7 +614,7 @@ const ScheduleModal = ({
                   className='w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 bg-slate-50 transition-all'
                   placeholder='alice@email.com, bob@email.com'
                 />
-              </div>
+              </div> */}
 
               <button
                 onClick={handleSchedule}
@@ -812,10 +813,16 @@ export default function ECastingRoom() {
   const [modal, setModal] = useState<"new" | "join" | "schedule" | null>(null);
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
+  const [createSessionMutation] = useCreateSessionMutation();
 
-  const handleStartMeeting = (m: Meeting) => {
-    setModal(null);
-    setActiveMeeting(m);
+  const handleStartMeeting = async () => {
+    console.log("hello...........");
+    // setModal(null);
+    // setActiveMeeting(m);
+
+    const res = await createSessionMutation().unwrap();
+
+    console.log({ res });
   };
 
   const handleScheduled = (m: Meeting) => {
@@ -860,12 +867,13 @@ export default function ECastingRoom() {
         {/* Action cards */}
         <div className='bg-transparent rounded-2xl'>
           <div className='flex flex-wrap justify-center sm:justify-start gap-8 sm:gap-10'>
-            <ActionCard
+            {/* <ActionCard
               icon={<VideoIcon />}
               label='New Meeting'
               color='bg-blue-500 hover:bg-blue-600 shadow-blue-400/40'
-              onClick={() => setModal("new")}
-            />
+              // onClick={() => setModal("new")}
+              onClick={() => handleStartMeeting()}
+            /> */}
             <ActionCard
               icon={<PlusIcon />}
               label='Join Meeting'
@@ -897,12 +905,12 @@ export default function ECastingRoom() {
       </div>
 
       {/* Modals */}
-      {modal === "new" && (
+      {/* {modal === "new" && (
         <NewMeetingModal
           onClose={() => setModal(null)}
           onStart={handleStartMeeting}
         />
-      )}
+      )} */}
       {modal === "join" && (
         <JoinMeetingModal
           onClose={() => setModal(null)}

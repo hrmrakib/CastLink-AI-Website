@@ -10,10 +10,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSelector } from "react-redux";
 import {
   useAiChatCreateMutation,
+  useBookTalentMutation,
+  useECastingRequestMutation,
   useGetChatBySessionIdQuery,
+  useSelfTapRequestMutation,
+  useShortlistTalentMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import { useAuth } from "@/hooks/useAuth";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 interface Message {
   id: number;
@@ -68,6 +73,12 @@ export default function AIDynamicPage() {
   const sessionId = useSelector((state: any) => state.aiChat.sessionId);
   // FIX 1: read the full slice so we can react to changes
   const { user } = useAuth();
+
+  const [selfTapRequestMutation] = useSelfTapRequestMutation();
+  const [eCastingRequestMutation] = useECastingRequestMutation();
+  const [shortlistTalentMutation] = useShortlistTalentMutation();
+  const [bookTalentMutation] = useBookTalentMutation();
+
   const { data } = useGetChatBySessionIdQuery(id);
 
   console.log({ messages });
@@ -171,6 +182,72 @@ export default function AIDynamicPage() {
     }
   };
 
+  //TODO: job_id ---> not available
+  const handleTalentBooking = async (talendId: number) => {
+    try {
+      const res = await bookTalentMutation({
+        session_id: id,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //TODO: job_id ---> not available
+  const handleECastingRequest = async (talendId: number) => {
+    try {
+      const res = await eCastingRequestMutation({
+        session_id: id,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  //TODO: job_id ---> not available
+  const handleselftapRequest = async (talendId: number) => {
+    try {
+      const res = await bookTalentMutation({
+        session_id: id,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //TODO: job_id ---> not available
+  const handleShortListTalent = async (talendId: number) => {
+    console.log({ talendId, id });
+    try {
+      const res = await bookTalentMutation({
+        session_id: id,
+        talent_id: talendId,
+      }).unwrap();
+
+      console.log("shortlists res", res);
+
+      if (res?.status) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Chat Messages Area */}
@@ -261,7 +338,7 @@ export default function AIDynamicPage() {
                                 )}
 
                                 {/* Profile Details — visible on hover */}
-                                <div className='absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3'>
+                                <div className='absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3'>
                                   <p className='font-semibold text-sm mb-1'>
                                     {profile.name}
                                   </p>
@@ -281,40 +358,49 @@ export default function AIDynamicPage() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
-                                
+                                  onClick={() =>
+                                    handleShortListTalent(profile?.talent_id)
+                                  }
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Like'
-                                  title='Like'
+                                  title='Shortlists'
                                 >
                                   <Heart size={20} fill='currentColor' />
                                 </button>
                                 <button
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Schedule'
-                                  title='Schedule'
+                                  title='Availability'
                                 >
                                   <Calendar size={20} />
                                 </button>
                                 <button
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Photo'
-                                  title='View Photos'
+                                  title='Selftapes Request'
                                 >
                                   <Camera size={20} />
                                 </button>
                                 <button
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Call'
-                                  title='Contact'
+                                  title='E-Casting Request'
                                 >
                                   <Phone size={20} />
                                 </button>
                                 <button
                                   className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Approve'
-                                  title='Approve'
+                                  title='Booking Request'
                                 >
                                   <Check size={20} />
+                                </button>
+                                <button
+                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  aria-label='Approve'
+                                  title='Polas Request'
+                                >
+                                  <Camera size={20} />
                                 </button>
                               </div>
                             </div>

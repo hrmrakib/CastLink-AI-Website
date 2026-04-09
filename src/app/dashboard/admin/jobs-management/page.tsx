@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Info, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useJobManagementQuery } from "@/redux/features/admin/adminAPI";
 
@@ -61,8 +62,7 @@ interface Job {
   updated_at: string;
 }
 
-const STATUS_OPTIONS = ["requested", "accepted", "rejected", "responded"];
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -141,7 +141,6 @@ function StatusBadge({ status }: { status: string }) {
 export default function JobManagement() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [status, setStatus] = useState("requested");
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -151,7 +150,6 @@ export default function JobManagement() {
 
   const queryParams: Record<string, unknown> = { page, limit };
   if (search) queryParams.search = search;
-  // if (status !== "all") queryParams.current_status = status;
 
   const { data, isFetching } = useJobManagementQuery(queryParams);
 
@@ -167,14 +165,13 @@ export default function JobManagement() {
     setPage(1);
   };
 
-  const handleStatusChange = (val: string) => {
-    setStatus(val);
-    setPage(1);
-  };
+  console.log({ deleteConfirmJob });
 
-  const handleDeleteJob = () => {
+  const handleDeleteJob = async () => {
     if (!deleteConfirmJob) return;
-    setDeletedIds((prev) => [...prev, deleteConfirmJob.job_id]);
+    try {
+      // const res = await deleteJobMutation(deleteConfirmJob.job_id).unwrap();
+    } catch (error) {}
     setDeleteConfirmJob(null);
   };
 
@@ -528,7 +525,7 @@ export default function JobManagement() {
                     )}
 
                     {/* Suggested Talents */}
-                    {selectedJob.ai_result.suggested_talents?.length > 0 && (
+                    {selectedJob?.ai_result.suggested_talents?.length > 0 && (
                       <div>
                         <p className='text-xs font-semibold text-gray-500 mb-2'>
                           SUGGESTED TALENTS
@@ -538,6 +535,7 @@ export default function JobManagement() {
                             const primaryImg =
                               t.images.find((img) => img.is_primary) ??
                               t.images[0];
+
                             return (
                               <div
                                 key={t.talent_id}
@@ -545,7 +543,7 @@ export default function JobManagement() {
                               >
                                 {primaryImg ? (
                                   <img
-                                    src={`${BASE_URL}${primaryImg.image}`}
+                                    src={`${BASE_URL}${primaryImg}`}
                                     alt={t.name}
                                     className='h-10 w-10 rounded-full object-cover shrink-0'
                                   />

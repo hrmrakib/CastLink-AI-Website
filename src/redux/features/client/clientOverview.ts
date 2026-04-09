@@ -4,7 +4,7 @@ const clientOverview = baseAPI.injectEndpoints({
   endpoints: (build) => ({
     getClientOverview: build.query({
       query: () => ({
-        url: "/accounts/agent/dashboard/",
+        url: "/accounts/client/dashboard/",
       }),
     }),
   }),

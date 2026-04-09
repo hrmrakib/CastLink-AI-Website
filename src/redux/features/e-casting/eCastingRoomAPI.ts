@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import baseAPI from "@/redux/api/api";
 
 const eCastingRoomAPI = baseAPI.injectEndpoints({
   endpoints: (build) => ({
-    createSession: build.mutation({
+    createSession: build.mutation<any, void>({
       query: () => ({
         url: "/ecasting/session/create/",
         method: "POST",
@@ -18,6 +19,6 @@ const eCastingRoomAPI = baseAPI.injectEndpoints({
   }),
 });
 
-export const { useCreateSessionMutation, useLazyJoinSessionQuery } =
+export const { useCreateSessionMutation, useJoinSessionQuery } =
   eCastingRoomAPI;
 export default eCastingRoomAPI;

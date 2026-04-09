@@ -14,118 +14,173 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetClientOverviewQuery } from "@/redux/features/client/clientOverview";
 
+export interface ClientOverviewStats {
+  active_jobs: number;
+  total_talent: number;
+  booked: number;
+  pending: number;
+}
+
+export interface ClientOverviewJob {
+  job_id: number;
+  title: string;
+  location: string;
+  status: string;
+  created_at: string;
+  applicants: number;
+  shortlisted: number;
+}
+
+export interface ClientOverviewActivity {
+  name: string;
+  action: string;
+  time: string;
+}
+
+export interface ClientOverviewData {
+  stats: ClientOverviewStats;
+  recent_jobs: ClientOverviewJob[];
+  recent_activity: ClientOverviewActivity[];
+}
+
+export interface ClientOverviewResponse {
+  status: boolean;
+  status_code: number;
+  message: string;
+  data: ClientOverviewData;
+}
+
+// ── Skeleton primitives ───────────────────────────────────────────
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
+      <Skeleton className='h-4 w-24 mb-3' />
+      <Skeleton className='h-10 w-16' />
+    </div>
+  );
+}
+
+function JobCardSkeleton() {
+  return (
+    <div className='bg-card border border-[#E7E8EA] rounded-lg p-6'>
+      <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+        <div className='flex-1 space-y-3'>
+          <Skeleton className='h-5 w-48' />
+          <div className='flex gap-4'>
+            <Skeleton className='h-4 w-32' />
+            <Skeleton className='h-4 w-28' />
+          </div>
+          <div className='flex gap-4'>
+            <Skeleton className='h-4 w-24' />
+            <Skeleton className='h-4 w-24' />
+          </div>
+        </div>
+        <Skeleton className='h-7 w-20 rounded-full' />
+      </div>
+      <div className='flex gap-3 mt-4'>
+        <Skeleton className='h-9 w-28' />
+        <Skeleton className='h-9 w-28' />
+      </div>
+    </div>
+  );
+}
+
+function ActivitySkeleton() {
+  return (
+    <div className='flex gap-4'>
+      <Skeleton className='w-10 h-10 rounded-full shrink-0' />
+      <div className='flex-1 space-y-2'>
+        <Skeleton className='h-4 w-48' />
+        <Skeleton className='h-3 w-20' />
+      </div>
+    </div>
+  );
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const AVATAR_COLORS = [
+  "bg-blue-500",
+  "bg-teal-500",
+  "bg-purple-500",
+  "bg-pink-500",
+];
+
+// ── Page ─────────────────────────────────────────────────────────
 export default function Page() {
   const router = useRouter();
-  const [jobs] = useState([
-    {
-      id: 1,
-      title: "Summer Fashion Campaign",
-      location: "New York, NY",
-      date: "Jan 20, 2026",
-      applicants: 18,
-      shortlisted: 3,
-      status: "Active",
-    },
-    {
-      id: 2,
-      title: "Summer Fashion Campaign",
-      location: "New York, NY",
-      date: "Jan 20, 2026",
-      applicants: 18,
-      shortlisted: 3,
-      status: "Active",
-    },
-    {
-      id: 3,
-      title: "Summer Fashion Campaign",
-      location: "New York, NY",
-      date: "Jan 20, 2026",
-      applicants: 18,
-      shortlisted: 3,
-      status: "Active",
-    },
-    {
-      id: 4,
-      title: "Summer Fashion Campaign",
-      location: "New York, NY",
-      date: "Jan 20, 2026",
-      applicants: 18,
-      shortlisted: 3,
-      status: "Active",
-    },
-  ]);
-
-  const [activities] = useState([
-    {
-      id: 1,
-      user: "Sarah johnson",
-      action: "Uploaded self-tape",
-      time: "2 hour ago",
-      color: "bg-blue-500",
-    },
-    {
-      id: 2,
-      user: "Sarah johnson",
-      action: "Uploaded self-tape",
-      time: "2 hour ago",
-      color: "bg-teal-500",
-    },
-    {
-      id: 3,
-      user: "Sarah johnson",
-      action: "Uploaded self-tape",
-      time: "2 hour ago",
-      color: "bg-purple-500",
-    },
-    {
-      id: 4,
-      user: "Sarah johnson",
-      action: "Uploaded self-tape",
-      time: "2 hour ago",
-      color: "bg-blue-500",
-    },
-  ]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
-  const { data } = useGetClientOverviewQuery({});
-  console.log({ data });
+  const { data: response, isLoading } = useGetClientOverviewQuery({});
+  const data = response?.data;
+
+  const stats = data?.stats;
+  const recentJobs = data?.recent_jobs ?? [];
+  const recentActivity = data?.recent_activity ?? [];
 
   return (
     <main className='min-h-screen bg-transparent'>
       <div className='container mx-auto px-4 py-8'>
         {/* Stats Section */}
         <div className='flex flex-wrap items-center gap-6 mb-8'>
-          {/* Stat Card 1 */}
-          <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-            <p className='text-muted-[#000000] text-sm font-medium mb-2'>
-              Active Jobs
-            </p>
-            <p className='text-4xl font-bold text-[#000000]'>8</p>
-          </div>
-
-          {/* Stat Card 2 */}
-          <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-            <p className='text-muted-[#000000] text-sm font-medium mb-2'>
-              Total Talent
-            </p>
-            <p className='text-4xl font-bold text-[#000000]'>15</p>
-          </div>
-
-          {/* Stat Card 3 */}
-          <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-            <p className='text-muted-[#000000] text-sm font-medium mb-2'>
-              Booked
-            </p>
-            <p className='text-4xl font-bold text-[#000000]'>15</p>
-          </div>
-
-          {/* Stat Card 4 */}
-          <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-            <p className='text-muted-[#000000] text-sm font-medium mb-2'>
-              Pending
-            </p>
-            <p className='text-4xl font-bold text-[#000000]'>15</p>
-          </div>
+          {isLoading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
+                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+                  Active Jobs
+                </p>
+                <p className='text-4xl font-bold text-[#000000]'>
+                  {stats?.active_jobs ?? 0}
+                </p>
+              </div>
+              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
+                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+                  Total Talent
+                </p>
+                <p className='text-4xl font-bold text-[#000000]'>
+                  {stats?.total_talent ?? 0}
+                </p>
+              </div>
+              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
+                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+                  Booked
+                </p>
+                <p className='text-4xl font-bold text-[#000000]'>
+                  {stats?.booked ?? 0}
+                </p>
+              </div>
+              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
+                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+                  Pending
+                </p>
+                <p className='text-4xl font-bold text-[#000000]'>
+                  {stats?.pending ?? 0}
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Main Content */}
@@ -143,47 +198,59 @@ export default function Page() {
             </div>
 
             <div className='space-y-4'>
-              {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  className='bg-card border border-[#E7E8EA] rounded-lg p-6'
-                >
-                  <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
-                    <div className='flex-1'>
-                      <h3 className='text-lg font-bold text-[#000000] mb-3'>
-                        {job.title}
-                      </h3>
-                      <div className='flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-muted-[#000000] mb-4'>
-                        <div className='flex items-center text-[#404145] gap-2'>
-                          <MapPin className='w-4 h-4' />
-                          {job.location}
-                        </div>
-                        <div className='flex items-center text-[#404145] gap-2'>
-                          <Calendar className='w-4 h-4' />
-                          {job.date}
-                        </div>
-                      </div>
-                      <div className='flex flex-col sm:flex-row gap-4 text-sm text-[#404145]'>
-                        <span>{job.applicants} Applicants</span>
-                        <span>{job.shortlisted} Shortlisted</span>
-                      </div>
-                    </div>
-                    <div className='flex items-center gap-3'>
-                      <span className='bg-[#E7F8F2] text-[#009F91] px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap'>
-                        {job.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div className='flex flex-col sm:flex-row gap-3 mt-4'>
-                    <button className='bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'>
-                      View Details
-                    </button>
-                    <button className='w-32! h-11! button text-sm! font-normal!'>
-                      AI Results
-                    </button>
-                  </div>
+              {isLoading ? (
+                <>
+                  <JobCardSkeleton />
+                  <JobCardSkeleton />
+                  <JobCardSkeleton />
+                </>
+              ) : recentJobs.length === 0 ? (
+                <div className='bg-card border border-[#E7E8EA] rounded-lg p-10 text-center text-[#91979F]'>
+                  No recent jobs found.
                 </div>
-              ))}
+              ) : (
+                recentJobs.map((job: ClientOverviewJob) => (
+                  <div
+                    key={job.job_id}
+                    className='bg-card border border-[#E7E8EA] rounded-lg p-6'
+                  >
+                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                      <div className='flex-1'>
+                        <h3 className='text-lg font-bold text-[#000000] mb-3'>
+                          {job.title}
+                        </h3>
+                        <div className='flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-muted-[#000000] mb-4'>
+                          <div className='flex items-center text-[#404145] gap-2'>
+                            <MapPin className='w-4 h-4' />
+                            {job.location}
+                          </div>
+                          <div className='flex items-center text-[#404145] gap-2'>
+                            <Calendar className='w-4 h-4' />
+                            {formatDate(job.created_at)}
+                          </div>
+                        </div>
+                        <div className='flex flex-col sm:flex-row gap-4 text-sm text-[#404145]'>
+                          <span>{job.applicants} Applicants</span>
+                          <span>{job.shortlisted} Shortlisted</span>
+                        </div>
+                      </div>
+                      <div className='flex items-center gap-3'>
+                        <span className='bg-[#E7F8F2] text-[#009F91] px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap'>
+                          {capitalize(job.status)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className='flex flex-col sm:flex-row gap-3 mt-4'>
+                      <button className='bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'>
+                        View Details
+                      </button>
+                      <button className='w-32! h-11! button text-sm! font-normal!'>
+                        AI Results
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -195,9 +262,8 @@ export default function Page() {
                 Quick Actions
               </h3>
               <div className='grid grid-cols-2 gap-4'>
-                {/* Create New Job */}
                 <button
-                  onClick={() => router.push("/dashboard/client/jobs")}
+                  onClick={() => router.push("/dashboard/client/ai-chat")}
                   className='h-33 border border-dashed border-[#91979F] rounded-lg p-6 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition cursor-pointer'
                 >
                   <Plus className='w-6 h-6 text-[#000000]' />
@@ -206,7 +272,6 @@ export default function Page() {
                   </span>
                 </button>
 
-                {/* View Shortlists */}
                 <button
                   onClick={() => router.push("/dashboard/client/shortlists")}
                   className='h-33 border border-dashed border-[#91979F] rounded-lg p-6 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition cursor-pointer'
@@ -217,7 +282,6 @@ export default function Page() {
                   </span>
                 </button>
 
-                {/* Active Jobs */}
                 <button
                   onClick={() => router.push("/dashboard/client/active-jobs")}
                   className='h-33 border border-dashed border-[#91979F] rounded-lg p-6 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition cursor-pointer'
@@ -228,7 +292,6 @@ export default function Page() {
                   </span>
                 </button>
 
-                {/* Notification */}
                 <button
                   onClick={() => setShowNotificationModal(true)}
                   className='h-33 border border-dashed border-[#91979F] rounded-lg p-6 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition cursor-pointer'
@@ -247,24 +310,38 @@ export default function Page() {
                 Recent Activity
               </h3>
               <div className='space-y-4'>
-                {activities.map((activity) => (
-                  <div key={activity.id} className='flex gap-4'>
-                    <div
-                      className={`${activity.color} w-10 h-10 rounded-full flex items-center justify-center shrink-0`}
-                    >
-                      <User className='w-5 h-5 text-white' />
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-base font-medium text-[#000000]'>
-                        <span className='font-bold'>{activity.user}</span>{" "}
-                        {activity.action}
-                      </p>
-                      <p className='text-xs text-muted-[#000000] mt-1'>
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                {isLoading ? (
+                  <>
+                    <ActivitySkeleton />
+                    <ActivitySkeleton />
+                    <ActivitySkeleton />
+                  </>
+                ) : recentActivity.length === 0 ? (
+                  <p className='text-sm text-[#91979F]'>No recent activity.</p>
+                ) : (
+                  recentActivity.map(
+                    (activity: ClientOverviewActivity, index: number) => (
+                      <div key={index} className='flex gap-4'>
+                        <div
+                          className={`${
+                            AVATAR_COLORS[index % AVATAR_COLORS.length]
+                          } w-10 h-10 rounded-full flex items-center justify-center shrink-0`}
+                        >
+                          <User className='w-5 h-5 text-white' />
+                        </div>
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-base font-medium text-[#000000]'>
+                            <span className='font-bold'>{activity.name}</span>{" "}
+                            {activity.action}
+                          </p>
+                          <p className='text-xs text-muted-[#000000] mt-1'>
+                            {activity.time}
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                  )
+                )}
               </div>
             </div>
           </div>

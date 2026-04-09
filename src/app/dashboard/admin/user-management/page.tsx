@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, Info, Trash2, X } from "lucide-react";
+import { BadgeCheck, Info, Loader2, Trash2, X } from "lucide-react";
 import {
   useApproveOrRejectAgentMutation,
   useDeleteUserMutation,
@@ -90,8 +90,10 @@ export default function UserManagement() {
   );
   const [deletedIds] = useState<number[]>([]);
 
-  const [approveOrRejectAgentMutation] = useApproveOrRejectAgentMutation();
-  const [deleteUserMutation] = useDeleteUserMutation();
+  const [approveOrRejectAgentMutation, { isLoading: isApproving }] =
+    useApproveOrRejectAgentMutation();
+  const [deleteUserMutation, { isLoading: isDeleting }] =
+    useDeleteUserMutation();
   const { data, isFetching, refetch } = useGetUserByRoleQuery({
     role: activeTab === "Pending" ? "Agent" : activeTab,
     is_verified:
@@ -109,6 +111,8 @@ export default function UserManagement() {
   const handleDeleteUser = async () => {
     if (!deleteConfirmUser) return;
 
+    console.log({ deleteConfirmUser });
+    // return;
     try {
       const res = await deleteUserMutation(
         deleteConfirmUser?.user_id ?? 0,
@@ -134,29 +138,45 @@ export default function UserManagement() {
     try {
       const res = await approveOrRejectAgentMutation({
         agent_id: id,
-        action, //reject
+        action,
         message,
       }).unwrap();
 
-      console.log({ res });
-
-      if (res?.status) {
-        toast.success(res?.message);
+      if (res?.message) {
+        toast.success(res?.message || "Approved successfully!");
         refetch();
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setSelectedUser(null);
     }
   };
 
   const handleSendEmail = async () => {
     if (!emailForm.body || !selectedUser) return;
 
-    await handleAcceptOrReject(selectedUser.user_id, "reject", emailForm.body);
+    // await handleAcceptOrReject(selectedUser.user_id, "reject", emailForm.body);
+    try {
+      const res = await approveOrRejectAgentMutation({
+        agent_id: selectedUser.user_id,
+        action: "reject",
+        message: emailForm.body,
+      }).unwrap();
 
-    setShowEmailForm(false);
-    setEmailForm({ body: "" });
-    setSelectedUser(null);
+      console.log({ res });
+
+      if (res?.message) {
+        toast.success(res?.message || "Rejected and email sent successfully!");
+        refetch();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setShowEmailForm(false);
+      setEmailForm({ body: "" });
+      setSelectedUser(null);
+    }
   };
 
   return (
@@ -392,12 +412,14 @@ export default function UserManagement() {
             {activeTab === "Pending" ? (
               <div className='p-6 border-t bg-gray-50 grid grid-cols-2 gap-3'>
                 <button
+                  disabled={!selectedUser || isApproving}
                   onClick={() =>
                     handleAcceptOrReject(selectedUser?.user_id, "approve")
                   }
-                  className='py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
+                  className='flex items-center justify-center gap-1.5 py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  Approve
+                  Approve{" "}
+                  {isApproving ? <Loader2 className='animate-spin' /> : ""}
                 </button>
                 <button
                   onClick={() => setShowEmailForm(true)}
@@ -503,10 +525,11 @@ export default function UserManagement() {
                 Cancel
               </button>
               <button
+                disabled={isDeleting}
                 onClick={handleDeleteUser}
-                className='flex-1 rounded-lg bg-red-600 py-2 font-medium text-white transition-colors hover:bg-red-700'
+                className='flex items-center justify-center gap-1.5 flex-1 rounded-lg bg-red-600 py-2 font-medium text-white transition-colors hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed'
               >
-                Delete
+                Delete {isDeleting ? <Loader2 className='animate-spin' /> : ""}
               </button>
             </div>
           </div>

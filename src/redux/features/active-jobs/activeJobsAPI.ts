@@ -10,14 +10,15 @@ const activeJobsAPI = baseAPI.injectEndpoints({
       }),
     }),
 
-    getJobDetails: builder.query({
+    getActiveJobDetails: builder.query({
       query: (job_id) => ({
-        url: `/jobs/${job_id}/`,
+        url: `/jobs/active_jobs/${job_id}/`,
         method: "GET",
       }),
     }),
   }),
 });
 
-export const { useGetActiveJobsQuery, useGetJobDetailsQuery } = activeJobsAPI;
+export const { useGetActiveJobsQuery, useGetActiveJobDetailsQuery } =
+  activeJobsAPI;
 export default activeJobsAPI;
