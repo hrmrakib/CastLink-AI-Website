@@ -25,7 +25,7 @@ type TAuthState = {
 
 const initialState: TAuthState = {
   userToggle: false,
-  user: null,
+  user: null, 
   token: null,
   profileLoading: true,
 };

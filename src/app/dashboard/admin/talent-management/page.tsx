@@ -4,15 +4,13 @@
 import { useState } from "react";
 import { Trash2, Eye, X, Loader2 } from "lucide-react";
 import {
-  useApproveOrRejectAgentMutation,
   useApproveOrRejectTalentMutation,
   useDeleteTalentMutation,
-  useDeleteUserMutation,
   useGetTalentsQuery,
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
 
-type TalentTab = "active" | "pending";
+type TalentTab = "approved" | "pending";
 
 interface TalentImage {
   image_id: number;
@@ -45,12 +43,12 @@ function formatDate(dateStr: string) {
 }
 
 const TAB_CONFIG: { key: TalentTab; label: string }[] = [
-  { key: "active", label: "Active Talent" },
+  { key: "approved", label: "Active Talent" },
   { key: "pending", label: "Pending Talent" },
 ];
 
 export default function TalentManagement() {
-  const [activeTab, setActiveTab] = useState<TalentTab>("active");
+  const [activeTab, setActiveTab] = useState<TalentTab>("approved");
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [emailForm, setEmailForm] = useState({ body: "" });
@@ -58,7 +56,8 @@ export default function TalentManagement() {
 
   const [approveOrRejectTalentMutation, { isLoading: isApproving }] =
     useApproveOrRejectTalentMutation();
-  const [deleteTalentMutation] = useDeleteTalentMutation();
+  const [deleteTalentMutation, { isLoading: isDeleting }] =
+    useDeleteTalentMutation();
   const { data, isFetching, refetch } = useGetTalentsQuery({
     approval_status: activeTab,
   });
@@ -91,7 +90,7 @@ export default function TalentManagement() {
   ) => {
     try {
       const res = await approveOrRejectTalentMutation({
-        agent_id: id,
+        talent_id: id,
         action, //reject
         message,
       }).unwrap();
@@ -104,6 +103,8 @@ export default function TalentManagement() {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setSelectedTalent(null);
     }
   };
 
@@ -351,14 +352,17 @@ export default function TalentManagement() {
                   onClick={() =>
                     handleAcceptOrReject(selectedTalent.talent_id, "approve")
                   }
-                  className='flex items-center justify-center gap-1.5 py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
+                  disabled={isApproving}
+                  className='flex items-center justify-center gap-1.5 py-2.5 bg-[#2563EB] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   Approve{" "}
                   {isApproving ? <Loader2 className='animate-spin' /> : ""}
                 </button>
+
                 <button
+                  disabled={isApproving}
                   onClick={() => setShowEmailForm(true)}
-                  className='py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors'
+                  className='py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   Reject
                 </button>
@@ -426,8 +430,9 @@ export default function TalentManagement() {
                 Cancel
               </button>
               <button
+                disabled={!emailForm.body || isApproving}
                 onClick={handleSendEmail}
-                className='flex-1 px-4 py-2 bg-[#2563EB] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors'
+                className='flex-1 px-4 py-2 bg-[#2563EB] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Send
               </button>
@@ -455,11 +460,11 @@ export default function TalentManagement() {
                 Cancel
               </button>
               <button
-                // onClick={() => handleDelete(deleteConfirm)}
+                disabled={isDeleting}
                 onClick={handleDelete}
-                className='flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors'
+                className='flex items-center justify-center gap-1 flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                Delete
+                Delete {isDeleting ? <Loader2 className='animate-spin' /> : ""}
               </button>
             </div>
           </div>

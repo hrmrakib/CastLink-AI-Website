@@ -66,7 +66,7 @@ const adminAPI = baseAPI.injectEndpoints({
 
     deleteTalent: builder.mutation({
       query: (talentId) => ({
-        url: `/agent/talents/${talentId}/`,
+        url: `/admin/talents/${talentId}/`,
         method: "DELETE",
       }),
       invalidatesTags: ["Users"],
