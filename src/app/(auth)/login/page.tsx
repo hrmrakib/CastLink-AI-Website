@@ -79,7 +79,7 @@ export default function LoginPage() {
 
         await saveTokens(data?.access_token);
         localStorage.setItem("access_token", data?.access_token); // also fixed key to match baseAPI
-        router.push("/");
+        router.push(`/dashboard/${data?.user.role.toLowerCase()}`);
       } else {
         toast.error(data?.message);
         setErrors((prev) => ({

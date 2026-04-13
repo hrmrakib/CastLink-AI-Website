@@ -7,8 +7,8 @@ import {
   Plus,
   Star,
   Briefcase,
-  Bell,
   User,
+  MessagesSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -129,6 +129,8 @@ export default function Page() {
   const { data: response, isLoading } = useGetClientOverviewQuery({});
   const data = response?.data;
 
+  console.log({ data });
+
   const stats = data?.stats;
   const recentJobs = data?.recent_jobs ?? [];
   const recentActivity = data?.recent_activity ?? [];
@@ -241,7 +243,14 @@ export default function Page() {
                       </div>
                     </div>
                     <div className='flex flex-col sm:flex-row gap-3 mt-4'>
-                      <button className='bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/client/active-jobs/${job.job_id}`,
+                          )
+                        }
+                        className='bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'
+                      >
                         View Details
                       </button>
                       <button className='w-32! h-11! button text-sm! font-normal!'>
@@ -293,12 +302,13 @@ export default function Page() {
                 </button>
 
                 <button
-                  onClick={() => setShowNotificationModal(true)}
+                  // onClick={() => setShowNotificationModal(true)}
+                  onClick={() => router.push("/dashboard/client/message")}
                   className='h-33 border border-dashed border-[#91979F] rounded-lg p-6 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary/5 transition cursor-pointer'
                 >
-                  <Bell className='w-6 h-6 text-[#000000]' />
+                  <MessagesSquare className='w-6 h-6 text-[#000000]' />
                   <span className='text-base font-bold text-[#000000] text-center'>
-                    Notification
+                    Messages
                   </span>
                 </button>
               </div>

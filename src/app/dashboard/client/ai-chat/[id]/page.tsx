@@ -3,10 +3,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Heart, Calendar, Camera, Phone, Check } from "lucide-react";
+import {
+  Send,
+  Heart,
+  Calendar,
+  Camera,
+  Phone,
+  Check,
+  Sparkles,
+} from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSelector } from "react-redux";
 import {
   useAiChatCreateMutation,
@@ -19,7 +26,20 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 interface Message {
   id: number;
   sender: "ai" | "user";
@@ -63,8 +83,13 @@ export default function AIDynamicPage() {
   const [selectedTalent, setSelectedTalent] = useState<TalentProfile | null>(
     null,
   );
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [jobSaving, setJobSaving] = useState(false);
 
+  const [isSkipping, setIsSkipping] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [jobModal, setJobModal] = useState(false);
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -78,6 +103,8 @@ export default function AIDynamicPage() {
   const [eCastingRequestMutation] = useECastingRequestMutation();
   const [shortlistTalentMutation] = useShortlistTalentMutation();
   const [bookTalentMutation] = useBookTalentMutation();
+  const [generatingCastingLoading, setGeneratingCastingLoading] =
+    useState(false);
 
   const { data } = useGetChatBySessionIdQuery(id);
 
@@ -213,6 +240,7 @@ export default function AIDynamicPage() {
       console.log(error);
     }
   };
+
   //TODO: job_id ---> not available
   const handleselftapRequest = async (talendId: number) => {
     try {
@@ -246,6 +274,62 @@ export default function AIDynamicPage() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const runGenerateCasting = async () => {
+    try {
+      setGeneratingCastingLoading(true);
+      const res = await aiChatCreateMutation({
+        session_id: "",
+        // message,
+        location,
+        // shoot_dates: shootDates,
+        // budget_range: budget,
+        // job_type: jobType,
+        title: jobTitle,
+        description: jobDescription,
+        save_as_draft: false,
+        generate_job: true,
+      }).unwrap();
+
+      if (res?.detail) {
+        toast.success(res?.detail || "Job created successfully!");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate casting.");
+    } finally {
+      setGeneratingCastingLoading(false);
+    }
+  };
+
+  const handleJobSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!jobTitle) return;
+
+    setJobSaving(true);
+    try {
+      // Close modal first, then run casting generation with the saved title/description
+      setJobModal(false);
+      await runGenerateCasting();
+    } finally {
+      setJobSaving(false);
+    }
+  };
+
+  const handleGenerateCasting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // if (!message.trim()) return;
+
+    // FIX 7: isSkipping only bypasses modal once; reset it after use
+    // if (!isSkipping && jobTitle === "" && jobDescription === "") {
+    //   setJobModal(true);
+    //   return;
+    // }
+
+    // Reset skip flag so next attempt shows the modal again if fields are empty
+    // setIsSkipping(false);
+    // await runGenerateCasting();
   };
 
   return (
@@ -409,6 +493,26 @@ export default function AIDynamicPage() {
                     </div>
                   </div>
                 )}
+
+              {message.sender === "ai" &&
+                message.talents &&
+                message.talents.length > 0 && (
+                  <button
+                    type='submit'
+                    onClick={handleGenerateCasting}
+                    disabled={
+                      // !message.trim() ||
+                      generatingCastingLoading
+                      // || chatLoading
+                    }
+                    className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
+                  >
+                    <Sparkles className='w-4 h-4' />
+                    {generatingCastingLoading
+                      ? "Generating..."
+                      : "Generate Casting"}
+                  </button>
+                )}
             </div>
           ))}
 
@@ -474,6 +578,95 @@ export default function AIDynamicPage() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
           {selectedTalent && <ChatModalDetail talent={selectedTalent} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Job title & description modal */}
+      <Dialog
+        open={jobModal}
+        onOpenChange={(open) => {
+          if (!open) setIsSkipping(false);
+          setJobModal(open);
+        }}
+      >
+        <DialogContent className='sm:max-w-xl'>
+          <DialogHeader>
+            <DialogTitle>Add Job Info</DialogTitle>
+            <DialogDescription>
+              Enter the job title and description, then click Save to continue.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className='space-y-4' onSubmit={handleJobSave}>
+            <FieldGroup>
+              <Field>
+                <Label htmlFor='title' className='text-sm font-semibold'>
+                  Job Title
+                </Label>
+                <Input
+                  id='title'
+                  name='title'
+                  placeholder='e.g. Senior Fashion Model'
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                  className='h-11 border border-gray-300'
+                />
+              </Field>
+
+              <Field>
+                <Label
+                  htmlFor='job-description'
+                  className='text-sm font-semibold'
+                >
+                  Job Description
+                </Label>
+                <Textarea
+                  id='job-description'
+                  name='description'
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder='Describe the job requirements, expectations, and any relevant details...'
+                  required
+                  className='min-h-32 border border-gray-300 resize-none'
+                />
+              </Field>
+            </FieldGroup>
+
+            <DialogFooter className='pt-2'>
+              {/* FIX 7: Skip sets isSkipping=true and closes modal, then casting runs without modal next time */}
+              <Button
+                type='button'
+                variant='outline'
+                className='mr-5'
+                onClick={() => {
+                  setIsSkipping(true);
+                  setJobModal(false);
+                  // Trigger casting immediately after skipping
+                  runGenerateCasting();
+                }}
+              >
+                Skip
+              </Button>
+              <DialogClose asChild>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => {
+                    setJobTitle("");
+                    setJobDescription("");
+                    setIsSkipping(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              {/* FIX 8: form onSubmit now calls handleJobSave which triggers runGenerateCasting */}
+              <Button type='submit' disabled={jobSaving || !jobTitle}>
+                {jobSaving ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </main>

@@ -34,8 +34,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useDispatch } from "react-redux";
-import { addMessageResponse } from "@/redux/features/ai-chat/aiChatSlice";
 import { toast } from "sonner";
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
@@ -296,7 +294,6 @@ function AIChatInner() {
   const [generatingCastingLoading, setGeneratingCastingLoading] =
     useState(false);
 
-  const dispatch = useDispatch();
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const searchParams = useSearchParams();
@@ -369,23 +366,6 @@ function AIChatInner() {
 
     setChatLoading(true);
 
-    // FIX 9: use Date.now() for unique message IDs instead of message.length (string char count)
-    const userMessage = {
-      id: Date.now(),
-      type: "user" as const,
-      content: message,
-      talents: [],
-      avatar: "",
-      session_id: "",
-      timestamp: "",
-      pagination: null,
-      generated_job: null,
-      conversation: message,
-      data: null,
-    };
-
-    // dispatch(addMessageResponse(userMessage));
-
     try {
       const res = await aiChatCreateMutation({
         session_id: "",
@@ -401,21 +381,6 @@ function AIChatInner() {
       }).unwrap();
 
       if (res?.session_id) {
-        const aiMessage = {
-          id: Date.now() + 1,
-          type: "ai" as const,
-          content: res.conversation ?? "Here are the results I found.",
-          avatar: "/man.png",
-          talents: res.data?.talents ?? [],
-          session_id: res.session_id,
-          timestamp: res.timestamp,
-          pagination: res.pagination ?? null,
-          generated_job: res.generated_job ?? null,
-          conversation: res.conversation,
-          data: res.data,
-        };
-
-        // dispatch(addMessageResponse(aiMessage));
         router.push(`/dashboard/client/ai-chat/${res?.session_id}`);
       }
     } catch (error) {
@@ -674,7 +639,6 @@ function AIChatInner() {
       <Dialog
         open={jobModal}
         onOpenChange={(open) => {
-          // FIX 7: reset isSkipping when modal is dismissed without skipping
           if (!open) setIsSkipping(false);
           setJobModal(open);
         }}
