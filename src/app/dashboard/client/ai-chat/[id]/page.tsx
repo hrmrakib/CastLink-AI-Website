@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useAiChatCreateMutation,
   useBookTalentMutation,
@@ -40,6 +40,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { addTalentsToModal } from "@/redux/features/ai-chat/aiChatSlice";
 interface Message {
   id: number;
   sender: "ai" | "user";
@@ -77,6 +78,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 const MAX_VISIBLE_TALENTS = 3;
 
 export default function AIDynamicPage() {
+  const dispatch = useDispatch();
   const params = useParams();
   const id = params.id;
   const [isOpen, setIsOpen] = useState(false);
@@ -108,32 +110,35 @@ export default function AIDynamicPage() {
 
   const { data } = useGetChatBySessionIdQuery(id);
 
-  console.log({ messages });
-
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
-    if (data?.messages) {
-      const rawMessages = data.messages;
-      const talentList = data?.saved_filters?.suggested_talents_list ?? [];
+    const rawMessages = data?.data?.messages;
+    const talentList =
+      data?.data?.draft?.saved_filters?.suggested_talents_list ?? [];
 
-      const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
-        const isLastAi =
-          msg.sender === "ai" &&
-          idx === rawMessages.length - 1 &&
-          talentList.length > 0;
-
-        return {
-          id: idx,
-          sender: msg.sender,
-          content: msg.content,
-          avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
-          talents: isLastAi ? talentList : (msg.talents ?? []),
-        };
-      });
-
-      setMessages(normalized);
+    if (talentList) {
+      dispatch(addTalentsToModal(talentList));
     }
-  }, [data?.messages, data?.saved_filters, id]);
+
+    if (!rawMessages) return;
+
+    const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
+      const isLastAi =
+        msg.sender === "ai" &&
+        idx === rawMessages.length - 1 &&
+        talentList.length > 0;
+
+      return {
+        id: idx,
+        sender: msg.sender,
+        content: msg.content,
+        avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
+        talents: isLastAi ? talentList : (msg.talents ?? []),
+      };
+    });
+
+    setMessages(normalized);
+  }, [data?.data?.messages, data?.data?.draft?.saved_filters, id, dispatch]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -331,6 +336,8 @@ export default function AIDynamicPage() {
     // setIsSkipping(false);
     // await runGenerateCasting();
   };
+
+  console.log({ messages });
 
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>

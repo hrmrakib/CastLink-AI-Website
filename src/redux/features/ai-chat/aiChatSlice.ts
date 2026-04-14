@@ -45,6 +45,7 @@ interface ChatMessage {
 interface AiChatState {
   sessionId: string | null;
   messages: ChatMessage[]; // full history, each with its own conversation + talents
+  talentListForModal: Talent[];
 }
 
 // ── Initial State ─────────────────────────────────────────────────────────────
@@ -52,6 +53,7 @@ interface AiChatState {
 const initialState: AiChatState = {
   sessionId: null,
   messages: [],
+  talentListForModal: [], // separate list to feed the modal, updated with the latest API response's talents
 };
 
 // ── Raw API response shape (what comes back from the server) ──────────────────
@@ -105,9 +107,15 @@ const aiChatSlice = createSlice({
     resetChat() {
       return initialState;
     },
+
+    // Add talents to the modal list
+    addTalentsToModal(state, action: PayloadAction<Talent[]>) {
+      state.talentListForModal = action.payload;
+    },
   },
 });
 
-export const { addMessageResponse, resetChat } = aiChatSlice.actions;
+export const { addMessageResponse, resetChat, addTalentsToModal } =
+  aiChatSlice.actions;
 
 export default aiChatSlice.reducer;
