@@ -11,6 +11,7 @@ import {
   Phone,
   Check,
   Sparkles,
+  ScanFace,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -19,7 +20,9 @@ import {
   useAiChatCreateMutation,
   useBookTalentMutation,
   useECastingRequestMutation,
+  useGenerateJobFromMessageMutation,
   useGetChatBySessionIdQuery,
+  usePolasRequestMutation,
   useSelfTapRequestMutation,
   useShortlistTalentMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
@@ -101,12 +104,15 @@ export default function AIDynamicPage() {
   // FIX 1: read the full slice so we can react to changes
   const { user } = useAuth();
 
+  const [polasRequestMutation] = usePolasRequestMutation();
   const [selfTapRequestMutation] = useSelfTapRequestMutation();
   const [eCastingRequestMutation] = useECastingRequestMutation();
   const [shortlistTalentMutation] = useShortlistTalentMutation();
   const [bookTalentMutation] = useBookTalentMutation();
   const [generatingCastingLoading, setGeneratingCastingLoading] =
     useState(false);
+
+  const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
 
   const { data } = useGetChatBySessionIdQuery(id);
 
@@ -215,6 +221,22 @@ export default function AIDynamicPage() {
   };
 
   //TODO: job_id ---> not available
+  const handlePolasRequest = async (talendId: number) => {
+    try {
+      const res = await polasRequestMutation({
+        session_id: id,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
+  };
+
+  //TODO: job_id ---> not available
   const handleTalentBooking = async (talendId: number) => {
     try {
       const res = await bookTalentMutation({
@@ -222,11 +244,11 @@ export default function AIDynamicPage() {
         talent_id: talendId,
       }).unwrap();
 
-      if (res?.status) {
-        toast.success(res.message);
+      if (res?.status_message) {
+        toast.success(res.status_message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
     }
   };
 
@@ -238,27 +260,27 @@ export default function AIDynamicPage() {
         talent_id: talendId,
       }).unwrap();
 
-      if (res?.status) {
-        toast.success(res.message);
+      if (res?.status_message) {
+        toast.success(res.status_message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
     }
   };
 
   //TODO: job_id ---> not available
   const handleselftapRequest = async (talendId: number) => {
     try {
-      const res = await bookTalentMutation({
+      const res = await selfTapRequestMutation({
         session_id: id,
         talent_id: talendId,
       }).unwrap();
 
-      if (res?.status) {
-        toast.success(res.message);
+      if (res?.status_message) {
+        toast.success(res.status_message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
     }
   };
 
@@ -266,39 +288,31 @@ export default function AIDynamicPage() {
   const handleShortListTalent = async (talendId: number) => {
     console.log({ talendId, id });
     try {
-      const res = await bookTalentMutation({
+      const res = await shortlistTalentMutation({
         session_id: id,
         talent_id: talendId,
       }).unwrap();
 
-      console.log("shortlists res", res);
-
-      if (res?.status) {
-        toast.success(res.message);
+      if (res?.status_message) {
+        toast.success(res.status_message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
     }
   };
 
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
-      const res = await aiChatCreateMutation({
-        session_id: "",
-        // message,
-        location,
-        // shoot_dates: shootDates,
-        // budget_range: budget,
-        // job_type: jobType,
+      const res = await generateJobFromMessageMutation({
+        session_id: id,
         title: jobTitle,
         description: jobDescription,
-        save_as_draft: false,
         generate_job: true,
       }).unwrap();
 
-      if (res?.detail) {
-        toast.success(res?.detail || "Job created successfully!");
+      if (res?.status_message) {
+        toast.success(res?.status_message || "Job created successfully!");
       }
     } catch (error) {
       console.error(error);
@@ -324,20 +338,16 @@ export default function AIDynamicPage() {
 
   const handleGenerateCasting = async (e: React.FormEvent) => {
     e.preventDefault();
-    // if (!message.trim()) return;
 
-    // FIX 7: isSkipping only bypasses modal once; reset it after use
-    // if (!isSkipping && jobTitle === "" && jobDescription === "") {
-    //   setJobModal(true);
-    //   return;
-    // }
+    if (!isSkipping && jobTitle === "" && jobDescription === "") {
+      setJobModal(true);
+      return;
+    }
 
     // Reset skip flag so next attempt shows the modal again if fields are empty
-    // setIsSkipping(false);
-    // await runGenerateCasting();
+    setIsSkipping(false);
+    await runGenerateCasting();
   };
-
-  console.log({ messages });
 
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>
@@ -445,53 +455,65 @@ export default function AIDynamicPage() {
 
                               {/* Action Buttons */}
                               <div
-                                className='flex gap-2 sm:gap-3'
+                                className='flex gap-2 sm:gap-3 mt-4'
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
                                   onClick={() =>
                                     handleShortListTalent(profile?.talent_id)
                                   }
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Like'
                                   title='Shortlists'
                                 >
                                   <Heart size={20} fill='currentColor' />
                                 </button>
                                 <button
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Schedule'
                                   title='Availability'
                                 >
                                   <Calendar size={20} />
                                 </button>
                                 <button
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  onClick={() =>
+                                    handleselftapRequest(profile?.talent_id)
+                                  }
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Photo'
                                   title='Selftapes Request'
                                 >
                                   <Camera size={20} />
                                 </button>
                                 <button
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  onClick={() =>
+                                    handleECastingRequest(profile?.talent_id)
+                                  }
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Call'
                                   title='E-Casting Request'
                                 >
                                   <Phone size={20} />
                                 </button>
                                 <button
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  onClick={() =>
+                                    handleTalentBooking(profile?.talent_id)
+                                  }
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Approve'
                                   title='Booking Request'
                                 >
                                   <Check size={20} />
                                 </button>
                                 <button
-                                  className='p-2 hover:bg-blue-100 rounded-lg transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                  onClick={() =>
+                                    handlePolasRequest(profile?.talent_id)
+                                  }
+                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                   aria-label='Approve'
                                   title='Polas Request'
                                 >
-                                  <Camera size={20} />
+                                  <ScanFace size={20} />
                                 </button>
                               </div>
                             </div>
@@ -584,7 +606,7 @@ export default function AIDynamicPage() {
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
-          {selectedTalent && <ChatModalDetail talent={selectedTalent} />}
+          {selectedTalent && <ChatModalDetail />}
         </DialogContent>
       </Dialog>
 

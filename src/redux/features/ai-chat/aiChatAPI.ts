@@ -44,6 +44,14 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
       }),
     }),
 
+    generateJobFromMessage: builder.mutation({
+      query: (body) => ({
+        url: "/api/jobs/generate",
+        method: "POST",
+        body,
+      }),
+    }),
+
     getDeaftJobs: builder.query({
       query: ({ search }) => ({
         url: `/api/chat/drafts?search=${search || ""}`,
@@ -111,6 +119,7 @@ export const {
   useGetChatBySessionIdQuery,
   useGetAIResponseMutation,
   useAiChatCreateMutation,
+  useGenerateJobFromMessageMutation,
   useGetDeaftJobsQuery,
   useDeleteDraftJobMutation,
   useContinueDraftJobQuery,
