@@ -60,7 +60,7 @@ interface Talent extends ApiTalent {
 
 function SkeletonCard() {
   return (
-    <div className='flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:gap-4 sm:p-6 animate-pulse'>
+    <div className='w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:gap-4 sm:p-6 animate-pulse'>
       {/* number badge */}
       <div className='h-6 w-6 rounded-full bg-gray-200 shrink-0' />
       {/* avatar */}
@@ -87,17 +87,7 @@ function SkeletonCard() {
 function PageSkeleton() {
   return (
     <div className='min-h-screen bg-gray-50'>
-      <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
-        {/* header skeleton */}
-        <div className='mb-8 animate-pulse'>
-          <div className='h-8 w-2/3 rounded bg-gray-200' />
-          <div className='mt-2 h-4 w-1/3 rounded bg-gray-200' />
-          <div className='mt-6 flex justify-end gap-3'>
-            <div className='h-11 w-24 rounded-lg bg-gray-200' />
-            <div className='h-11 w-28 rounded-lg bg-gray-200' />
-            <div className='h-11 w-36 rounded-lg bg-gray-200' />
-          </div>
-        </div>
+      <div className='ml-auto lg:mr-auto max-w-4xl'>
         {/* card skeletons */}
         <div className='space-y-3 sm:space-y-4'>
           {Array.from({ length: 4 }).map((_, i) => (
@@ -174,7 +164,7 @@ export default function ShortlistDetailPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  if (isLoading) return <PageSkeleton />;
+  // if (isLoading) return <PageSkeleton />;
 
   const jobTitle = data?.data?.job_title ?? "Shortlist";
   const jobDescription = data?.data?.job_description ?? "";
@@ -235,92 +225,96 @@ export default function ShortlistDetailPage() {
         </div>
 
         {/* Talent Cards */}
-        <div className='space-y-3 sm:space-y-4'>
-          {talents?.map((talent, index) => (
-            <div
-              key={talent.id}
-              draggable
-              onDragStart={() => handleDragStart(talent.id)}
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(talent.id)}
-              className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
-                draggedItem === talent.id ? "opacity-50" : ""
-              } hover:shadow-md cursor-move active:cursor-grabbing`}
-            >
-              {/* Number Badge */}
-              <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
-                {index + 1}
-              </div>
+        {isLoading ? (
+          <PageSkeleton />
+        ) : (
+          <div className='space-y-3 sm:space-y-4'>
+            {talents?.map((talent, index) => (
+              <div
+                key={talent.id}
+                draggable
+                onDragStart={() => handleDragStart(talent.id)}
+                onDragOver={handleDragOver}
+                onDrop={() => handleDrop(talent.id)}
+                className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
+                  draggedItem === talent.id ? "opacity-50" : ""
+                } hover:shadow-md cursor-move active:cursor-grabbing`}
+              >
+                {/* Number Badge */}
+                <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
+                  {index + 1}
+                </div>
 
-              {/* Avatar */}
-              <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
-                {talent.image ? (
-                  <Image
-                    src={`${BASE_URL}${talent.image}`}
-                    alt={talent.talent_name}
-                    fill
-                    unoptimized
-                    className='object-cover'
-                  />
-                ) : (
-                  <div className='flex h-full w-full items-center justify-center text-white'>
-                    <UserRoundPlus />
+                {/* Avatar */}
+                <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
+                  {talent.image ? (
+                    <Image
+                      src={`${BASE_URL}${talent.image}`}
+                      alt={talent.talent_name}
+                      fill
+                      unoptimized
+                      className='object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-full w-full items-center justify-center text-white'>
+                      <UserRoundPlus />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className='flex-1 min-w-0'>
+                  <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
+                    {talent.talent_name}
+                  </h3>
+                  <div className='flex items-center gap-5 flex-wrap'>
+                    <p className='text-[#2563EB] text-sm'>
+                      Added: {formatDate(talent.created_at)}
+                    </p>
                   </div>
-                )}
-              </div>
+                  <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
+                    <span className='flex items-center gap-1'>
+                      <MapPin size={14} />
+                      {talent.location}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                      <Briefcase size={14} />
+                      {talent.talent_role}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                      <UserRound size={14} />
+                      {talent.agency_name}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Info */}
-              <div className='flex-1 min-w-0'>
-                <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
-                  {talent.talent_name}
-                </h3>
-                <div className='flex items-center gap-5 flex-wrap'>
-                  <p className='text-[#2563EB] text-sm'>
-                    Added: {formatDate(talent.created_at)}
-                  </p>
-                </div>
-                <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
-                  <span className='flex items-center gap-1'>
-                    <MapPin size={14} />
-                    {talent.location}
-                  </span>
-                  <span className='flex items-center gap-1'>
-                    <Briefcase size={14} />
-                    {talent.talent_role}
-                  </span>
-                  <span className='flex items-center gap-1'>
-                    <UserRound size={14} />
-                    {talent.agency_name}
-                  </span>
+                {/* Actions */}
+                <div className='flex gap-2 shrink-0'>
+                  <div
+                    className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
+                    aria-label='View talent'
+                  >
+                    <img src={"/badge.png"} alt={"Verified"} />
+                  </div>
+                  <button
+                    onClick={() => handleViewTalent(talent)}
+                    className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
+                    aria-label='View talent'
+                  >
+                    <Eye size={20} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTalent(talent.id)}
+                    className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
+                    aria-label='Delete talent'
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className='flex gap-2 shrink-0'>
-                <div
-                  className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-                  aria-label='View talent'
-                >
-                  <img src={"/badge.png"} alt={"Verified"} />
-                </div>
-                <button
-                  onClick={() => handleViewTalent(talent)}
-                  className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-                  aria-label='View talent'
-                >
-                  <Eye size={20} />
-                </button>
-                <button
-                  onClick={() => handleDeleteTalent(talent.id)}
-                  className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
-                  aria-label='Delete talent'
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
         {talents?.length === 0 && (

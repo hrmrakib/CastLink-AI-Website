@@ -543,7 +543,7 @@ export default function JobDetailPage() {
   const job = data?.data as JobData;
 
   const tabCounts: Record<TabKey, number> = {
-    ai: job?.ai_result.suggested_talents.length,
+    ai: job?.ai_result?.suggested_talents?.length,
     selftapes: job?.selftapes_count,
     ecastings: job?.ecastings_count,
     polas: job?.polas_count,
@@ -691,14 +691,14 @@ export default function JobDetailPage() {
                     AI-recommended talents based on job requirements
                   </p>
                 </div>
-                {job.ai_result.suggested_talents.length === 0 ? (
+                {job?.ai_result?.suggested_talents?.length === 0 ? (
                   <EmptyState
                     icon={<Sparkles className='w-8 h-8 text-gray-300' />}
                     label='No AI suggestions yet'
                   />
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    {job.ai_result.suggested_talents.map((t) => (
+                    {job?.ai_result?.suggested_talents?.map((t) => (
                       <SuggestionCard key={t.talent_id} talent={t} />
                     ))}
                   </div>
@@ -765,13 +765,13 @@ export default function JobDetailPage() {
             <Calendar className='w-5 h-5 text-blue-500' />
             <h3 className='font-semibold text-gray-900'>Shoot Dates</h3>
           </div>
-          {job.ai_result.shoot_date.length === 0 ? (
+          {job?.ai_result?.shoot_date?.length === 0 ? (
             <p className='text-sm text-gray-400'>
               No shoot dates scheduled yet.
             </p>
           ) : (
             <div className='flex flex-wrap gap-2'>
-              {job.ai_result.shoot_date.map((date, i) => (
+              {job?.ai_result?.shoot_date?.map((date, i) => (
                 <span
                   key={i}
                   className='bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full font-medium'
