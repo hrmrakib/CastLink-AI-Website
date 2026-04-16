@@ -5,5 +5,11 @@ export default function AgentLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <RoleRedirect allowedRole='AGENT'>{children}</RoleRedirect>;
+  return (
+    <>
+      {/* <RoleRedirect allowedRole='AGENT'> */}
+      {children}
+      {/* </RoleRedirect>; */}
+    </>
+  );
 }

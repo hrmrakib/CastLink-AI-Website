@@ -338,7 +338,7 @@ export default function ActiveJobsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={locationFilter} onValueChange={setLocationFilter}>
+          {/* <Select value={locationFilter} onValueChange={setLocationFilter}>
             <SelectTrigger className='w-full sm:w-40'>
               <SelectValue placeholder='Location' />
             </SelectTrigger>
@@ -350,7 +350,7 @@ export default function ActiveJobsPage() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select> */}
         </div>
 
         {/* Error state */}

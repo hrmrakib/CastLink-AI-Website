@@ -44,11 +44,13 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addTalentsToModal } from "@/redux/features/ai-chat/aiChatSlice";
+import { ChatSkeleton } from "@/components/loading/ChatSkeleton";
 interface Message {
   id: number;
   sender: "ai" | "user";
   content: string;
   avatar?: string;
+  timestamp?: string;
   talents?: TalentProfile[];
 }
 
@@ -114,37 +116,81 @@ export default function AIDynamicPage() {
 
   const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
 
-  const { data } = useGetChatBySessionIdQuery(id);
+  const {
+    data,
+    isLoading: isLoadingChat,
+    refetch,
+  } = useGetChatBySessionIdQuery(id);
 
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
     const rawMessages = data?.data?.messages;
-    const talentList =
-      data?.data?.draft?.saved_filters?.suggested_talents_list ?? [];
-
-    if (talentList) {
-      dispatch(addTalentsToModal(talentList));
-    }
 
     if (!rawMessages) return;
 
+    // Collect all talents across all messages for the modal
+    const allTalents = rawMessages
+      .filter((msg: any) => msg.saved_filters?.suggested_talents_list?.length)
+      .flatMap((msg: any) => msg.saved_filters.suggested_talents_list);
+
+    if (allTalents.length > 0) {
+      dispatch(addTalentsToModal(allTalents));
+    }
+
     const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
-      const isLastAi =
-        msg.sender === "ai" &&
-        idx === rawMessages.length - 1 &&
-        talentList.length > 0;
+      // Attach talents to the specific AI message that has saved_filters
+      const talentList: TalentProfile[] =
+        msg.sender === "ai" && msg.saved_filters?.suggested_talents_list
+          ? msg.saved_filters.suggested_talents_list
+          : (msg.talents ?? []);
 
       return {
         id: idx,
         sender: msg.sender,
         content: msg.content,
         avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
-        talents: isLastAi ? talentList : (msg.talents ?? []),
+        talents: talentList,
       };
     });
 
     setMessages(normalized);
-  }, [data?.data?.messages, data?.data?.draft?.saved_filters, id, dispatch]);
+  }, [data?.data?.messages, id, dispatch]);
+
+  // useEffect(() => {
+  //   const rawMessages = data?.data?.messages;
+
+  //   const talentList = data?.data?.saved_filters?.suggested_talents_list ?? [];
+
+  //   if (talentList) {
+  //     dispatch(addTalentsToModal(talentList));
+  //   }
+
+  //   if (!rawMessages) return;
+
+  //   const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
+  //     const isLastAi =
+  //       msg.sender === "ai" &&
+  //       idx === rawMessages.length - 1 &&
+  //       talentList.length > 0;
+
+  //     return {
+  //       id: idx,
+  //       sender: msg.sender,
+  //       content: msg.content,
+  //       avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
+  //       talents: isLastAi ? talentList : (msg.talents ?? []),
+  //     };
+  //   });
+
+  //   setMessages(normalized);
+  // }, [
+  //   data?.data?.messages,
+  //   data?.data?.saved_filters?.suggested_talents_list,
+  //   id,
+  //   dispatch,
+  // ]);
+
+  console.log({ messages });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -166,11 +212,11 @@ export default function AIDynamicPage() {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    // FIX 3: use Date.now() for unique IDs instead of array-length-based IDs
     const userMessage: Message = {
       id: Date.now(),
       sender: "user",
       content: inputValue,
+      timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
@@ -188,7 +234,7 @@ export default function AIDynamicPage() {
 
       if (res?.session_id) {
         const aiMessage: Message = {
-          id: Date.now() + 1, // FIX 3 continued
+          id: Date.now() + 1,
           sender: "ai",
           content: res.conversation ?? "Here are the results I found.",
           avatar: "/man.png",
@@ -199,13 +245,15 @@ export default function AIDynamicPage() {
     } catch (error) {
       console.error(error);
       const errorMessage: Message = {
-        id: Date.now() + 1, // FIX 3 continued
+        id: Date.now() + 1,
         sender: "ai",
         content: "Something went wrong. Please try again.",
         avatar: "/man.png",
+        timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
+      refetch();
       setIsLoading(false);
       textareaRef.current?.focus();
     }
@@ -353,206 +401,243 @@ export default function AIDynamicPage() {
     <main className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Chat Messages Area */}
       <div className='bg-white flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-8 max-w-6xl mx-auto w-full rounded-2xl'>
-        {messages?.length > 0 &&
-          messages?.map((message) => (
-            <div key={message.id} className='flex flex-col space-y-6'>
-              {/* Message bubble */}
-              {message.sender === "user" ? (
-                <div className='flex gap-3 justify-end items-start'>
-                  <div className='bg-[#2563EB] text-white rounded-3xl px-4 py-2 max-w-xs sm:max-w-md text-sm sm:text-base shadow-sm'>
-                    {message.content}
-                  </div>
-                  {/* FIX 4: null-guard on profile_pic; fallback to placeholder */}
-                  <img
-                    src={
-                      user?.profile_pic
-                        ? `${BASE_URL}${user.profile_pic}`
-                        : "/placeholder.svg"
-                    }
-                    alt='User Avatar'
-                    width={80}
-                    height={80}
-                    className='w-8 h-8 sm:w-8 sm:h-8 rounded-full shrink-0 object-cover'
-                  />
-                </div>
-              ) : (
-                <div className='flex gap-1.5 justify-start items-start'>
-                  <div className=''>
-                    <Image
-                      src={"/ai.svg"}
-                      alt='AI Avatar'
-                      width={800}
-                      height={800}
-                      className='w-8 h-8 sm:w-10 sm:h-10 rounded-full shrink-0 object-cover'
-                    />
-                  </div>
-                  <div className='text-gray-800 rounded-3xl px-4 py-3 max-w-xs sm:max-w-md text-sm sm:text-base whitespace-pre-line'>
-                    {message.content}
-                  </div>
-                </div>
-              )}
-
-              {/* Talent Profiles Grid — only for AI messages with talents */}
-              {message.sender === "ai" &&
-                message.talents &&
-                message.talents.length > 0 && (
-                  <div className='md:col-span-3'>
-                    {/* FIX 5: slice to MAX_VISIBLE_TALENTS so extra cards are not rendered at all */}
-                    <div className='grid grid-cols-2 gap-4'>
-                      {message.talents
-                        .slice(0, MAX_VISIBLE_TALENTS)
-                        .map((profile, idx) => {
-                          const imageUrl = profile.images?.[0]
-                            ? `${BASE_URL}${profile.images[0]}`
-                            : "/placeholder.svg";
-
-                          // Show "+N" overlay only on the last VISIBLE card when there are hidden cards
-                          const hiddenCount =
-                            message.talents!.length - MAX_VISIBLE_TALENTS;
-                          const isLastVisible =
-                            idx === MAX_VISIBLE_TALENTS - 1 && hiddenCount > 0;
-
-                          return (
-                            <div
-                              key={profile.talent_id}
-                              className='space-y-3'
-                              onClick={() => handleOpenModal(profile)}
-                            >
-                              {/* Profile Card */}
-                              <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
-                                <Image
-                                  src={imageUrl}
-                                  alt={profile.name}
-                                  width={600}
-                                  height={600}
-                                  unoptimized
-                                  className='w-full h-120 object-cover'
-                                />
-
-                                {/* FIX 5 continued: overlay shows correct hidden count */}
-                                {isLastVisible && (
-                                  <div className='absolute inset-0 bg-black/70 flex items-center justify-center'>
-                                    <span className='text-white text-4xl font-bold'>
-                                      +{hiddenCount}
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Profile Details — visible on hover */}
-                                <div className='absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3'>
-                                  <p className='font-semibold text-sm mb-1'>
-                                    {profile.name}
-                                  </p>
-                                  <p>Height: {profile.height}</p>
-                                  <p>Bust: {profile.bust}</p>
-                                  <p>Waist: {profile.waist}</p>
-                                  <p>Hips: {profile.hips}</p>
-                                  <p>Shoe Size: {profile.shoe_size}</p>
-                                  <p>Hair: {profile.hair_color}</p>
-                                  <p>Eyes: {profile.eye_color}</p>
-                                </div>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div
-                                className='flex gap-2 sm:gap-3 mt-4'
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <button
-                                  onClick={() =>
-                                    handleShortListTalent(profile?.talent_id)
-                                  }
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Like'
-                                  title='Shortlists'
-                                >
-                                  <Heart size={20} fill='currentColor' />
-                                </button>
-                                <button
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Schedule'
-                                  title='Availability'
-                                >
-                                  <Calendar size={20} />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleselftapRequest(profile?.talent_id)
-                                  }
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Photo'
-                                  title='Selftapes Request'
-                                >
-                                  <Camera size={20} />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleECastingRequest(profile?.talent_id)
-                                  }
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Call'
-                                  title='E-Casting Request'
-                                >
-                                  <Phone size={20} />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleTalentBooking(profile?.talent_id)
-                                  }
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Approve'
-                                  title='Booking Request'
-                                >
-                                  <Check size={20} />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handlePolasRequest(profile?.talent_id)
-                                  }
-                                  className='p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                                  aria-label='Approve'
-                                  title='Polas Request'
-                                >
-                                  <ScanFace size={20} />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
+        {isLoadingChat ? (
+          <ChatSkeleton />
+        ) : (
+          <>
+            {messages?.length > 0 &&
+              messages?.map((message) => (
+                <div key={message.id} className='flex flex-col space-y-6'>
+                  {/* Message bubble */}
+                  {message.sender === "user" ? (
+                    <div className='flex gap-3 justify-end items-start'>
+                      <div className='bg-[#2563EB] text-white rounded-3xl px-4 py-2 max-w-xs sm:max-w-md text-sm sm:text-base shadow-sm'>
+                        {message.content}
+                      </div>
+                      {/* FIX 4: null-guard on profile_pic; fallback to placeholder */}
+                      <img
+                        src={
+                          user?.profile_pic
+                            ? `${BASE_URL}${user.profile_pic}`
+                            : "/placeholder.svg"
+                        }
+                        alt='User Avatar'
+                        width={80}
+                        height={80}
+                        className='w-8 h-8 sm:w-8 sm:h-8 rounded-full shrink-0 object-cover'
+                      />
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className='flex gap-1.5 justify-start items-start'>
+                      <div className=''>
+                        <Image
+                          src={"/ai.svg"}
+                          alt='AI Avatar'
+                          width={800}
+                          height={800}
+                          className='w-8 h-8 sm:w-10 sm:h-10 rounded-full shrink-0 object-cover'
+                        />
+                      </div>
+                      <div className='text-gray-800 rounded-3xl px-4 py-3 max-w-xs sm:max-w-md text-sm sm:text-base whitespace-pre-line'>
+                        {message.content}
+                      </div>
+                    </div>
+                  )}
 
-              {message.sender === "ai" &&
-                message.talents &&
-                message.talents.length > 0 && (
-                  <button
-                    type='submit'
-                    onClick={handleGenerateCasting}
-                    disabled={
-                      // !message.trim() ||
-                      generatingCastingLoading
-                      // || chatLoading
-                    }
-                    className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
-                  >
-                    <Sparkles className='w-4 h-4' />
-                    {generatingCastingLoading
-                      ? "Generating..."
-                      : "Generate Casting"}
-                  </button>
-                )}
-            </div>
-          ))}
+                  {/* Talent Profiles Grid — only for AI messages with talents */}
+                  {message.sender === "ai" &&
+                    message.talents &&
+                    message.talents.length > 0 && (
+                      <div className='md:col-span-3'>
+                        {/* FIX 5: slice to MAX_VISIBLE_TALENTS so extra cards are not rendered at all */}
+                        <div className='grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4'>
+                          {message.talents
+                            .slice(0, MAX_VISIBLE_TALENTS)
+                            .map((profile, idx) => {
+                              const imageUrl = profile.images?.[0]
+                                ? `${BASE_URL}${profile.images[0]}`
+                                : "/placeholder.svg";
 
-        {/* Loading indicator */}
-        {isLoading && (
-          <div className='flex gap-3 justify-start items-start'>
-            <div className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 shrink-0' />
-            <div className='bg-white border border-gray-200 rounded-3xl px-4 py-3 text-sm text-gray-500 shadow-sm'>
-              <span className='animate-pulse'>Finding the best talent...</span>
-            </div>
-          </div>
+                              // Show "+N" overlay only on the last VISIBLE card when there are hidden cards
+                              const hiddenCount =
+                                message.talents!.length - MAX_VISIBLE_TALENTS;
+                              const isLastVisible =
+                                idx === MAX_VISIBLE_TALENTS - 1 &&
+                                hiddenCount > 0;
+
+                              return (
+                                <div
+                                  key={profile.talent_id}
+                                  className='space-y-3'
+                                  onClick={() => handleOpenModal(profile)}
+                                >
+                                  {/* Profile Card */}
+                                  <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
+                                    <Image
+                                      src={imageUrl}
+                                      alt={profile.name}
+                                      width={600}
+                                      height={600}
+                                      unoptimized
+                                      className='w-full h-120 object-cover'
+                                    />
+
+                                    {/* FIX 5 continued: overlay shows correct hidden count */}
+                                    {isLastVisible && (
+                                      <div className='absolute inset-0 bg-black/70 flex items-center justify-center'>
+                                        <span className='text-white text-4xl font-bold'>
+                                          +{hiddenCount}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* Profile Details — visible on hover */}
+                                    <div className='absolute top-2  group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3 z-20'>
+                                      <div className='flex items-center gap-3 font-semibold text-sm mb-1'>
+                                        {profile?.is_active && (
+                                          <img
+                                            title='Verified'
+                                            className='w-5 h-5'
+                                            src='/verfied.png'
+                                            alt='Verified'
+                                          />
+                                        )}
+                                        {profile?.is_active && (
+                                          <img
+                                            title='Available'
+                                            className='w-5.5 h-5.5'
+                                            src='/star.png'
+                                            alt='Verified'
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Profile Details — visible on hover */}
+                                    <div className='absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3'>
+                                      <p className='font-semibold text-sm mb-1'>
+                                        Talent Name: {profile.name}
+                                      </p>
+                                      <p>Height: {profile.height}</p>
+                                      <p>Bust: {profile.bust}</p>
+                                      <p>Waist: {profile.waist}</p>
+                                      <p>Hips: {profile.hips}</p>
+                                      <p>Shoe Size: {profile.shoe_size}</p>
+                                      <p>Hair: {profile.hair_color}</p>
+                                      <p>Eyes: {profile.eye_color}</p>
+                                      <p>Agent: {profile.agent_name}</p>
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div
+                                    className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <button
+                                      onClick={() =>
+                                        handleShortListTalent(
+                                          profile?.talent_id,
+                                        )
+                                      }
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Like'
+                                      title='Shortlists'
+                                    >
+                                      <Heart size={20} fill='currentColor' />
+                                    </button>
+                                    <button
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Schedule'
+                                      title='Availability'
+                                    >
+                                      <Calendar size={20} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleselftapRequest(profile?.talent_id)
+                                      }
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Photo'
+                                      title='Selftapes Request'
+                                    >
+                                      <Camera size={20} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleECastingRequest(
+                                          profile?.talent_id,
+                                        )
+                                      }
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Call'
+                                      title='E-Casting Request'
+                                    >
+                                      <Phone size={20} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleTalentBooking(profile?.talent_id)
+                                      }
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Approve'
+                                      title='Booking Request'
+                                    >
+                                      <Check size={20} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handlePolasRequest(profile?.talent_id)
+                                      }
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      aria-label='Approve'
+                                      title='Polas Request'
+                                    >
+                                      <ScanFace size={20} />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
+                  {message.sender === "ai" &&
+                    message.talents &&
+                    message.talents.length > 0 && (
+                      <button
+                        type='submit'
+                        onClick={handleGenerateCasting}
+                        disabled={generatingCastingLoading}
+                        className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
+                      >
+                        <Sparkles className='w-4 h-4' />
+                        {generatingCastingLoading
+                          ? "Generating..."
+                          : "Generate Casting"}
+                      </button>
+                    )}
+                </div>
+              ))}
+
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className='flex gap-3 justify-start items-start'>
+                {/* <div className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 shrink-0' />
+                <div className='bg-white border border-gray-200 rounded-3xl px-4 py-3 text-sm text-gray-500 shadow-sm'>
+                  <span className='animate-pulse'>
+                    Finding the best talent...
+                  </span>
+                </div> */}
+
+                <div className='flex items-center justify-center gap-3 mt-4'>
+                  <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
+                  <p className='text-[#404145]'>AI is thinking...</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div ref={messagesEndRef} />

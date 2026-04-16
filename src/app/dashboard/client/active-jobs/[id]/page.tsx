@@ -543,10 +543,10 @@ export default function JobDetailPage() {
   const job = data?.data as JobData;
 
   const tabCounts: Record<TabKey, number> = {
-    ai: job.ai_result.suggested_talents.length,
-    selftapes: job.selftapes_count,
-    ecastings: job.ecastings_count,
-    polas: job.polas_count,
+    ai: job?.ai_result.suggested_talents.length,
+    selftapes: job?.selftapes_count,
+    ecastings: job?.ecastings_count,
+    polas: job?.polas_count,
   };
 
   if (isLoading)

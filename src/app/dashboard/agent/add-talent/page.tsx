@@ -1,11 +1,14 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { useCreateTalentMutation } from "@/redux/features/talent/talentAPI";
-import { X } from "lucide-react";
+import { Calendar, X } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -25,6 +28,231 @@ interface FormData {
   location: string;
   dateOfBirth: string;
   uploadedImages: File[];
+}
+const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+interface DateCalendarModalProps {
+  open: boolean;
+  initialDates: string[];
+  onClose: () => void;
+  onConfirm: (dates: string[]) => void;
+}
+
+function toDateString(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function DateCalendarModal({
+  open,
+  initialDates,
+  onClose,
+  onConfirm,
+}: DateCalendarModalProps) {
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDates, setSelectedDates] = useState<string[]>(initialDates);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedDates(initialDates);
+    }
+  }, [open, initialDates]);
+
+  if (!open) return null;
+
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  const prevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else setViewMonth((m) => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else setViewMonth((m) => m + 1);
+  };
+
+  const toggleDate = (dateStr: string) => {
+    setSelectedDates((prev) =>
+      prev.includes(dateStr)
+        ? prev.filter((d) => d !== dateStr)
+        : [...prev, dateStr],
+    );
+  };
+
+  const cells: { day: number; month: "prev" | "current" | "next" }[] = [];
+  for (let i = firstDay - 1; i >= 0; i--)
+    cells.push({ day: daysInPrevMonth - i, month: "prev" });
+  for (let d = 1; d <= daysInMonth; d++)
+    cells.push({ day: d, month: "current" });
+  const remaining = 42 - cells.length;
+  for (let d = 1; d <= remaining; d++) cells.push({ day: d, month: "next" });
+
+  return (
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center p-4'
+      style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      onClick={onClose}
+    >
+      <div
+        className='bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden'
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className='flex items-center justify-between px-6 pt-5 pb-2'>
+          <span className='font-semibold text-gray-900 text-sm flex items-center gap-2'>
+            <Calendar className='w-4 h-4 text-[#2563EB]' />
+            Select Shoot Date(s)
+          </span>
+          <button
+            onClick={onClose}
+            className='w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-colors'
+          >
+            <X className='w-4 h-4' />
+          </button>
+        </div>
+
+        <div className='flex items-center justify-between px-6 py-3'>
+          <button
+            onClick={prevMonth}
+            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500'
+          >
+            <svg width='8' height='14' viewBox='0 0 8 14' fill='none'>
+              <path
+                d='M7 1L1 7L7 13'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
+          </button>
+          <span className='font-semibold text-gray-900 text-base tracking-wide'>
+            {MONTHS[viewMonth]} {viewYear}
+          </span>
+          <button
+            onClick={nextMonth}
+            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500'
+          >
+            <svg width='8' height='14' viewBox='0 0 8 14' fill='none'>
+              <path
+                d='M1 1L7 7L1 13'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className='grid grid-cols-7 px-4 pb-1'>
+          {DAYS.map((d) => (
+            <div
+              key={d}
+              className='text-center text-xs font-medium text-gray-400 py-1'
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+
+        <div className='grid grid-cols-7 px-4 pb-3'>
+          {cells.map((cell, idx) => {
+            if (cell.month !== "current") {
+              return (
+                <div
+                  key={idx}
+                  className='flex items-center justify-center h-10'
+                >
+                  <span className='text-sm text-gray-300'>{cell.day}</span>
+                </div>
+              );
+            }
+            const dateStr = toDateString(viewYear, viewMonth, cell.day);
+            const isSelected = selectedDates.includes(dateStr);
+            return (
+              <button
+                key={idx}
+                onClick={() => toggleDate(dateStr)}
+                className='flex items-center justify-center h-10'
+              >
+                <span
+                  className={`
+                  w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-150
+                  ${
+                    isSelected
+                      ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
+                  }
+                `}
+                >
+                  {cell.day}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {selectedDates.length > 0 && (
+          <div className='mx-5 mb-3'>
+            <div className='bg-blue-50 border border-blue-100 rounded-xl px-4 py-2 flex items-center gap-2'>
+              <div className='w-2 h-2 rounded-full bg-blue-500 flex-shrink-0' />
+              <span className='text-sm text-blue-700 font-medium'>
+                {selectedDates.length} date{selectedDates.length > 1 ? "s" : ""}{" "}
+                selected
+              </span>
+              <button
+                onClick={() => setSelectedDates([])}
+                className='ml-auto text-xs text-blue-400 hover:text-[#2563EB] transition-colors font-medium'
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className='px-5 pb-5 pt-1'>
+          <button
+            onClick={() => {
+              onConfirm([...selectedDates].sort());
+              onClose();
+            }}
+            disabled={selectedDates.length === 0}
+            className={`
+              w-full py-3.5 rounded-2xl text-base font-semibold transition-all duration-200
+              ${
+                selectedDates.length > 0
+                  ? "bg-[#2563EB] text-white hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-200"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }
+            `}
+          >
+            Set Date
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Success Message Component
@@ -107,6 +335,15 @@ function SuccessMessage({
   );
 }
 
+function formatDisplay(dates: string[]): string {
+  if (dates.length === 0) return "";
+  if (dates.length === 1) {
+    const [y, m, d] = dates[0].split("-");
+    return `${parseInt(d)} ${MONTHS[parseInt(m) - 1]} ${y}`;
+  }
+  return `${dates.length} dates selected`;
+}
+
 interface ImageItem {
   id: string;
   url: string;
@@ -145,7 +382,8 @@ export default function AddTalentPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [shootDates, setShootDates] = useState<string[]>([]);
   const [createTalentMutation] = useCreateTalentMutation();
 
   const validateForm = () => {
@@ -497,6 +735,93 @@ export default function AddTalentPage() {
               </div>
             </div>
 
+            <div>
+              <h2 className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
+                Select available
+              </h2>
+
+              <RadioGroup
+                defaultValue='comfortable'
+                className='w-full mb-6 border-b pb-3'
+              >
+                <div className='flex items-center gap-3'>
+                  <RadioGroupItem value='default' id='r1' className='w-5 h-5' />
+                  <Label
+                    htmlFor='r1'
+                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
+                  >
+                    Available
+                  </Label>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <RadioGroupItem
+                    value='comfortable'
+                    id='r2'
+                    className='w-5 h-5'
+                  />
+                  <Label
+                    htmlFor='r2'
+                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
+                  >
+                    Available on request
+                  </Label>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <RadioGroupItem value='compact' id='r3' className='w-5 h-5' />
+                  <Label
+                    htmlFor='r3'
+                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
+                  >
+                    Unavailable
+                  </Label>
+                </div>
+              </RadioGroup>
+              {/* Shoot Date */}
+              <div>
+                <label className='flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
+                  <Calendar className='w-4 h-4' />
+                  Shoot Date
+                </label>
+                <button
+                  type='button'
+                  onClick={() => setCalendarOpen(true)}
+                  className='w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-white hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-left flex items-center justify-between group'
+                >
+                  <span
+                    className={
+                      shootDates.length > 0 ? "text-[#000000]" : "text-gray-400"
+                    }
+                  >
+                    {shootDates.length > 0
+                      ? formatDisplay(shootDates)
+                      : "Select shoot date(s)"}
+                  </span>
+                  <Calendar className='w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0' />
+                </button>
+                {shootDates.length > 1 && (
+                  <div className='flex flex-wrap gap-1.5 mt-2'>
+                    {shootDates.map((d) => (
+                      <span
+                        key={d}
+                        className='inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full border border-blue-100'
+                      >
+                        {d}
+                        <button
+                          type='button'
+                          onClick={() =>
+                            setShootDates((prev) => prev.filter((x) => x !== d))
+                          }
+                          className='hover:text-blue-900 transition-colors'
+                        >
+                          <X className='w-3 h-3' />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* File Uploads */}
             <div className='w-full rounded-lg border border-border bg-card p-4 md:p-6'>
               <div className='mb-6'>
@@ -599,6 +924,13 @@ export default function AddTalentPage() {
           </form>
         </div>
       </div>
+
+      <DateCalendarModal
+        open={calendarOpen}
+        initialDates={shootDates}
+        onClose={() => setCalendarOpen(false)}
+        onConfirm={(dates) => setShootDates(dates)}
+      />
     </main>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
+import useDebounce from "@/hooks/useDebounce";
 
 interface Job {
   job_id: string;
@@ -72,12 +73,13 @@ function getApplicantProgress(job: Job): number {
 export default function Page() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const debouncedSearch = useDebounce(searchQuery, 900);
 
   const { data, isLoading, isFetching } = useGetActiveJobsQuery({
     page: currentPage,
     limit: 10,
+    search: debouncedSearch,
   });
 
   const activeJobs: Job[] = data?.data || [];
@@ -89,23 +91,6 @@ export default function Page() {
   };
 
   console.log({ activeJobs });
-
-  const filteredJobs = activeJobs.filter((job) => {
-    const matchesSearch = job.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    if (selectedFilter === "All") return matchesSearch;
-    if (selectedFilter === "Urgent")
-      return matchesSearch && getApplicantProgress(job) < 50;
-    if (selectedFilter === "This Week") {
-      const jobDate = new Date(job.created_at);
-      const now = new Date();
-      const diffDays =
-        (now.getTime() - jobDate.getTime()) / (1000 * 60 * 60 * 24);
-      return matchesSearch && diffDays <= 7;
-    }
-    return matchesSearch;
-  });
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > pagination.total_pages) return;
@@ -295,7 +280,9 @@ export default function Page() {
                       </button>
                       <button
                         onClick={() =>
-                          router.push(`/dashboard/client/active-jobs/e-casting-room/`)
+                          router.push(
+                            `/dashboard/client/active-jobs/e-casting-room/`,
+                          )
                         }
                         className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'
                       >

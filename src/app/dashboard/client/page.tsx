@@ -29,6 +29,7 @@ export interface ClientOverviewJob {
   created_at: string;
   applicants: number;
   shortlisted: number;
+  session_id: string;
 }
 
 export interface ClientOverviewActivity {
@@ -192,7 +193,7 @@ export default function Page() {
             <div className='flex items-center justify-between mb-6'>
               <h2 className='text-xl font-bold text-[#000000]'>Recent Jobs</h2>
               <Link
-                href='/dashboard/client/jobs'
+                href='/dashboard/client/active-jobs'
                 className='text-[#2563EB] hover:underline text-sm font-medium'
               >
                 View all
@@ -253,7 +254,14 @@ export default function Page() {
                       >
                         View Details
                       </button>
-                      <button className='w-32! h-11! button text-sm! font-normal!'>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/client/ai-chat/${job.session_id}`,
+                          )
+                        }
+                        className='w-32! h-11! button text-sm! font-normal!'
+                      >
                         AI Results
                       </button>
                     </div>

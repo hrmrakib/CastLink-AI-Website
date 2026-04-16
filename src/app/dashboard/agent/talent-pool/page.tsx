@@ -10,7 +10,6 @@ import {
   Pencil,
   Trash,
 } from "lucide-react";
-import Image from "next/image";
 
 import {
   Select,
@@ -29,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { TalentPoolSkeleton } from "./TalentPoolSkeleton";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "";
 
@@ -38,7 +38,7 @@ export default function TalentVault() {
   const [availability, setAvailability] = useState("all");
   const [role, setRole] = useState("all");
 
-  const { data } = useGetTalentQuery({
+  const { data, isLoading } = useGetTalentQuery({
     ...(availability !== "all" && { is_active: availability === "available" }),
     ...(role !== "all" && { gender: role }),
   });
@@ -65,6 +65,8 @@ export default function TalentVault() {
       eyes: talent.eye_colour || "—",
     };
   });
+
+  if (isLoading) return <TalentPoolSkeleton />;
 
   return (
     <main className='min-h-screen bg-white rounded-xl!'>

@@ -235,7 +235,7 @@ function DateCalendarModal({
         {selectedDates.length > 0 && (
           <div className='mx-5 mb-3'>
             <div className='bg-blue-50 border border-blue-100 rounded-xl px-4 py-2 flex items-center gap-2'>
-              <div className='w-2 h-2 rounded-full bg-blue-500 flex-shrink-0' />
+              <div className='w-2 h-2 rounded-full bg-blue-500 shrink-0' />
               <span className='text-sm text-blue-700 font-medium'>
                 {selectedDates.length} date{selectedDates.length > 1 ? "s" : ""}{" "}
                 selected
@@ -380,8 +380,10 @@ function AIChatInner() {
         generate_job: false,
       }).unwrap();
 
-      if (res?.session_id) {
-        router.push(`/dashboard/client/ai-chat/${res?.session_id}`);
+      console.log({ res });
+
+      if (res?.data?.session_id) {
+        router.push(`/dashboard/client/ai-chat/${res?.data?.session_id}`);
       }
     } catch (error) {
       console.error(error);
@@ -464,6 +466,14 @@ function AIChatInner() {
               Describe what you&apos;re looking for and let AI match the perfect
               talent
             </p>
+
+            {/* chat loading indicator */}
+            {chatLoading && (
+              <div className='flex items-center justify-center gap-3 mt-4'>
+                <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
+                <p className='text-[#404145]'>AI is thinking...</p>
+              </div>
+            )}
           </div>
 
           {/* Form */}
