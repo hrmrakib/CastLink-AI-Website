@@ -12,6 +12,8 @@ import {
   Camera,
   Phone,
   CheckCircle,
+  Check,
+  ScanFace,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 
@@ -234,40 +236,58 @@ export default function ChatModalDetail() {
 
             {/* Action Buttons */}
             <div className='bg-white px-6 md:px-8 py-6 flex justify-center gap-6 md:gap-8 flex-wrap'>
-              <button
-                onClick={() => {
-                  setLiked(!liked);
-                  handleAction("like");
-                }}
-                className={`flex items-center justify-center w-14 h-14 rounded-full transition-all transform hover:scale-110 ${
-                  liked
-                    ? "bg-blue-500 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                }`}
-                title='Like'
+              <div
+                className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                onClick={(e) => e.stopPropagation()}
               >
-                <Heart className={`w-6 h-6 ${liked ? "fill-current" : ""}`} />
-              </button>
-
-              {[
-                { action: "calendar", Icon: Calendar, title: "Schedule" },
-                { action: "camera", Icon: Camera, title: "Photos" },
-                { action: "phone", Icon: Phone, title: "Call" },
-                { action: "check", Icon: CheckCircle, title: "Approve" },
-              ].map(({ action, Icon, title }) => (
                 <button
-                  key={action}
-                  onClick={() => handleAction(action)}
-                  className={`flex items-center justify-center w-14 h-14 rounded-full bg-gray-200 text-blue-500 hover:bg-blue-100 transition-all transform hover:scale-110 ${
-                    selectedAction === action
-                      ? "bg-blue-100 ring-2 ring-blue-500"
-                      : ""
-                  }`}
-                  title={title}
+                  // onClick={() => handleShortListTalent(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Like'
+                  title='Shortlists'
                 >
-                  <Icon className='w-6 h-6' />
+                  <Heart size={20} fill='currentColor' />
                 </button>
-              ))}
+                <button
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Schedule'
+                  title='Availability'
+                >
+                  <Calendar size={20} />
+                </button>
+                <button
+                  // onClick={() => handleselftapRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Photo'
+                  title='Selftapes Request'
+                >
+                  <Camera size={20} />
+                </button>
+                <button
+                  // onClick={() => handleECastingRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Call'
+                  title='E-Casting Request'
+                >
+                  <Phone size={20} />
+                </button>
+                <button
+                  // onClick={() => handleTalentBooking(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Approve'
+                  title='Booking Request'
+                >
+                  <Check size={20} />
+                </button>
+                <button
+                  // onClick={() => handlePolasRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Approve'
+                  title='Polas Request'
+                >
+                  <ScanFace size={20} />
+                </button>
+              </div>
             </div>
           </>
         )}

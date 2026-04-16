@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
@@ -14,19 +15,14 @@ import {
   MapPin,
   Briefcase,
   UserRound,
+  Heart,
+  Calendar,
+  Camera,
+  Phone,
+  Check,
+  ScanFace,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +32,9 @@ import {
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
@@ -77,6 +76,7 @@ function SkeletonCard() {
       </div>
       {/* action icons */}
       <div className='flex gap-2 shrink-0'>
+        <div className='h-8 w-8 rounded-lg bg-gray-200' />
         <div className='h-8 w-8 rounded-lg bg-gray-200' />
         <div className='h-8 w-8 rounded-lg bg-gray-200' />
       </div>
@@ -147,8 +147,9 @@ export default function ShortlistDetailPage() {
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  const handleDeleteTalent = (id: string) =>
+  const handleDeleteTalent = (id: string) => {
     setTalents((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleViewTalent = (talent: Talent) => {
     setSelectedTalent(talent);
@@ -157,14 +158,86 @@ export default function ShortlistDetailPage() {
 
   const handleShareLink = () => {
     navigator.clipboard?.writeText(window.location.href);
-    alert("Link copied to clipboard: " + window.location.href);
+    toast.success("Got it! Link copied to clipboard.");
   };
 
-  const handleDownloadPDF = () => alert("PDF download started");
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
 
+    // ── Header ──────────────────────────────────────────────────────────────
+    doc.setFillColor(37, 99, 235); // blue-600
+    doc.rect(0, 0, pageWidth, 32, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Shortlist: ${jobTitle}`, 14, 14);
+
+    if (jobDescription) {
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      const descLines = doc.splitTextToSize(jobDescription, pageWidth - 28);
+      doc.text(descLines.slice(0, 2), 14, 23); // max 2 lines in header
+    }
+
+    // ── Meta line ────────────────────────────────────────────────────────────
+    doc.setTextColor(100, 116, 139); // slate-500
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Generated: ${new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })}   •   ${talents.length} talent${talents.length !== 1 ? "s" : ""}`,
+      14,
+      40,
+    );
+
+    // ── Table ────────────────────────────────────────────────────────────────
+    autoTable(doc, {
+      startY: 46,
+      head: [["#", "Name", "Role", "Agency", "Location", "Added"]],
+      body: talents.map((t, i) => [
+        i + 1,
+        t.talent_name,
+        t.talent_role,
+        t.agency_name,
+        t.location,
+        formatDate(t.created_at),
+      ]),
+      headStyles: {
+        fillColor: [37, 99, 235],
+        textColor: 255,
+        fontStyle: "bold",
+        fontSize: 9,
+      },
+      bodyStyles: { fontSize: 8.5, textColor: [30, 30, 30] },
+      alternateRowStyles: { fillColor: [239, 246, 255] }, // blue-50
+      columnStyles: {
+        0: { halign: "center", cellWidth: 10 },
+        5: { cellWidth: 24 },
+      },
+      margin: { left: 14, right: 14 },
+      didDrawPage: (hookData) => {
+        // Footer on every page
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        const currentPage = hookData.pageNumber;
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text(
+          `Page ${currentPage} of ${pageCount}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 8,
+          { align: "center" },
+        );
+      },
+    });
+
+    doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
+  };
   // ── Render ─────────────────────────────────────────────────────────────────
-
-  // if (isLoading) return <PageSkeleton />;
 
   const jobTitle = data?.data?.job_title ?? "Shortlist";
   const jobDescription = data?.data?.job_description ?? "";
@@ -324,45 +397,132 @@ export default function ShortlistDetailPage() {
         )}
       </div>
 
-      {/* View Talent Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <form>
-          <DialogContent className='sm:max-w-106.5'>
-            <DialogHeader>
-              <DialogTitle>
-                {selectedTalent?.talent_name ?? "Talent"}
-              </DialogTitle>
-              <DialogDescription>
-                {selectedTalent?.talent_role} · {selectedTalent?.agency_name}
-              </DialogDescription>
-            </DialogHeader>
-            <div className='grid gap-4'>
-              <div className='grid gap-3'>
-                <Label htmlFor='name-1'>Name</Label>
-                <Input
-                  id='name-1'
-                  name='name'
-                  defaultValue={selectedTalent?.talent_name ?? ""}
-                />
+      {/* View Talent Modal */}
+      {isOpen && selectedTalent && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className='relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl'
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className='absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
+            >
+              ✕
+            </button>
+
+            {/* Profile grid */}
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 md:p-8'>
+              {/* Left — info */}
+              <div className='flex flex-col'>
+                <h1 className='text-2xl font-bold text-gray-900 mb-6'>
+                  Profile Details
+                </h1>
+                <div className='space-y-1.5'>
+                  {[
+                    { label: "Name", value: selectedTalent.talent_name },
+                    { label: "Role", value: selectedTalent.talent_role },
+                    { label: "Agent", value: selectedTalent.agency_name },
+                    { label: "Location", value: selectedTalent.location },
+                    {
+                      label: "Added",
+                      value: formatDate(selectedTalent.created_at),
+                    },
+                  ].map(({ label, value }) => (
+                    <div key={label} className='flex gap-6 items-center pb-3'>
+                      <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
+                        {label}:
+                      </span>
+                      <span className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className='grid gap-3'>
-                <Label htmlFor='location-1'>Location</Label>
-                <Input
-                  id='location-1'
-                  name='location'
-                  defaultValue={selectedTalent?.location ?? ""}
-                />
+
+              {/* Right — image */}
+              <div className='flex flex-col gap-4'>
+                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
+                  {selectedTalent.image ? (
+                    <Image
+                      src={`${BASE_URL}${selectedTalent.image}`}
+                      alt={selectedTalent.talent_name}
+                      fill
+                      unoptimized
+                      className='object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-full w-full items-center justify-center text-gray-400'>
+                      <UserRoundPlus size={48} />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant='outline'>Cancel</Button>
-              </DialogClose>
-              <Button type='submit'>Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </form>
-      </Dialog>
+
+            {/* Action buttons */}
+            <div className='px-6 md:px-8 py-6 flex justify-center gap-6 flex-wrap border-t border-gray-100'>
+              <div
+                className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  // onClick={() => handleShortListTalent(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Like'
+                  title='Shortlists'
+                >
+                  <Heart size={20} fill='currentColor' />
+                </button>
+                <button
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Schedule'
+                  title='Availability'
+                >
+                  <Calendar size={20} />
+                </button>
+                <button
+                  // onClick={() => handleselftapRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Photo'
+                  title='Selftapes Request'
+                >
+                  <Camera size={20} />
+                </button>
+                <button
+                  // onClick={() => handleECastingRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Call'
+                  title='E-Casting Request'
+                >
+                  <Phone size={20} />
+                </button>
+                <button
+                  // onClick={() => handleTalentBooking(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Approve'
+                  title='Booking Request'
+                >
+                  <Check size={20} />
+                </button>
+                <button
+                  // onClick={() => handlePolasRequest(profile?.talent_id)}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  aria-label='Approve'
+                  title='Polas Request'
+                >
+                  <ScanFace size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

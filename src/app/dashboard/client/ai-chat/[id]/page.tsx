@@ -624,13 +624,6 @@ export default function AIDynamicPage() {
             {/* Loading indicator */}
             {isLoading && (
               <div className='flex gap-3 justify-start items-start'>
-                {/* <div className='w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 shrink-0' />
-                <div className='bg-white border border-gray-200 rounded-3xl px-4 py-3 text-sm text-gray-500 shadow-sm'>
-                  <span className='animate-pulse'>
-                    Finding the best talent...
-                  </span>
-                </div> */}
-
                 <div className='flex items-center justify-center gap-3 mt-4'>
                   <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
                   <p className='text-[#404145]'>AI is thinking...</p>
