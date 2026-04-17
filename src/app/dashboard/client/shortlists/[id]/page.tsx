@@ -21,6 +21,7 @@ import {
   Phone,
   Check,
   ScanFace,
+  Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -118,6 +119,15 @@ function formatDate(iso: string) {
 export default function ShortlistDetailPage() {
   const params = useParams();
   const id = Number(params.id);
+
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  // Example dates - you can replace this with your actual array
+  const availableDates: string[] = [
+    // "2026-05-10",
+    // "2026-05-11",
+    // "2026-05-15",
+    // "2026-05-20",
+  ];
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
@@ -263,8 +273,6 @@ export default function ShortlistDetailPage() {
 
   const jobTitle = data?.data?.job_title ?? "Shortlist";
   const jobDescription = data?.data?.job_description ?? "";
-
-  // if (dummyLoading) return <FullScreenLoader isLoading />;
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -444,15 +452,14 @@ export default function ShortlistDetailPage() {
           >
             {dummyLoading ? (
               <div className='flex flex-col items-center justify-center min-h-120 w-full bg-white/30 backdrop-blur-sm rounded-xl'>
-                <div className='relative'>
+                <div className='relative flex items-center gap-3'>
                   {/* The Spinning Ring */}
-                  <div className='w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin'></div>
+                  {/* <div className='w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin'></div> */}
                   {/* Optional: Static inner glow for glass effect */}
-                  <div className='absolute inset-0 w-12 h-12 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.2)]'></div>
+                  {/* <div className='absolute inset-0 w-12 h-12 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.2)]'></div> */}
+                  <Loader className='animate-spin' />
+                  <span>Processing ...</span>
                 </div>
-                <p className='mt-4 text-gray-500 font-medium animate-pulse'>
-                  Loading Profile...
-                </p>
               </div>
             ) : (
               <>
@@ -536,11 +543,7 @@ export default function ShortlistDetailPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleDummyAction(
-                          "Availability schedule requested successfully.",
-                        )
-                      }
+                      onClick={() => setIsDateModalOpen(true)}
                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                       aria-label='Schedule'
                       title='Availability'
@@ -601,6 +604,65 @@ export default function ShortlistDetailPage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Availability Date Modal */}
+      {isDateModalOpen && (
+        <div
+          className='fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm'
+          onClick={() => setIsDateModalOpen(false)}
+        >
+          <div
+            className='bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 overflow-hidden border border-gray-100'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className='flex justify-between items-center mb-4'>
+              <h3 className='text-lg font-bold text-gray-900 flex items-center gap-2'>
+                <Calendar size={20} className='text-blue-600' />
+                Available Dates
+              </h3>
+              <button
+                onClick={() => setIsDateModalOpen(false)}
+                className='text-gray-400 hover:text-gray-600 transition-colors'
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className='space-y-2 max-h-60 overflow-y-auto pr-2'>
+              {availableDates.length > 0 ? (
+                availableDates.map((date, index) => (
+                  <div
+                    key={index}
+                    className='flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100'
+                  >
+                    <span className='text-blue-900 font-medium'>
+                      {new Date(date).toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "long",
+                      })}
+                    </span>
+                    <span className='text-[10px] uppercase tracking-wider font-bold text-blue-500 bg-white px-2 py-1 rounded shadow-sm'>
+                      Available
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className='text-center text-gray-500 py-4'>
+                  No dates available.
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsDateModalOpen(false)}
+              className='w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md shadow-blue-200'
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}

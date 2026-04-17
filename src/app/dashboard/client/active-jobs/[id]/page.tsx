@@ -559,7 +559,7 @@ export default function JobDetailPage() {
   return (
     <div className='min-h-screen bg-[#F3F6F9]'>
       {/* ── Top nav ── */}
-      <div className='bg-white border-b border-gray-100 sticky top-0 z-30'>
+      <div className='bg- border-b border-gray-100 sticky top-0 z-30'>
         <div className='max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3'>
           <button
             onClick={() => router.back()}
@@ -708,7 +708,7 @@ export default function JobDetailPage() {
 
             {activeTab === "selftapes" && (
               <div>
-                {job.ai_result.requested_selftapes.length === 0 ? (
+                {job?.ai_result?.requested_selftapes?.length === 0 ? (
                   <EmptyState
                     icon={<Film className='w-8 h-8 text-gray-300' />}
                     label='No self-tapes requested yet'
