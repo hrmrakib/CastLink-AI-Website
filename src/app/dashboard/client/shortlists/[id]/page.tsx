@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -35,6 +36,9 @@ import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Loading from "@/components/loading/Loading";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
+import FullScreenLoader from "@/components/loading/FullScreenLoader";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
@@ -119,6 +123,10 @@ export default function ShortlistDetailPage() {
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [talents, setTalents] = useState<Talent[]>([]);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("");
+  const [dummyLoading, setDummyLoading] = useState(false);
+
+  console.log({ filter });
 
   const { data, isLoading } = useGetSingleShortlistJobQuery(id);
 
@@ -237,10 +245,26 @@ export default function ShortlistDetailPage() {
 
     doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
   };
+
+  const handleDummyAction = (message: string) => {
+    setDummyLoading(true);
+
+    const timer = setTimeout(() => {
+      toast.success(message);
+      setDummyLoading(false);
+    }, 1500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   const jobTitle = data?.data?.job_title ?? "Shortlist";
   const jobDescription = data?.data?.job_description ?? "";
+
+  // if (dummyLoading) return <FullScreenLoader isLoading />;
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -270,12 +294,23 @@ export default function ShortlistDetailPage() {
                   variant='outline'
                   className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
                 >
-                  <Filter size={18} /> Filter
+                  <Filter size={18} />
+                  {filter === "" ? "Filter" : filter}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className='w-36' align='start'>
-                <DropdownMenuLabel>1st Option</DropdownMenuLabel>
-                <DropdownMenuLabel>2nd Option</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setFilter("")}>
+                  All
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
+                  1st Option
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
+                  2nd Option
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("Not available")}>
+                  Not available
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -407,119 +442,165 @@ export default function ShortlistDetailPage() {
             className='relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl'
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className='absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
-            >
-              ✕
-            </button>
-
-            {/* Profile grid */}
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 md:p-8'>
-              {/* Left — info */}
-              <div className='flex flex-col'>
-                <h1 className='text-2xl font-bold text-gray-900 mb-6'>
-                  Profile Details
-                </h1>
-                <div className='space-y-1.5'>
-                  {[
-                    { label: "Name", value: selectedTalent.talent_name },
-                    { label: "Role", value: selectedTalent.talent_role },
-                    { label: "Agent", value: selectedTalent.agency_name },
-                    { label: "Location", value: selectedTalent.location },
-                    {
-                      label: "Added",
-                      value: formatDate(selectedTalent.created_at),
-                    },
-                  ].map(({ label, value }) => (
-                    <div key={label} className='flex gap-6 items-center pb-3'>
-                      <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
-                        {label}:
-                      </span>
-                      <span className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
-                        {value}
-                      </span>
-                    </div>
-                  ))}
+            {dummyLoading ? (
+              <div className='flex flex-col items-center justify-center min-h-120 w-full bg-white/30 backdrop-blur-sm rounded-xl'>
+                <div className='relative'>
+                  {/* The Spinning Ring */}
+                  <div className='w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin'></div>
+                  {/* Optional: Static inner glow for glass effect */}
+                  <div className='absolute inset-0 w-12 h-12 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.2)]'></div>
                 </div>
+                <p className='mt-4 text-gray-500 font-medium animate-pulse'>
+                  Loading Profile...
+                </p>
               </div>
+            ) : (
+              <>
+                {/* Close */}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className='absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
+                >
+                  ✕
+                </button>
 
-              {/* Right — image */}
-              <div className='flex flex-col gap-4'>
-                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
-                  {selectedTalent.image ? (
-                    <Image
-                      src={`${BASE_URL}${selectedTalent.image}`}
-                      alt={selectedTalent.talent_name}
-                      fill
-                      unoptimized
-                      className='object-cover'
-                    />
-                  ) : (
-                    <div className='flex h-full w-full items-center justify-center text-gray-400'>
-                      <UserRoundPlus size={48} />
+                {/* Profile grid */}
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 md:p-8'>
+                  {/* Left — info */}
+                  <div className='flex flex-col'>
+                    <h1 className='text-2xl font-bold text-gray-900 mb-6'>
+                      Profile Details
+                    </h1>
+                    <div className='space-y-1.5'>
+                      {[
+                        { label: "Name", value: selectedTalent.talent_name },
+                        { label: "Role", value: selectedTalent.talent_role },
+                        { label: "Agent", value: selectedTalent.agency_name },
+                        { label: "Location", value: selectedTalent.location },
+                        {
+                          label: "Added",
+                          value: formatDate(selectedTalent.created_at),
+                        },
+                      ].map(({ label, value }) => (
+                        <div
+                          key={label}
+                          className='flex gap-6 items-center pb-3'
+                        >
+                          <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
+                            {label}:
+                          </span>
+                          <span className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
+                            {value}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
+                  </div>
 
-            {/* Action buttons */}
-            <div className='px-6 md:px-8 py-6 flex justify-center gap-6 flex-wrap border-t border-gray-100'>
-              <div
-                className='flex flex-wrap gap-2 sm:gap-3 mt-4'
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  // onClick={() => handleShortListTalent(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Like'
-                  title='Shortlists'
-                >
-                  <Heart size={20} fill='currentColor' />
-                </button>
-                <button
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Schedule'
-                  title='Availability'
-                >
-                  <Calendar size={20} />
-                </button>
-                <button
-                  // onClick={() => handleselftapRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Photo'
-                  title='Selftapes Request'
-                >
-                  <Camera size={20} />
-                </button>
-                <button
-                  // onClick={() => handleECastingRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Call'
-                  title='E-Casting Request'
-                >
-                  <Phone size={20} />
-                </button>
-                <button
-                  // onClick={() => handleTalentBooking(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Approve'
-                  title='Booking Request'
-                >
-                  <Check size={20} />
-                </button>
-                <button
-                  // onClick={() => handlePolasRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-                  aria-label='Approve'
-                  title='Polas Request'
-                >
-                  <ScanFace size={20} />
-                </button>
-              </div>
-            </div>
+                  {/* Right — image */}
+                  <div className='flex flex-col gap-4'>
+                    <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
+                      {selectedTalent.image ? (
+                        <Image
+                          src={`${BASE_URL}${selectedTalent.image}`}
+                          alt={selectedTalent.talent_name}
+                          fill
+                          unoptimized
+                          className='object-cover'
+                        />
+                      ) : (
+                        <div className='flex h-full w-full items-center justify-center text-gray-400'>
+                          <UserRoundPlus size={48} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className='px-6 md:px-8 py-6 flex justify-center gap-6 flex-wrap border-t border-gray-100'>
+                  <div
+                    className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() =>
+                        handleDummyAction("Added to your favorites list!")
+                      }
+                      // onClick={() => handleShortListTalent(profile?.talent_id)}
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Like'
+                      title='Shortlists'
+                    >
+                      <Heart size={20} fill='currentColor' />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleDummyAction(
+                          "Availability schedule requested successfully.",
+                        )
+                      }
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Schedule'
+                      title='Availability'
+                    >
+                      <Calendar size={20} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDummyAction("Selftape request sent to the agent.")
+                      }
+                      // onClick={() => handleselftapRequest(profile?.talent_id)}
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Photo'
+                      title='Selftapes Request'
+                    >
+                      <Camera size={20} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDummyAction(
+                          "E-Casting request has been initialized.",
+                        )
+                      }
+                      // onClick={() => handleECastingRequest(profile?.talent_id)}
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Call'
+                      title='E-Casting Request'
+                    >
+                      <Phone size={20} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDummyAction(
+                          "Booking request submitted for approval.",
+                        )
+                      }
+                      // onClick={() => handleTalentBooking(profile?.talent_id)}
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Approve'
+                      title='Booking Request'
+                    >
+                      <Check size={20} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDummyAction(
+                          "Polaroid (Polas) request sent successfully.",
+                        )
+                      }
+                      // onClick={() => handlePolasRequest(profile?.talent_id)}
+                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                      aria-label='Approve'
+                      title='Polas Request'
+                    >
+                      <ScanFace size={20} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
