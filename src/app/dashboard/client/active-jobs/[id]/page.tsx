@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetActiveJobDetailsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,7 +88,8 @@ interface JobData {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "https://api.example.com";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_AI_MEDIA_URL ?? "https://api.example.com";
 
 function resolveUrl(path: string) {
   if (!path) return "";
@@ -109,7 +111,7 @@ function formatDate(iso: string) {
 }
 
 function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return s?.charAt(0)?.toUpperCase() + s?.slice(1);
 }
 
 function isPdf(url: string) {
@@ -292,7 +294,7 @@ function SuggestionCard({ talent }: { talent: Talent }) {
 
 // ─── Selftape Card ────────────────────────────────────────────────────────────
 
-function SelftapeCard({ talent }: { talent: Talent }) {
+function SelftapeCard({ talent, id }: { talent: Talent; id?: string }) {
   return (
     <div className='bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 hover:shadow-md transition-shadow'>
       <div className='flex items-start gap-3'>
@@ -323,11 +325,12 @@ function SelftapeCard({ talent }: { talent: Talent }) {
           </p>
           <div className='flex flex-col gap-2'>
             {talent.tapes!.map((tape, i) => (
-              <a
+              <Link
                 key={i}
-                href={resolveUrl(tape)}
-                target='_blank'
-                rel='noopener noreferrer'
+                // href={resolveUrl(tape)}
+                href={`/dashboard/client/active-jobs/video/${id}`}
+                // target='_blank'
+                // rel='noopener noreferrer'
                 className='flex items-center gap-3 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl px-3 py-2.5 transition-colors group'
               >
                 <div className='w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-200 transition-colors'>
@@ -342,7 +345,7 @@ function SelftapeCard({ talent }: { talent: Talent }) {
                   </p>
                 </div>
                 <Download className='w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0' />
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -569,12 +572,12 @@ export default function JobDetailPage() {
           </button>
           <div className='flex-1 min-w-0'>
             <h1 className='text-sm sm:text-base font-semibold text-gray-900 truncate'>
-              {job.title}
+              {job?.title}
             </h1>
-            <p className='text-xs text-gray-400'>Job #{job.job_id}</p>
+            <p className='text-xs text-gray-400'>Job #{job?.job_id}</p>
           </div>
           <span className='px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-full shrink-0'>
-            {capitalize(job.status)}
+            {capitalize(job?.status)}
           </span>
         </div>
       </div>
@@ -586,17 +589,17 @@ export default function JobDetailPage() {
             <div className='flex-1 min-w-0'>
               <div className='flex flex-wrap items-center gap-2 mb-2'>
                 <span className='text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-semibold capitalize'>
-                  {job.job_type}
+                  {job?.job_type}
                 </span>
                 <span className='text-xs text-gray-400'>
-                  Posted {formatDate(job.created_at)}
+                  Posted {formatDate(job?.created_at)}
                 </span>
               </div>
               <h2 className='text-lg sm:text-xl font-bold text-gray-900 leading-snug'>
-                {job.title}
+                {job?.title}
               </h2>
               <p className='text-sm text-gray-500 mt-2 leading-relaxed'>
-                {job.description}
+                {job?.description}
               </p>
             </div>
           </div>
@@ -605,15 +608,15 @@ export default function JobDetailPage() {
           <div className='mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-4'>
             <div className='flex items-center gap-2 text-sm text-gray-600'>
               <MapPin className='w-4 h-4 text-gray-400' />
-              <span>{job.location}</span>
+              <span>{job?.location}</span>
             </div>
             <div className='flex items-center gap-2 text-sm text-gray-600'>
               <DollarSign className='w-4 h-4 text-gray-400' />
-              <span>{formatBudget(job.budget_min, job.budget_max)}</span>
+              <span>{formatBudget(job?.budget_min, job?.budget_max)}</span>
             </div>
             <div className='flex items-center gap-2 text-sm text-gray-600'>
               <Calendar className='w-4 h-4 text-gray-400' />
-              <span>Updated {formatDate(job.updated_at)}</span>
+              <span>Updated {formatDate(job?.updated_at)}</span>
             </div>
           </div>
         </div>
@@ -623,31 +626,31 @@ export default function JobDetailPage() {
           <StatCard
             icon={<Users className='w-5 h-5 text-blue-600' />}
             label='Applicants'
-            value={job.applicants_count}
+            value={job?.applicants_count}
             color='bg-blue-50'
           />
           <StatCard
             icon={<Bookmark className='w-5 h-5 text-purple-600' />}
             label='Shortlisted'
-            value={job.shortlisted_count}
+            value={job?.shortlisted_count}
             color='bg-purple-50'
           />
           <StatCard
             icon={<Film className='w-5 h-5 text-orange-500' />}
             label='Self-tapes'
-            value={job.selftapes_count}
+            value={job?.selftapes_count}
             color='bg-orange-50'
           />
           <StatCard
             icon={<Camera className='w-5 h-5 text-green-600' />}
             label='E-Castings'
-            value={job.ecastings_count}
+            value={job?.ecastings_count}
             color='bg-green-50'
           />
           <StatCard
             icon={<ImageIcon className='w-5 h-5 text-pink-500' />}
             label='Polas'
-            value={job.polas_count}
+            value={job?.polas_count}
             color='bg-pink-50'
           />
         </div>
@@ -657,7 +660,7 @@ export default function JobDetailPage() {
           {/* Tab bar — horizontal scroll on mobile */}
           <div className='overflow-x-auto'>
             <div className='flex border-b border-gray-100 min-w-max'>
-              {TABS.map((tab) => (
+              {TABS?.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
@@ -715,8 +718,12 @@ export default function JobDetailPage() {
                   />
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    {job.ai_result.requested_selftapes.map((t) => (
-                      <SelftapeCard key={t.talent_id} talent={t} />
+                    {job?.ai_result?.requested_selftapes?.map((t) => (
+                      <SelftapeCard
+                        key={t.talent_id}
+                        talent={t}
+                        id={id as string}
+                      />
                     ))}
                   </div>
                 )}
@@ -725,14 +732,14 @@ export default function JobDetailPage() {
 
             {activeTab === "ecastings" && (
               <div>
-                {job.ai_result.requested_ecastings.length === 0 ? (
+                {job?.ai_result?.requested_ecastings?.length === 0 ? (
                   <EmptyState
                     icon={<Camera className='w-8 h-8 text-gray-300' />}
                     label='No e-castings requested yet'
                   />
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    {job.ai_result.requested_ecastings.map((t) => (
+                    {job?.ai_result?.requested_ecastings?.map((t) => (
                       <ECastingCard key={t.talent_id} talent={t} />
                     ))}
                   </div>
@@ -742,14 +749,14 @@ export default function JobDetailPage() {
 
             {activeTab === "polas" && (
               <div>
-                {job.ai_result.requested_polas.length === 0 ? (
+                {job?.ai_result?.requested_polas?.length === 0 ? (
                   <EmptyState
                     icon={<ImageIcon className='w-8 h-8 text-gray-300' />}
                     label='No polas requested yet'
                   />
                 ) : (
                   <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    {job.ai_result.requested_polas.map((t) => (
+                    {job?.ai_result?.requested_polas?.map((t) => (
                       <PolaCard key={t.talent_id} talent={t} />
                     ))}
                   </div>

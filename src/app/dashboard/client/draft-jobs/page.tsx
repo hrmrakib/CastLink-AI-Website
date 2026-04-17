@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/purity */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState } from "react";
@@ -15,9 +15,43 @@ export interface DraftJob {
   draft_id: number;
   user_id: number;
   session_id: string;
-  saved_filters: Record<string, string>;
+  title: string | null;
+  description: string | null;
+  saved_filters: Record<string, string | null>;
   Updated: string;
   last_updated: string;
+  generate_job: boolean;
+}
+
+function JobCardSkeleton() {
+  return (
+    <div className='rounded-lg border border-[#E7E8EA] bg-white py-8 px-5 shadow-sm animate-pulse'>
+      <div className='mb-6 flex flex-col items-start justify-between'>
+        {/* Image Placeholder */}
+        <div className='rounded-lg mb-5 bg-gray-200 h-10 w-24' />
+
+        <div className='flex items-start justify-between gap-3 w-full'>
+          <div className='flex-1'>
+            {/* Title Placeholder */}
+            <div className='h-6 bg-gray-200 rounded w-3/4 mb-3' />
+            {/* Description Lines */}
+            <div className='space-y-2'>
+              <div className='h-4 bg-gray-200 rounded w-full' />
+              <div className='h-4 bg-gray-200 rounded w-5/6' />
+            </div>
+          </div>
+          {/* Date Placeholder */}
+          <div className='h-3 bg-gray-200 rounded w-12' />
+        </div>
+      </div>
+
+      {/* Buttons Placeholder */}
+      <div className='flex flex-wrap gap-3 sm:flex-nowrap'>
+        <div className='h-10 bg-gray-200 rounded-lg w-20' />
+        <div className='h-10 bg-gray-200 rounded-lg w-24' />
+      </div>
+    </div>
+  );
 }
 
 // ─── Delete Confirmation Modal ───────────────────────────────────────────────
@@ -41,12 +75,9 @@ function DeleteModal({
         className='bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6'
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Icon */}
         <div className='flex items-center justify-center w-14 h-14 rounded-full bg-red-50 mx-auto mb-4'>
           <Trash2 className='text-red-500 w-6 h-6' />
         </div>
-
-        {/* Text */}
         <h2 className='text-center text-lg font-bold text-gray-900 mb-2'>
           Delete Draft Job?
         </h2>
@@ -54,8 +85,6 @@ function DeleteModal({
           This action cannot be undone. The draft will be permanently removed
           from your account.
         </p>
-
-        {/* Actions */}
         <div className='flex gap-3'>
           <button
             onClick={onCancel}
@@ -85,26 +114,33 @@ function JobCard({
   onDelete: (id: number) => void;
   onContinue: (id: number) => void;
 }) {
-  const title = job.saved_filters?.["Job type"] ?? "Untitled Draft";
+  // Prefer top-level title/description, fall back to saved_filters
+  const title =
+    job.title ?? job.saved_filters?.["Job type"] ?? "Untitled Draft";
+
   const description =
-    job.saved_filters?.["Message"] ?? "No description provided.";
+    job.description ??
+    job.saved_filters?.["Message"] ??
+    "No description provided.";
 
   return (
     <div className='rounded-lg border border-[#E7E8EA] bg-white py-8 px-5 shadow-sm transition-all hover:shadow-md'>
       <div className='mb-6 flex flex-col items-start justify-between'>
         <div className='rounded-lg mb-5'>
           <Image
-            src={`/assets/draft.svg`}
+            src='/assets/draft.svg'
             width={100}
             height={100}
             alt={title}
             className='w-full h-10 object-cover'
           />
         </div>
-        <div className='flex items-start justify-between gap-3'>
+        <div className='flex items-start justify-between gap-3 w-full'>
           <div className='flex-1'>
-            <h3 className='font-bold text-xl text-[#000000] mb-2'>{title}</h3>
-            <p className='text-sm text-[#404145]'>{description}</p>
+            <h3 className='font-bold text-xl text-[#000000] mb-2 capitalize'>
+              {title}
+            </h3>
+            <p className='text-sm text-[#404145] line-clamp-3'>{description}</p>
           </div>
           <div className='whitespace-nowrap text-xs text-[#404145]'>
             {job.Updated}
@@ -115,13 +151,13 @@ function JobCard({
       <div className='flex flex-wrap gap-3 sm:flex-nowrap'>
         <button
           onClick={() => onDelete(job.draft_id)}
-          className='flex- w-auto rounded-lg border border-gray-300 px-4 py-2 font-medium text-[#000000] transition-all hover:bg-gray-50 active:scale-95 cursor-pointer'
+          className='w-auto rounded-lg border border-gray-300 px-4 py-2 font-medium text-[#000000] transition-all hover:bg-gray-50 active:scale-95 cursor-pointer'
         >
           Delete
         </button>
         <button
           onClick={() => onContinue(job.draft_id)}
-          className='flex- w-auto rounded-lg bg-[#2563EB] px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 active:scale-95 cursor-pointer'
+          className='w-auto rounded-lg bg-[#2563EB] px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 active:scale-95 cursor-pointer'
         >
           Continue
         </button>
@@ -140,24 +176,20 @@ export default function DraftJobsPage() {
     search: debouncedSearch,
   });
   const [deleteDraftJobMutation] = useDeleteDraftJobMutation();
-  const draftJobs: DraftJob[] = data ?? [];
 
-  console.log({ draftJobs, isError });
+  // ✅ Fix: API returns { data: [...] }, so extract the array from data.data
+  const draftJobs: DraftJob[] = data?.data ?? [];
 
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-  const handleDeleteClick = (id: number) => {
-    setPendingDeleteId(id);
-  };
-
-  const handleCancelDelete = () => {
-    setPendingDeleteId(null);
-  };
+  const handleDeleteClick = (id: number) => setPendingDeleteId(id);
+  const handleCancelDelete = () => setPendingDeleteId(null);
 
   const handleConfirmDelete = async () => {
     if (pendingDeleteId !== null) {
       try {
-        const res = await deleteDraftJobMutation(pendingDeleteId).unwrap();
+        await deleteDraftJobMutation(pendingDeleteId).unwrap();
+        refetch();
       } catch (error) {
         console.error("Error deleting draft job:", error);
       } finally {
@@ -172,16 +204,15 @@ export default function DraftJobsPage() {
 
   return (
     <>
-      {/* Delete Confirmation Modal */}
       <DeleteModal
         isOpen={pendingDeleteId !== null}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
       />
 
-      <div className='min-h-screen bg-linear-to-br from-gray-50 to-gray-100'>
+      <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100'>
         <div className='mx-auto container py-8'>
-          {/* Header Section */}
+          {/* Header */}
           <div className='mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
             <div>
               <h1 className='text-3xl font-bold text-gray-900'>Draft Jobs</h1>
@@ -204,31 +235,37 @@ export default function DraftJobsPage() {
                 onClick={() => router.push("/dashboard/client/ai-chat")}
                 className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
               >
-                <Sparkles
-                  className='w-6 h-6 text-[#ffffff]'
-                  strokeWidth={1.2}
-                />
+                <Sparkles className='w-6 h-6 text-white' strokeWidth={1.2} />
                 Create New Job
               </button>
             </div>
           </div>
 
+          {/* Loading */}
           {/* Loading State */}
           {isLoading && (
-            <div className='col-span-full py-12 text-center text-gray-500'>
-              Loading draft jobs...
+            <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
+              {[...Array(6)].map((_, i) => (
+                <JobCardSkeleton key={i} />
+              ))}
             </div>
           )}
 
-          {/* Error State */}
-          {/* {isError && (
-            <div className='col-span-full py-12 text-center text-red-500'>
-              Failed to load draft jobs. Please try again.
+          {/* Error */}
+          {isError && !isLoading && (
+            <div className='py-12 text-center text-red-500'>
+              Failed to load draft jobs.{" "}
+              <button
+                onClick={refetch}
+                className='underline hover:text-red-700 cursor-pointer'
+              >
+                Try again
+              </button>
             </div>
-          )} */}
+          )}
 
-          {/* Jobs Grid */}
-          {!isLoading && (
+          {/* Grid */}
+          {!isLoading && !isError && (
             <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
               {draftJobs.length > 0 ? (
                 draftJobs.map((job) => (

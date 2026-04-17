@@ -304,15 +304,17 @@ function AIChatInner() {
     { skip: !draftId },
   );
 
+  console.log({ continueDraftJob });
+
   useEffect(() => {
     if (continueDraftJob) {
-      setMessage(continueDraftJob?.messages[0]?.content);
-      setJobTitle(continueDraftJob?.saved_filters?.title);
-      setJobDescription(continueDraftJob?.saved_filters?.description);
-      setJobType(continueDraftJob?.saved_filters?.job_type);
-      setBudget(continueDraftJob?.saved_filters?.budget);
-      setLocation(continueDraftJob?.saved_filters?.location);
-      setShootDates(continueDraftJob?.saved_filters?.shoot_date ?? []);
+      setMessage(continueDraftJob?.data?.messages[0]?.content);
+      setJobTitle(continueDraftJob?.data?.saved_filters?.title);
+      setJobDescription(continueDraftJob?.data?.saved_filters?.description);
+      setJobType(continueDraftJob?.data?.saved_filters?.job_type);
+      setBudget(continueDraftJob?.data?.saved_filters?.budget);
+      setLocation(continueDraftJob?.data?.saved_filters?.location);
+      setShootDates(continueDraftJob?.data?.saved_filters?.shoot_date ?? []);
     }
   }, [continueDraftJob]);
 

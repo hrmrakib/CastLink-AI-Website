@@ -28,7 +28,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -37,9 +36,6 @@ import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import Loading from "@/components/loading/Loading";
-import LoadingSpinner from "@/components/loading/LoadingSpinner";
-import FullScreenLoader from "@/components/loading/FullScreenLoader";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
@@ -407,12 +403,14 @@ export default function ShortlistDetailPage() {
                 {/* Actions */}
                 <div className='flex gap-2 shrink-0'>
                   <div
+                    title='Verfied'
                     className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
                     aria-label='View talent'
                   >
                     <img src={"/badge.png"} alt={"Verified"} />
                   </div>
                   <button
+                    title='View Talent'
                     onClick={() => handleViewTalent(talent)}
                     className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
                     aria-label='View talent'
@@ -420,6 +418,7 @@ export default function ShortlistDetailPage() {
                     <Eye size={20} />
                   </button>
                   <button
+                    title='Delete Talent'
                     onClick={() => handleDeleteTalent(talent.id)}
                     className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
                     aria-label='Delete talent'

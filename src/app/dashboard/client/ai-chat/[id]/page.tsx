@@ -156,42 +156,6 @@ export default function AIDynamicPage() {
     setMessages(normalized);
   }, [data?.data?.messages, id, dispatch]);
 
-  // useEffect(() => {
-  //   const rawMessages = data?.data?.messages;
-
-  //   const talentList = data?.data?.saved_filters?.suggested_talents_list ?? [];
-
-  //   if (talentList) {
-  //     dispatch(addTalentsToModal(talentList));
-  //   }
-
-  //   if (!rawMessages) return;
-
-  //   const normalized: Message[] = rawMessages.map((msg: any, idx: number) => {
-  //     const isLastAi =
-  //       msg.sender === "ai" &&
-  //       idx === rawMessages.length - 1 &&
-  //       talentList.length > 0;
-
-  //     return {
-  //       id: idx,
-  //       sender: msg.sender,
-  //       content: msg.content,
-  //       avatar: msg.sender === "ai" ? "/ai.svg" : undefined,
-  //       talents: isLastAi ? talentList : (msg.talents ?? []),
-  //     };
-  //   });
-
-  //   setMessages(normalized);
-  // }, [
-  //   data?.data?.messages,
-  //   data?.data?.saved_filters?.suggested_talents_list,
-  //   id,
-  //   dispatch,
-  // ]);
-
-  console.log({ messages });
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };

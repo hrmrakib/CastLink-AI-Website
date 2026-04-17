@@ -2,7 +2,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Play,
   Pause,
@@ -13,12 +13,15 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  MapPin,
+  Ruler,
 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useGetActiveJobDetailsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
 
 const MEDIA_URL = process.env.NEXT_PUBLIC_AI_MEDIA_URL ?? "";
+const API_IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
 // ── Types ─────────────────────────────────────────────────────────
 interface RequestedSelftape {
@@ -117,16 +120,16 @@ function MediaNav({
         <button
           onClick={onPrev}
           disabled={current === 0}
-          className='p-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-30 transition'
+          className='p-1 rounded-full border border-gray-300 hover:bg-gray-100 disabled:opacity-30 transition'
         >
-          <ChevronLeft className='w-4 h-4' />
+          <ChevronLeft className='w-5 h-5' />
         </button>
         <button
           onClick={onNext}
           disabled={current === total - 1}
-          className='p-1 rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-30 transition'
+          className='p-1 rounded-full border border-gray-300 hover:bg-gray-100 disabled:opacity-30 transition'
         >
-          <ChevronRight className='w-4 h-4' />
+          <ChevronRight className='w-5 h-5' />
         </button>
       </div>
     </div>
@@ -140,7 +143,6 @@ const Page = () => {
   const router = useRouter();
 
   const jobId = params?.id as string;
-  // talent_id optionally passed as query param to highlight a specific talent
   const talentIdParam = searchParams.get("talentId");
 
   const { data: response, isLoading } = useGetActiveJobDetailsQuery(jobId, {
@@ -151,32 +153,86 @@ const Page = () => {
   const selftapes: RequestedSelftape[] =
     job?.ai_result?.requested_selftapes ?? [];
 
-  // Pick the tape: by talentId param → first tape in list
-  const activeTape: RequestedSelftape | undefined = talentIdParam
-    ? (selftapes.find((t) => t.talent_id === Number(talentIdParam)) ??
-      selftapes[0])
-    : selftapes[0];
+  // ── 1. FLATTEN ALL VIDEOS ──────────────────────────────────────
+  // Collect all tapes into a single array, keeping track of which talent owns which tape
+  const allVideos = useMemo(() => {
+    return selftapes.flatMap((talent) =>
+      (talent.tapes || []).map((tapeUrl) => ({
+        tapeUrl,
+        talent,
+      })),
+    );
+  }, [selftapes]);
+
+  // ── 2. INITIALIZE STARTING TAPE ────────────────────────────────
+  // If a specific talentId was passed, find their first tape. Otherwise, start at 0.
+  const initialIndex = useMemo(() => {
+    if (!talentIdParam) return 0;
+    const index = allVideos.findIndex(
+      (v) => v.talent.talent_id === Number(talentIdParam),
+    );
+    return index >= 0 ? index : 0;
+  }, [allVideos, talentIdParam]);
+
+  // ── 1. FLATTEN ALL IMAGES ──────────────────────────────────────
+  const allImages = useMemo(() => {
+    return selftapes.flatMap((talent) =>
+      (talent.images || []).map((imageUrl) => ({
+        imageUrl,
+        talent,
+      })),
+    );
+  }, [selftapes]);
+
+  // Find the starting image index if a talentId is provided
+  const initialImageIndex = useMemo(() => {
+    if (!talentIdParam) return 0;
+    const index = allImages.findIndex(
+      (img) => img.talent.talent_id === Number(talentIdParam),
+    );
+    return index >= 0 ? index : 0;
+  }, [allImages, talentIdParam]);
 
   // ── Media navigation ──────────────────────────────────────────
   const [currentTapeIndex, setCurrentTapeIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Reset navigation when active tape changes
+  // Set initial image on load
   useEffect(() => {
-    setCurrentTapeIndex(0);
+    setCurrentImageIndex(initialImageIndex);
+  }, [initialImageIndex]);
+
+  // This ensures currentImageSrc pulls from the global list
+  const currentImageData = allImages[currentImageIndex];
+  const currentImageSrc = currentImageData?.imageUrl
+    ? `${API_IMAGE_URL}${currentImageData.imageUrl}`
+    : null;
+
+  // Optional: If you want the profile info to update based on the IMAGE being viewed:
+  // const activeTalentForImage = currentImageData?.talent;
+
+  // Sync initial index when data loads
+  useEffect(() => {
+    setCurrentTapeIndex(initialIndex);
+  }, [initialIndex]);
+
+  // Extract the currently playing video and its associated talent
+  const currentVideoData = allVideos[currentTapeIndex];
+  const activeTape = currentVideoData?.talent ?? selftapes[0]; // activeTape holds the Talent Profile
+  const images = activeTape?.images ?? [];
+
+  // Reset image navigation when the active talent changes (as you scroll through videos)
+  useEffect(() => {
     setCurrentImageIndex(0);
   }, [activeTape?.talent_id]);
 
-  const tapes = activeTape?.tapes ?? [];
-  const images = activeTape?.images ?? [];
-
-  const currentVideoSrc = tapes[currentTapeIndex]
-    ? `${MEDIA_URL}${tapes[currentTapeIndex]}`
+  const currentVideoSrc = currentVideoData?.tapeUrl
+    ? `${MEDIA_URL}${currentVideoData.tapeUrl}`
     : null;
 
-  const currentImageSrc = images[currentImageIndex]
-    ? `${MEDIA_URL}${images[currentImageIndex]}`
-    : null;
+  // const currentImageSrc = images[currentImageIndex]
+  //   ? `${MEDIA_URL}${images[currentImageIndex]}`
+  //   : null;
 
   // ── Video player ──────────────────────────────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -296,23 +352,14 @@ const Page = () => {
       {/* Header */}
       <header className='bg-transparent'>
         <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-start'>
             <button
               onClick={() => router.back()}
-              className='items-center gap-2 bg-white inline-flex mx-auto px-3 py-2.5 border rounded-xl! text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
+              className='flex items-center gap-2 bg-white px-3 py-2.5 border rounded-xl text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
             >
               <ArrowLeft className='w-5 h-5' />
               Back
             </button>
-            <div className='text-center'>
-              <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>
-                E-Casting Room
-              </h1>
-              <p className='text-gray-600 text-sm sm:text-base'>
-                {job?.title ?? "Review Session"}
-              </p>
-            </div>
-            <div className='w-24' />
           </div>
         </div>
       </header>
@@ -429,17 +476,17 @@ const Page = () => {
                     </div>
                   </div>
 
-                  {/* Tape navigator */}
+                  {/* Tape navigator now points to allVideos.length */}
                   <MediaNav
                     current={currentTapeIndex}
-                    total={tapes.length}
-                    label='Tape'
+                    total={allVideos.length}
+                    label='All Submissions'
                     onPrev={() =>
                       setCurrentTapeIndex((i) => Math.max(0, i - 1))
                     }
                     onNext={() =>
                       setCurrentTapeIndex((i) =>
-                        Math.min(tapes.length - 1, i + 1),
+                        Math.min(allVideos.length - 1, i + 1),
                       )
                     }
                   />
@@ -458,10 +505,11 @@ const Page = () => {
                   </h3>
                   <div className='flex flex-wrap gap-4 sm:gap-6 text-sm sm:text-base'>
                     <div className='flex items-center gap-2 text-gray-600'>
-                      <span>📍</span> {activeTape?.location ?? "—"}
+                      <MapPin />
+                      {activeTape?.location ?? "—"}
                     </div>
                     <div className='flex items-center gap-2 text-gray-600'>
-                      <span>📏</span> {activeTape?.height ?? "—"}&apos;
+                      <Ruler /> {activeTape?.height ?? "—"}&apos;
                     </div>
                     <div className='flex items-center gap-2 text-gray-600'>
                       <span>👤</span>{" "}
@@ -471,7 +519,7 @@ const Page = () => {
                     </div>
                   </div>
                 </div>
-                <div className='flex flex-col sm:flex-row gap-3 mt-6'>
+                {/* <div className='flex flex-col sm:flex-row gap-3 mt-6'>
                   <button
                     onClick={() => setShowShortlistConfirm(true)}
                     className='px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-blue-600 hover:text-blue-600 transition font-medium'
@@ -484,7 +532,7 @@ const Page = () => {
                   >
                     Reject
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -495,9 +543,9 @@ const Page = () => {
                 <div className='relative w-full h-48 bg-gray-100'>
                   {currentImageSrc ? (
                     <Image
-                      key={currentImageSrc}
+                      key={currentImageSrc} // Key helps React handle the transition
                       src={currentImageSrc}
-                      alt={activeTape?.name ?? "Talent"}
+                      alt='Talent Photo'
                       fill
                       className='object-cover'
                       unoptimized
@@ -510,18 +558,19 @@ const Page = () => {
                 </div>
                 <div className='px-4 pb-3 pt-3'>
                   <h3 className='text-lg font-bold text-gray-900'>
-                    {activeTape?.name ?? "—"}
+                    {/* Show the name of the talent the current image belongs to */}
+                    {currentImageData?.talent?.name ?? "—"}
                   </h3>
                   <MediaNav
                     current={currentImageIndex}
-                    total={images.length}
-                    label='Photo'
+                    total={allImages.length}
+                    label='All Photos'
                     onPrev={() =>
                       setCurrentImageIndex((i) => Math.max(0, i - 1))
                     }
                     onNext={() =>
                       setCurrentImageIndex((i) =>
-                        Math.min(images.length - 1, i + 1),
+                        Math.min(allImages.length - 1, i + 1),
                       )
                     }
                   />
@@ -568,7 +617,7 @@ const Page = () => {
               </div>
 
               {/* Confirm Booking */}
-              <button
+              {/* <button
                 onClick={() => setShowConfirmBooking(true)}
                 disabled={bookingConfirmed}
                 className={`w-full py-3 rounded-lg font-bold text-white transition text-sm sm:text-base ${
@@ -578,7 +627,7 @@ const Page = () => {
                 }`}
               >
                 {bookingConfirmed ? "Booking Confirmed ✓" : "Confirm Booking"}
-              </button>
+              </button> */}
             </div>
           </div>
         )}
