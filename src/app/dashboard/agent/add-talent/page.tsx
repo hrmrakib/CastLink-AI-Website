@@ -28,7 +28,10 @@ interface FormData {
   location: string;
   dateOfBirth: string;
   uploadedImages: File[];
+  availability: boolean; // true for available/on-request, false for unavailable
+  availableOnRequest: boolean; // true only for the middle option
 }
+
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS = [
   "January",
@@ -216,7 +219,7 @@ function DateCalendarModal({
         {selectedDates.length > 0 && (
           <div className='mx-5 mb-3'>
             <div className='bg-blue-50 border border-blue-100 rounded-xl px-4 py-2 flex items-center gap-2'>
-              <div className='w-2 h-2 rounded-full bg-blue-500 flex-shrink-0' />
+              <div className='w-2 h-2 rounded-full bg-blue-500 shrink-0' />
               <span className='text-sm text-blue-700 font-medium'>
                 {selectedDates.length} date{selectedDates.length > 1 ? "s" : ""}{" "}
                 selected
@@ -369,6 +372,8 @@ const INITIAL_FORM: FormData = {
   location: "",
   dateOfBirth: "",
   uploadedImages: [],
+  availability: true,
+  availableOnRequest: false,
 };
 
 // Main Page Component
@@ -443,6 +448,11 @@ export default function AddTalentPage() {
       payload.append("country", formData.country);
       payload.append("location", formData.location);
       payload.append("date_of_birth", formData.dateOfBirth);
+      payload.append("is_available", String(formData.availability));
+      payload.append(
+        "is_available_on_request",
+        String(formData.availableOnRequest),
+      );
 
       // Append all image files under the key "uploaded_images"
       images.forEach((img) => {
@@ -736,46 +746,74 @@ export default function AddTalentPage() {
             </div>
 
             <div>
-              <h2 className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
-                Select available
-              </h2>
+              {/* Availability Selection */}
+              <div>
+                <label className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
+                  Select availability status
+                </label>
 
-              <RadioGroup
-                defaultValue='comfortable'
-                className='w-full mb-6 border-b pb-3'
-              >
-                <div className='flex items-center gap-3'>
-                  <RadioGroupItem value='default' id='r1' className='w-5 h-5' />
-                  <Label
-                    htmlFor='r1'
-                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
-                  >
-                    Available
-                  </Label>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <RadioGroupItem
-                    value='comfortable'
-                    id='r2'
-                    className='w-5 h-5'
-                  />
-                  <Label
-                    htmlFor='r2'
-                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
-                  >
-                    Available on request
-                  </Label>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <RadioGroupItem value='compact' id='r3' className='w-5 h-5' />
-                  <Label
-                    htmlFor='r3'
-                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200'
-                  >
-                    Unavailable
-                  </Label>
-                </div>
-              </RadioGroup>
+                <RadioGroup
+                  // Derive the string value from the two boolean states
+                  value={
+                    !formData.availability
+                      ? "unavailable"
+                      : formData.availableOnRequest
+                        ? "request"
+                        : "available"
+                  }
+                  onValueChange={(val) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      availability: val !== "unavailable",
+                      availableOnRequest: val === "request",
+                    }));
+                  }}
+                  className='w-full mb-6 border-b pb-3'
+                >
+                  <div className='flex items-center gap-3'>
+                    <RadioGroupItem
+                      value='available'
+                      id='r1'
+                      className='w-5 h-5'
+                    />
+                    <Label
+                      htmlFor='r1'
+                      className='text-sm font-semibold text-slate-700 dark:text-slate-200'
+                    >
+                      Available
+                    </Label>
+                  </div>
+
+                  <div className='flex items-center gap-3'>
+                    <RadioGroupItem
+                      value='request'
+                      id='r2'
+                      className='w-5 h-5'
+                    />
+                    <Label
+                      htmlFor='r2'
+                      className='text-sm font-semibold text-slate-700 dark:text-slate-200'
+                    >
+                      Available on request
+                    </Label>
+                  </div>
+
+                  <div className='flex items-center gap-3'>
+                    <RadioGroupItem
+                      value='unavailable'
+                      id='r3'
+                      className='w-5 h-5'
+                    />
+                    <Label
+                      htmlFor='r3'
+                      className='text-sm font-semibold text-slate-700 dark:text-slate-200'
+                    >
+                      Unavailable
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Shoot Date */}
               <div>
                 <label className='flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
