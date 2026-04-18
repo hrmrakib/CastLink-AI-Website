@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/purity */
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Eye,
   Video,
@@ -12,6 +14,10 @@ import {
   MapPin,
   DollarSign,
   Loader2,
+  ImageUp,
+  CloudUpload,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -26,6 +32,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
+import VideoUploadModal from "@/components/agent/modal/VideoUploadModal";
+import { toast } from "sonner";
+import {
+  usePolasUploadMutation,
+  useSelftapUploadMutation,
+} from "@/redux/features/ai-chat/aiChatAPI";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,6 +68,8 @@ interface Talent {
   status?: string;
   tapes?: string[];
   polas?: string[];
+  source_type?: string;
+  job_id?: number;
 }
 
 interface AIResult {
@@ -88,11 +102,12 @@ interface Job {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
 function resolveMedia(path: string) {
   if (!path) return "/placeholder.svg";
   if (path.startsWith("http")) return path;
+  console.log(`${BASE_URL}${path}`);
   return `${BASE_URL}${path}`;
 }
 
@@ -116,14 +131,203 @@ function capitalize(str: string) {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
 function TalentRow({ talent }: { talent: Talent }) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  // RTK Query or Apollo mutations
+  const [polasUploadMutation] = usePolasUploadMutation();
+  const [selftapUploadMutation] = useSelftapUploadMutation();
+
+  const handlePolaClick = () => imageInputRef.current?.click();
+  const handleVideoClick = () => videoInputRef.current?.click();
+
+  /**
+   * Helper to construct FormData based on your API requirements:
+   * job_id, talent_id, and files
+   */
+  const prepareFormData = (file: File) => {
+    const formData = new FormData();
+    // Ensure these keys match your backend exactly
+    formData.append("job_id", String(talent?.job_id));
+    formData.append("talent_id", String(talent?.talent_id));
+    formData.append("files", file);
+    return formData;
+  };
+
+  // Automatic Pola Upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = prepareFormData(file);
+
+      try {
+        await toast.promise(polasUploadMutation(formData).unwrap(), {
+          loading: `Uploading Pola for ${talent.name}...`,
+          success: "Pola uploaded successfully!",
+          error: "Failed to upload Pola.",
+        });
+      } catch (err) {
+        console.error("Pola upload error:", err);
+      }
+    }
+  };
+
+  // Automatic Self-tape Upload
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = prepareFormData(file);
+
+      try {
+        await toast.promise(selftapUploadMutation(formData).unwrap(), {
+          loading: `Uploading Self-tape for ${talent.name}...`,
+          success: "Self-tape uploaded successfully!",
+          error: "Failed to upload video.",
+        });
+      } catch (err) {
+        console.error("Video upload error:", err);
+      }
+    }
+  };
+
+  const handleCopyLink = () => {
+    const link = `${window.location.origin}/casting/${talent.talent_id}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    toast.success("Casting link copied!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className='flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition'>
+    <div className='flex items-center gap-3 p-3 rounded-lg transition hover:bg-gray-50 dark:hover:bg-slate-900'>
       <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
         <AvatarImage src={resolveMedia(talent.images?.[0])} />
         <AvatarFallback>
-          {talent.name
+          {talent?.name
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)}
+        </AvatarFallback>
+      </Avatar>
+
+      <div className='min-w-0 flex-1'>
+        <p className='font-semibold text-sm text-foreground truncate'>
+          {talent.name}
+        </p>
+        <p className='text-xs text-muted-foreground capitalize'>
+          {talent.role} · {talent.location}
+        </p>
+      </div>
+
+      <div className='text-right shrink-0'>
+        {/* Hidden inputs for file selection */}
+        <input
+          type='file'
+          ref={imageInputRef}
+          className='hidden'
+          accept='image/*'
+          onChange={handleFileChange}
+        />
+        <input
+          type='file'
+          ref={videoInputRef}
+          className='hidden'
+          accept='video/*'
+          onChange={handleVideoChange}
+        />
+
+        <div
+          className={`px-2.5 py-2 rounded-full text-xs font-semibold ${
+            talent.source_type === "ecasting"
+              ? "bg-[#F4E8FF] text-[#7408D3]"
+              : talent.source_type === "pola" ||
+                  talent.source_type === "selftape"
+                ? "bg-[#FDF8E9] text-[#D3A008]"
+                : talent.source_type === "suggestion"
+                  ? "bg-yellow-500 text-white"
+                  : ""
+          }`}
+        >
+          {talent.source_type === "pola" ? (
+            <button
+              onClick={handlePolaClick}
+              className='flex items-center gap-1 hover:opacity-80'
+            >
+              Polas requested <ImageUp size={16} />
+            </button>
+          ) : talent.source_type === "ecasting" ? (
+            <button
+              onClick={handleCopyLink}
+              className='flex items-center gap-1 hover:opacity-80'
+            >
+              E-casting requested{" "}
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+          ) : talent.source_type === "selftape" ? (
+            <button
+              onClick={handleVideoClick}
+              className='flex items-center gap-1 hover:opacity-80'
+            >
+              Self-tape requested <CloudUpload size={16} />
+            </button>
+          ) : (
+            "Suggestion"
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TalentRowOld({ talent }: { talent: Talent }) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null); // Dedicated video ref
+  const [copied, setCopied] = useState(false);
+  const [polasUploadMutation] = usePolasUploadMutation();
+  const [selftapUploadMutation] = useSelftapUploadMutation();
+
+  // Handle Image (Pola) Upload
+  const handlePolaClick = () => imageInputRef.current?.click();
+
+  // Trigger Video Picker
+  const handleVideoClick = () => videoInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log("Uploading image for talent:", talent.talent_id, file);
+      toast.success(`Uploading Pola for ${talent.name}...`);
+      // Implement your image upload API logic here
+    }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log("Uploading video:", file.name);
+      // Trigger the parent function with the talent data and the selected file
+      // onUploadVideo(talent, file);
+    }
+  };
+
+  // Handle Link Copy (E-casting)
+  const handleCopyLink = () => {
+    const link = `${window.location.origin}/casting/${talent.talent_id}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    toast.success("Casting link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className='flex items-center gap-3 p-3 rounded-lg transition'>
+      <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
+        <AvatarImage src={resolveMedia(talent.images?.[0])} />
+        <AvatarFallback>
+          {talent?.name
             .split(" ")
             .map((n) => n[0])
             .join("")
@@ -139,10 +343,57 @@ function TalentRow({ talent }: { talent: Talent }) {
         </p>
       </div>
       <div className='text-right shrink-0'>
-        <p className='text-xs text-muted-foreground'>{talent.height}″</p>
-        <p className='text-xs text-muted-foreground'>
-          {capitalize(talent.skin_color)}
-        </p>
+        <div
+          className={`${talent.source_type === "selftape" && ""} ${
+            talent.source_type === "ecasting" && "bg-[#F4E8FF] text-[#7408D3]"
+          } ${talent.source_type === "pola" && "bg-[#FDF8E9] text-[#D3A008]"} ${talent.source_type === "suggestion" && "bg-yellow-500"} 
+             px-2.5 py-2 rounded-full text-xs font-semibold 
+          `}
+        >
+          <input
+            type='file'
+            ref={imageInputRef}
+            className='hidden'
+            accept='image/*'
+            onChange={handleFileChange}
+          />
+
+          <input
+            type='file'
+            ref={videoInputRef}
+            className='hidden'
+            accept='video/*'
+            onChange={handleVideoChange}
+          />
+
+          {talent.source_type === "pola" ? (
+            <button
+              onClick={handlePolaClick}
+              className='flex items-center gap-1'
+            >
+              Polas requested <ImageUp size={16} />
+            </button>
+          ) : talent.source_type === "ecasting" ? (
+            <button
+              onClick={handleCopyLink}
+              className='flex items-center gap-1'
+            >
+              E-casting requested <Copy size={16} />
+            </button>
+          ) : talent.source_type === "selftape" ? (
+            <>
+              <button
+                onClick={handleVideoClick}
+                className='flex items-center gap-1 bg-[#FDF8E9] text-[#D3A008]'
+              >
+                Self-tape requested
+                <CloudUpload size={16} />
+              </button>
+            </>
+          ) : (
+            "Suggestion"
+          )}
+        </div>
       </div>
     </div>
   );
@@ -249,6 +500,15 @@ function CardSkeleton() {
   );
 }
 
+// filtering id babed talent
+
+interface AiResult {
+  suggested_talents: Talent[];
+  requested_selftapes: any[];
+  requested_ecastings: any[];
+  requested_polas: any[];
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ActiveJobsPage() {
@@ -257,6 +517,7 @@ export default function ActiveJobsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const { data, isLoading, isError } = useGetActiveJobsQuery({});
 
@@ -301,6 +562,52 @@ export default function ActiveJobsPage() {
       null
     );
   }
+
+  // TODO: test console
+  // const aiResult = jobData.ai_result!;
+  // const aiResult = data?.data?.ai_result;
+  const aiResult = selectedJob?.ai_result as AiResult;
+
+  const filteredTalents = aiResult?.suggested_talents?.map((talent: Talent) => {
+    const tId = talent.talent_id;
+
+    // 1. Check Polas (Highest Priority)
+    const polaMatch = aiResult.requested_polas.find(
+      (p: Talent) => p.talent_id === tId,
+    );
+
+    if (polaMatch) {
+      return { ...polaMatch, source_type: "pola" };
+    }
+
+    // 2. Check E-Castings (Medium Priority)
+    const ecastingMatch = aiResult.requested_ecastings.find(
+      (e: Talent) => e.talent_id === tId,
+    );
+
+    if (ecastingMatch) {
+      return { ...ecastingMatch, source_type: "ecasting" };
+    }
+
+    // 3. Check Selftapes (Lowest Priority)
+    const selftapeMatch = aiResult.requested_selftapes.find(
+      (s: Talent) => s.talent_id === tId,
+    );
+
+    if (selftapeMatch) {
+      return { ...selftapeMatch, source_type: "selftape" };
+    }
+
+    // 4. Default: If no request exists, keep the original suggested talent info
+    return { ...talent, source_type: "suggestion" };
+  });
+
+  // Usage:
+  console.log({ filteredTalents });
+  // console.log(data?.data);
+  console.log({ selectedJob });
+  // const filtered = filterTalents(selectedJob);
+  // console.log(filtered);
 
   return (
     <div className='min-h-screen bg-white rounded-xl'>
@@ -402,7 +709,7 @@ export default function ActiveJobsPage() {
                         key={job.job_id}
                         className='hover:bg-secondary/30 transition'
                       >
-                        <td className='px-6 py-4 text-sm font-medium text-foreground max-w-[200px] truncate'>
+                        <td className='px-6 py-4 text-sm font-medium text-foreground max-w-50 truncate'>
                           {job.title}
                         </td>
                         <td className='px-6 py-4'>
@@ -646,14 +953,13 @@ export default function ActiveJobsPage() {
                 {/* ── Right Panel ── */}
                 <div className='flex-1 flex flex-col gap-5'>
                   {/* Suggested Talents */}
-                  {selectedJob.ai_result.suggested_talents.length > 0 && (
+                  {filteredTalents?.length > 0 && (
                     <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
                       <h3 className='text-base font-bold text-foreground mb-4'>
-                        Suggested Talents (
-                        {selectedJob.ai_result.suggested_talents.length})
+                        Suggested Talents ({filteredTalents?.length})
                       </h3>
-                      <div className='space-y-3'>
-                        {selectedJob.ai_result.suggested_talents.map((t) => (
+                      <div className='space-y-1.5'>
+                        {filteredTalents?.map((t) => (
                           <TalentRow key={`sug-${t.talent_id}`} talent={t} />
                         ))}
                       </div>
@@ -661,7 +967,7 @@ export default function ActiveJobsPage() {
                   )}
 
                   {/* Self-tapes */}
-                  {/* {selectedJob.ai_result.requested_selftapes.length > 0 && (
+                  {/* {selectedJob?.ai_result?.requested_selftapes?.length > 0 && (
                     <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
                       <h3 className='text-base font-bold text-foreground mb-4'>
                         Self-tapes Requested
@@ -797,7 +1103,10 @@ export default function ActiveJobsPage() {
                 <Button className='flex-1 bg-[#CD0000] hover:bg-red-700 text-white rounded-lg h-12 font-semibold'>
                   Decline
                 </Button>
-                <Button className='flex-1 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg h-12 font-semibold'>
+                <Button
+                  onClick={() => setIsUploadOpen(true)}
+                  className='flex-1 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg h-12 font-semibold'
+                >
                   Respond
                 </Button>
               </div> */}
@@ -805,6 +1114,18 @@ export default function ActiveJobsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <VideoUploadModal
+        open={isUploadOpen}
+        onOpenChange={setIsUploadOpen}
+        jobId={selectedJob?.job_id}
+        jobTitle={selectedJob?.title}
+        onUploadComplete={(files) => {
+          console.log("Uploaded files:", files);
+          // TODO: call your API with the uploaded file references here
+          setIsUploadOpen(false);
+        }}
+      />
     </div>
   );
 }

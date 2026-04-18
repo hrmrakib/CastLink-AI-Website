@@ -22,6 +22,7 @@ import {
   Check,
   ScanFace,
   Loader,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -113,6 +114,7 @@ function formatDate(iso: string) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ShortlistDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
 
@@ -290,49 +292,59 @@ export default function ShortlistDetailPage() {
             </p>
           )}
 
-          {/* Action Buttons */}
-          <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='outline'
-                  className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-                >
-                  <Filter size={18} />
-                  {filter === "" ? "Filter" : filter}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-36' align='start'>
-                <DropdownMenuItem onSelect={() => setFilter("")}>
-                  All
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
-                  1st Option
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
-                  2nd Option
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("Not available")}>
-                  Not available
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <div className='flex flex-wrap items-end justify-between mt-6'>
             <button
-              onClick={handleShareLink}
+              onClick={() => router.back()}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
-              <Share2 size={18} />
-              Share Link
+              <ArrowLeft size={18} />
+              Go Back
             </button>
 
-            <button
-              onClick={handleDownloadPDF}
-              className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
-            >
-              <Download size={18} />
-              Download PDF
-            </button>
+            {/* Action Buttons */}
+            <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant='outline'
+                    className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+                  >
+                    <Filter size={18} />
+                    {filter === "" ? "Filter" : filter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='w-36' align='start'>
+                  <DropdownMenuItem onSelect={() => setFilter("")}>
+                    All
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
+                    1st Option
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
+                    2nd Option
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("Not available")}>
+                    Not available
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <button
+                onClick={handleShareLink}
+                className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              >
+                <Share2 size={18} />
+                Share Link
+              </button>
+
+              <button
+                onClick={handleDownloadPDF}
+                className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
+              >
+                <Download size={18} />
+                Download PDF
+              </button>
+            </div>
           </div>
         </div>
 

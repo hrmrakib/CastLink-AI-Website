@@ -112,6 +112,22 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         body,
       }),
     }),
+
+    polasUpload: builder.mutation({
+      query: (data) => ({
+        url: "/api/jobs/polas/upload",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    selftapUpload: builder.mutation({
+      query: (data) => ({
+        url: "/api/jobs/selftape/upload",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -128,5 +144,7 @@ export const {
   useShortlistTalentMutation,
   useBookTalentMutation,
   usePolasRequestMutation,
+  usePolasUploadMutation,
+  useSelftapUploadMutation,
 } = aiChatAPI;
 export default aiChatAPI;

@@ -9,6 +9,15 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -124,7 +133,7 @@ function DateCalendarModal({
         <div className='flex items-center justify-between px-6 pt-5 pb-2'>
           <span className='font-semibold text-gray-900 text-sm flex items-center gap-2'>
             <Calendar className='w-4 h-4 text-[#2563EB]' />
-            Select Shoot Date(s)
+            Select Available Date(s)
           </span>
           <button
             onClick={onClose}
@@ -390,6 +399,14 @@ export default function AddTalentPage() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [createTalentMutation] = useCreateTalentMutation();
+  const [role, setRole] = useState("lead_male");
+
+  // Mapping object for clean UI labels
+  const roleLabels: Record<string, string> = {
+    lead_male: "Lead Male",
+    lead_female: "Lead Female",
+    extra: "Extra",
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -453,6 +470,12 @@ export default function AddTalentPage() {
         "is_available_on_request",
         String(formData.availableOnRequest),
       );
+      shootDates.forEach((date) => {
+        payload.append("available_date", date);
+      });
+      
+      // payload.append("available_date", JSON.stringify(shootDates));
+      payload.append("character", role);
 
       // Append all image files under the key "uploaded_images"
       images.forEach((img) => {
@@ -536,6 +559,9 @@ export default function AddTalentPage() {
       </main>
     );
   }
+
+  console.log({ shootDates });
+  console.log(JSON.stringify(shootDates));
 
   return (
     <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
@@ -814,11 +840,11 @@ export default function AddTalentPage() {
                 </RadioGroup>
               </div>
 
-              {/* Shoot Date */}
+              {/* Available Date */}
               <div>
                 <label className='flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'>
                   <Calendar className='w-4 h-4' />
-                  Shoot Date
+                  Available Date
                 </label>
                 <button
                   type='button'
@@ -832,7 +858,7 @@ export default function AddTalentPage() {
                   >
                     {shootDates.length > 0
                       ? formatDisplay(shootDates)
-                      : "Select shoot date(s)"}
+                      : "Select available date(s)"}
                   </span>
                   <Calendar className='w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0' />
                 </button>
@@ -858,6 +884,36 @@ export default function AddTalentPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Dropdown of Characters */}
+            <div className='w-full mb-10'>
+              <DropdownMenu>
+                <Label className='mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200'>
+                  Character
+                </Label>
+                <DropdownMenuTrigger asChild>
+                  <Button variant='outline' className='w-full justify-between'>
+                    {roleLabels[role] || "Select Role"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className='w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width)'
+                  align='start'
+                >
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => setRole("lead_male")}>
+                      Lead Male
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("lead_female")}>
+                      Lead Female
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("extra")}>
+                      Extra
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* File Uploads */}

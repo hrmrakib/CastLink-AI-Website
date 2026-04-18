@@ -466,6 +466,7 @@ export default function AIDynamicPage() {
                                             alt='Verified'
                                           />
                                         )}
+
                                         {profile?.is_active && (
                                           <img
                                             title='Available'
@@ -586,7 +587,7 @@ export default function AIDynamicPage() {
               ))}
 
             {/* Loading indicator */}
-            {isLoading && (
+            {(isLoading || isLoadingChat) && (
               <div className='flex gap-3 justify-start items-start'>
                 <div className='flex items-center justify-center gap-3 mt-4'>
                   <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
