@@ -96,6 +96,7 @@ export default function AIDynamicPage() {
     null,
   );
   const [jobSaving, setJobSaving] = useState(false);
+  const [selectedTalentIndex, setSelectedTalentIndex] = useState(0);
 
   const [isSkipping, setIsSkipping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -173,8 +174,9 @@ export default function AIDynamicPage() {
     scrollToBottom();
   }, [messages]);
 
-  const handleOpenModal = (talent: TalentProfile) => {
+  const handleOpenModal = (talent: TalentProfile, index: number) => {
     setSelectedTalent(talent);
+    setSelectedTalentIndex(index);
     setIsOpen(true);
   };
 
@@ -438,7 +440,7 @@ export default function AIDynamicPage() {
                                 <div
                                   key={profile.talent_id}
                                   className='space-y-3'
-                                  onClick={() => handleOpenModal(profile)}
+                                  onClick={() => handleOpenModal(profile, idx)}
                                 >
                                   {/* Profile Card */}
                                   <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
@@ -699,7 +701,9 @@ export default function AIDynamicPage() {
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
-          {selectedTalent && <ChatModalDetail />}
+          {selectedTalent && (
+            <ChatModalDetail initialIndex={selectedTalentIndex} />
+          )}
         </DialogContent>
       </Dialog>
 

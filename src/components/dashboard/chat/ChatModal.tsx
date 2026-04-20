@@ -41,13 +41,22 @@ interface TalentProfile {
   country: string;
 }
 
+interface ChatModalDetailProps {
+  initialIndex?: number;
+}
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
-export default function ChatModalDetail() {
-  const [currentTalentIndex, setCurrentTalentIndex] = useState(0);
+export default function ChatModalDetail({
+  initialIndex = 0,
+}: ChatModalDetailProps) {
+  const [currentTalentIndex, setCurrentTalentIndex] = useState(initialIndex);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentTalentIndex(initialIndex);
+  }, [initialIndex]);
 
   const talentList: TalentProfile[] = useSelector(
     (state: any) => state.aiChat.talentListForModal ?? [],
