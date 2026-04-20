@@ -12,6 +12,8 @@ import {
   Check,
   Sparkles,
   ScanFace,
+  Star,
+  ShieldAlert,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -76,6 +78,9 @@ interface TalentProfile {
   location: string;
   continent: string;
   country: string;
+  is_available?: boolean;
+  approval_status?: string;
+  is_available_on_request?: boolean;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
@@ -458,23 +463,68 @@ export default function AIDynamicPage() {
                                     {/* Profile Details — visible on hover */}
                                     <div className='absolute top-2  group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3 z-20'>
                                       <div className='flex items-center gap-3 font-semibold text-sm mb-1'>
-                                        {profile?.is_active && (
-                                          <img
+                                        {profile?.approval_status ===
+                                        "approved" ? (
+                                          <div
+                                            className='w-6 h-6 text-xl text-blue-400 fill-blue-700'
                                             title='Verified'
-                                            className='w-5 h-5'
-                                            src='/verfied.png'
-                                            alt='Verified'
-                                          />
+                                          >
+                                            <Star
+                                              size={24}
+                                              strokeWidth={1}
+                                              className='fill-blue-400'
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className='w-6 h-6 text-xl'
+                                            title='Not Verified'
+                                          >
+                                            <ShieldAlert
+                                              size={24}
+                                              strokeWidth={1}
+                                              className='opacity-50 fill-blue-400'
+                                            />
+                                          </div>
                                         )}
 
-                                        {profile?.is_active && (
-                                          <img
-                                            title='Available'
-                                            className='w-5.5 h-5.5'
-                                            src='/star.png'
-                                            alt='Verified'
+                                        {/* is available */}
+                                        <div
+                                          className='flex items-center justify-center w-6 h-6'
+                                          title={
+                                            profile?.is_available
+                                              ? "Available "
+                                              : "Not Available "
+                                          }
+                                        >
+                                          <span
+                                            className={`w-5 h-5 rounded-full ${
+                                              profile?.is_available
+                                                ? "bg-green-400"
+                                                : "bg-red-500"
+                                            }`}
+                                            aria-hidden='true'
                                           />
-                                        )}
+                                        </div>
+
+                                        {/* Available for request */}
+                                        <div
+                                          className='flex items-center justify-center w-6 h-6'
+                                          title={
+                                            profile?.is_available_on_request
+                                              ? "Available on request"
+                                              : "Not Available on request"
+                                          }
+                                        >
+                                          <span
+                                            className={`w-5 h-5 rounded-full ${
+                                              profile?.is_available_on_request
+                                                ? "bg-yellow-400"
+                                                : "bg-slate-200"
+                                            }`}
+                                            aria-hidden='true'
+                                          />
+                                        </div>
                                       </div>
                                     </div>
 
@@ -602,7 +652,7 @@ export default function AIDynamicPage() {
       </div>
 
       {/* Input Area */}
-      <div className='bg-transparent sticky bottom-0 p-4 sm:p-6'>
+      <div className='bg-transparent sticky bottom-0 p-4 sm:p-6 z-50'>
         <div className='max-w-6xl mx-auto'>
           <div className='relative w-full'>
             <textarea
