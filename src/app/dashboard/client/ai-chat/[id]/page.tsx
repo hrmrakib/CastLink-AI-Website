@@ -176,6 +176,7 @@ export default function AIDynamicPage() {
 
   const handleOpenModal = (talent: TalentProfile, index: number) => {
     setSelectedTalent(talent);
+
     setSelectedTalentIndex(index);
     setIsOpen(true);
   };
@@ -239,7 +240,6 @@ export default function AIDynamicPage() {
     }
   };
 
-  //TODO: job_id ---> not available
   const handlePolasRequest = async (talendId: number) => {
     try {
       const res = await polasRequestMutation({
@@ -255,7 +255,6 @@ export default function AIDynamicPage() {
     }
   };
 
-  //TODO: job_id ---> not available
   const handleTalentBooking = async (talendId: number) => {
     try {
       const res = await bookTalentMutation({
@@ -271,7 +270,6 @@ export default function AIDynamicPage() {
     }
   };
 
-  //TODO: job_id ---> not available
   const handleECastingRequest = async (talendId: number) => {
     try {
       const res = await eCastingRequestMutation({
@@ -287,7 +285,6 @@ export default function AIDynamicPage() {
     }
   };
 
-  //TODO: job_id ---> not available
   const handleselftapRequest = async (talendId: number) => {
     try {
       const res = await selfTapRequestMutation({
@@ -303,7 +300,6 @@ export default function AIDynamicPage() {
     }
   };
 
-  //TODO: job_id ---> not available
   const handleShortListTalent = async (talendId: number) => {
     console.log({ talendId, id });
     try {
@@ -702,7 +698,10 @@ export default function AIDynamicPage() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
           {selectedTalent && (
-            <ChatModalDetail initialIndex={selectedTalentIndex} />
+            <ChatModalDetail
+              initialIndex={selectedTalentIndex}
+              sessionId={id}
+            />
           )}
         </DialogContent>
       </Dialog>

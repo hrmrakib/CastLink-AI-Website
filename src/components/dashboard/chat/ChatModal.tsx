@@ -11,11 +11,18 @@ import {
   Calendar,
   Camera,
   Phone,
-  CheckCircle,
   Check,
   ScanFace,
 } from "lucide-react";
 import { useSelector } from "react-redux";
+import {
+  useBookTalentMutation,
+  useECastingRequestMutation,
+  usePolasRequestMutation,
+  useSelfTapRequestMutation,
+  useShortlistTalentMutation,
+} from "@/redux/features/ai-chat/aiChatAPI";
+import { toast } from "sonner";
 
 interface TalentProfile {
   talent_id: number;
@@ -43,20 +50,38 @@ interface TalentProfile {
 
 interface ChatModalDetailProps {
   initialIndex?: number;
+  sessionId?: string | string[]; // Allow the array type here
 }
+
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
 export default function ChatModalDetail({
   initialIndex = 0,
+  sessionId = "",
 }: ChatModalDetailProps) {
   const [currentTalentIndex, setCurrentTalentIndex] = useState(initialIndex);
+  const [currentSessionId, setCurrentSessionId] = useState(sessionId);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [liked, setLiked] = useState(false);
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  // mutation
+  const [polasRequestMutation, { isLoading: polasLoading }] =
+    usePolasRequestMutation();
+  const [selfTapRequestMutation, { isLoading: selfTapLoading }] =
+    useSelfTapRequestMutation();
+  const [eCastingRequestMutation, { isLoading: eCastingLoading }] =
+    useECastingRequestMutation();
+  const [shortlistTalentMutation, { isLoading: shortlistLoading }] =
+    useShortlistTalentMutation();
+  const [bookTalentMutation, { isLoading: bookLoading }] =
+    useBookTalentMutation();
 
   useEffect(() => {
     setCurrentTalentIndex(initialIndex);
   }, [initialIndex]);
+
+  useEffect(() => {
+    setCurrentSessionId(sessionId);
+  }, [sessionId]);
 
   const talentList: TalentProfile[] = useSelector(
     (state: any) => state.aiChat.talentListForModal ?? [],
@@ -66,6 +91,8 @@ export default function ChatModalDetail({
   const hasTalents = talentList.length > 0;
   const isFirst = currentTalentIndex === 0;
   const isLast = currentTalentIndex === talentList.length - 1;
+
+  console.log({ talent });
 
   // Reset image index when talent changes
   useEffect(() => {
@@ -116,9 +143,79 @@ export default function ChatModalDetail({
     );
   };
 
-  const handleAction = (action: string) => {
-    setSelectedAction(action);
-    setTimeout(() => setSelectedAction(null), 1000);
+  const handleShortListTalent = async (talendId: number) => {
+    try {
+      const res = await shortlistTalentMutation({
+        session_id: currentSessionId,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
+  };
+
+  const handlePolasRequest = async (talendId: number) => {
+    try {
+      const res = await polasRequestMutation({
+        session_id: currentSessionId,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
+  };
+
+  const handleTalentBooking = async (talendId: number) => {
+    try {
+      const res = await bookTalentMutation({
+        session_id: currentSessionId,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
+  };
+
+  const handleECastingRequest = async (talendId: number) => {
+    try {
+      const res = await eCastingRequestMutation({
+        session_id: currentSessionId,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
+  };
+
+  const handleselftapRequest = async (talendId: number) => {
+    try {
+      const res = await selfTapRequestMutation({
+        session_id: currentSessionId,
+        talent_id: talendId,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.status_message);
+    }
   };
 
   return (
@@ -168,13 +265,13 @@ export default function ChatModalDetail({
           </div>
         ) : (
           <>
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 p-6 md:p-8'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-6 md:px-8 py-2'>
               {/* Left Side - Profile Info */}
               <div className='flex flex-col justify-start'>
                 <h1 className='text-2xl md:text-3xl font-bold text-gray-900 mb-6'>
                   Profile Details
                 </h1>
-                <div className='space-y-1.5'>
+                <div className='space-y-1'>
                   {profileRows.map(({ label, value }) => (
                     <div
                       key={label}
@@ -244,19 +341,21 @@ export default function ChatModalDetail({
             </div>
 
             {/* Action Buttons */}
-            <div className='bg-white px-6 md:px-8 py-6 flex justify-center gap-6 md:gap-8 flex-wrap'>
+            <div className='bg-transparent px-6 md:px-8 p-6 flex justify-center gap-6 md:gap-8 flex-wrap'>
               <div
                 className='flex flex-wrap gap-2 sm:gap-3 mt-4'
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  // onClick={() => handleShortListTalent(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  onClick={() => handleShortListTalent(talent?.talent_id)}
+                  disabled={shortlistLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Like'
                   title='Shortlists'
                 >
                   <Heart size={20} fill='currentColor' />
                 </button>
+
                 <button
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                   aria-label='Schedule'
@@ -264,33 +363,41 @@ export default function ChatModalDetail({
                 >
                   <Calendar size={20} />
                 </button>
+
                 <button
-                  // onClick={() => handleselftapRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  onClick={() => handleselftapRequest(talent?.talent_id)}
+                  disabled={selfTapLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Photo'
                   title='Selftapes Request'
                 >
                   <Camera size={20} />
                 </button>
+
                 <button
-                  // onClick={() => handleECastingRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  onClick={() => handleECastingRequest(talent?.talent_id)}
+                  disabled={eCastingLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Call'
                   title='E-Casting Request'
                 >
                   <Phone size={20} />
                 </button>
+
                 <button
-                  // onClick={() => handleTalentBooking(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  onClick={() => handleTalentBooking(talent?.talent_id)}
+                  disabled={bookLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Approve'
                   title='Booking Request'
                 >
                   <Check size={20} />
                 </button>
+
                 <button
-                  // onClick={() => handlePolasRequest(profile?.talent_id)}
-                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                  onClick={() => handlePolasRequest(talent?.talent_id)}
+                  disabled={polasLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Approve'
                   title='Polas Request'
                 >
