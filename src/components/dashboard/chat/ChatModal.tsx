@@ -23,6 +23,16 @@ import {
   useShortlistTalentMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface TalentProfile {
   talent_id: number;
@@ -46,6 +56,10 @@ interface TalentProfile {
   location: string;
   continent: string;
   country: string;
+  is_available?: boolean;
+  approval_status?: string;
+  is_available_on_request?: boolean;
+  available_dates?: string[];
 }
 
 interface ChatModalDetailProps {
@@ -74,6 +88,11 @@ export default function ChatModalDetail({
     useShortlistTalentMutation();
   const [bookTalentMutation, { isLoading: bookLoading }] =
     useBookTalentMutation();
+  const [availabilityModal, setAvailabilityModal] = useState(false);
+  const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
+    useState<TalentProfile | null>(null);
+
+  console.log({ selectedAvailabilityTalent });
 
   useEffect(() => {
     setCurrentTalentIndex(initialIndex);
@@ -357,6 +376,11 @@ export default function ChatModalDetail({
                 </button>
 
                 <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedAvailabilityTalent(talent);
+                    setAvailabilityModal(true);
+                  }}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                   aria-label='Schedule'
                   title='Availability'
@@ -408,6 +432,50 @@ export default function ChatModalDetail({
           </>
         )}
       </div>
+
+      {/* Availability modal */}
+      <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>Available Dates</DialogTitle>
+            <DialogDescription>
+              {selectedAvailabilityTalent?.name}&apos;s available dates for
+              booking.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='py-2 space-y-2'>
+            {selectedAvailabilityTalent?.available_dates?.length ? (
+              selectedAvailabilityTalent.available_dates.map((date) => (
+                <div
+                  key={date}
+                  className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
+                >
+                  <Calendar size={16} className='text-[#2563EB] shrink-0' />
+                  <span className='text-sm font-medium text-gray-800'>
+                    {new Date(date + "T00:00:00").toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className='text-sm text-gray-500 text-center py-6'>
+                No available dates listed.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant='outline'>Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
