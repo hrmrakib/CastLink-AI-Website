@@ -48,16 +48,20 @@ export default function DashboardSidebar() {
     router.push("/login");
   };
 
-  if (
-    pathname === "/signup" ||
-    pathname === "/signin" ||
-    pathname === "/forget-password" ||
-    pathname === "/verify-password" ||
-    pathname === "/verify-otp" ||
-    pathname === "/reset-password"
-  ) {
-    return null;
-  }
+  const hiddenRoutes = [
+    "/signup",
+    "/signin",
+    "/forget-password",
+    "/verify-password",
+    "/verify-otp",
+    "/reset-password",
+  ];
+
+  const isHiddenRoute =
+    hiddenRoutes.includes(pathname) ||
+    pathname.startsWith("/dashboard/client/shortlists/");
+
+  if (isHiddenRoute) return null;
 
   return (
     <>
@@ -77,21 +81,6 @@ export default function DashboardSidebar() {
           </SidebarContent>
 
           <SidebarFooter className='p-6'>
-            {/* <div className='mb-4 text-xs font-medium text-gray-500 uppercase tracking-wider px-4'>
-              Settings
-            </div> */}
-            <ul>
-              {/* Author @shaishab316 */}
-              {/* <NavItem
-                href='/dashboard/settings'
-                icon={Settings}
-                label='Settings'
-                active={
-                  pathname === "/dashboard/settings" ||
-                  pathname.startsWith("/dashboard/settings/")
-                }
-              /> */}
-            </ul>
             <button
               onClick={() => setIsLogoutModalOpen(true)}
               className='flex w-full items-center gap-3 px-4 py-3 mt-2'

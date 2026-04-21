@@ -9,7 +9,7 @@ export default function ClientLayout({
     <>
       {/* <RoleRedirect allowedRole='CLIENT'> */}
       {children}
+      {/* </RoleRedirect>; */}
     </>
   );
-  // </RoleRedirect>;
 }
