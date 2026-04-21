@@ -57,9 +57,9 @@ export default function DashboardSidebar() {
     "/reset-password",
   ];
 
-  const isHiddenRoute =
-    hiddenRoutes.includes(pathname) ||
-    pathname.startsWith("/dashboard/client/shortlists/");
+  const isHiddenRoute = hiddenRoutes.includes(pathname);
+  // ||
+  // pathname.startsWith("/dashboard/client/shortlists/");
 
   if (isHiddenRoute) return null;
 

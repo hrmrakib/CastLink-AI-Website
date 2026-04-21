@@ -15,7 +15,11 @@ const hiddenRoutes = [
 function useHideNavFooter() {
   const pathname = usePathname();
 
-  return hiddenRoutes.includes(pathname) || pathname.startsWith("/dashboard/");
+  return (
+    hiddenRoutes.includes(pathname) ||
+    pathname.startsWith("/dashboard/") ||
+    pathname.startsWith("/shortlist/shared")
+  );
 }
 
 export default useHideNavFooter;

@@ -329,11 +329,7 @@ export default function ShortlistDetailPage() {
   };
 
   const handleShareLink = () => {
-    const baseUrl = window.location.origin;
-
-    const shareUrl = `${baseUrl}/shortlist/shared/${id}`;
-
-    navigator.clipboard?.writeText(shareUrl);
+    navigator.clipboard?.writeText(window.location.href);
     toast.success("Got it! Link copied to clipboard.");
   };
 
@@ -443,14 +439,14 @@ export default function ShortlistDetailPage() {
             </p>
           )}
 
-          <div className='flex flex-wrap items-end justify-between mt-6'>
-            <button
+          <div className='flex flex-wrap items-end justify-end mt-6'>
+            {/* <button
               onClick={() => router.back()}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
               <ArrowLeft size={18} />
               Go Back
-            </button>
+            </button> */}
 
             <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
               <DropdownMenu>

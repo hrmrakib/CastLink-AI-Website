@@ -12,7 +12,7 @@ interface RoleRedirectProps {
 
 export function RoleRedirect({ allowedRole, children }: RoleRedirectProps) {
   const router = useRouter();
-  const { user, profileLoading } = useAuth();
+  const { user, token, profileLoading } = useAuth();
 
   const authStatus = useMemo(() => {
     if (profileLoading) return "loading";
@@ -31,7 +31,7 @@ export function RoleRedirect({ allowedRole, children }: RoleRedirectProps) {
   // ✅ Move redirects into useEffect so they only run after render
   useEffect(() => {
     if (authStatus === "unauthenticated") {
-      router.replace("/login");
+      // router.replace("/login");
     } else if (authStatus.startsWith("redirect:")) {
       const role = authStatus.split(":")[1];
       router.replace(`/dashboard/${role}`);
@@ -45,7 +45,11 @@ export function RoleRedirect({ allowedRole, children }: RoleRedirectProps) {
   ) {
     return (
       <div className='text-center flex items-center justify-center gap-2 py-20'>
-        Checking access <Loader className='animate-spin' />
+        {profileLoading ? (
+          <p>
+            Checking access <Loader className='animate-spin' />
+          </p>
+        ) : null}
       </div>
     );
   }
