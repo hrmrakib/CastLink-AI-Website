@@ -3,9 +3,18 @@ import baseAPI from "@/redux/api/api";
 const talentAPI = baseAPI.injectEndpoints({
   endpoints: (build) => ({
     getTalent: build.query({
-      query: () => ({
-        url: "/agent/talents/",
-      }),
+      query: (params) => {
+        const cleanedParams = Object.fromEntries(
+          Object.entries(params || {}).filter(
+            ([_, value]) => value !== undefined && value !== null,
+          ),
+        );
+
+        return {
+          url: "/agent/talents/",
+          params: cleanedParams,
+        };
+      },
     }),
 
     getTalentById: build.query({

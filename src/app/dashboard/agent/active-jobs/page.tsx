@@ -602,13 +602,6 @@ export default function ActiveJobsPage() {
     return { ...talent, source_type: "suggestion" };
   });
 
-  // Usage:
-  console.log({ filteredTalents });
-  // console.log(data?.data);
-  console.log({ selectedJob });
-  // const filtered = filterTalents(selectedJob);
-  // console.log(filtered);
-
   return (
     <div className='min-h-screen bg-white rounded-xl'>
       <div className='mx-auto container px-4 py-8 sm:px-6 lg:px-8'>
@@ -621,7 +614,7 @@ export default function ActiveJobsPage() {
         </div>
 
         {/* Filters */}
-        <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:gap-3'>
+        {/* <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:gap-3'>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className='w-full sm:w-40'>
               <SelectValue placeholder='Status' />
@@ -644,21 +637,7 @@ export default function ActiveJobsPage() {
               <SelectItem value='60days'>Last 60 Days</SelectItem>
             </SelectContent>
           </Select>
-
-          {/* <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger className='w-full sm:w-40'>
-              <SelectValue placeholder='Location' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Locations</SelectItem>
-              {locations.map((loc) => (
-                <SelectItem key={loc} value={loc}>
-                  {loc}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select> */}
-        </div>
+        </div> */}
 
         {/* Error state */}
         {isError && (

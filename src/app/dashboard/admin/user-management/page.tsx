@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, Info, Loader2, Trash2, X } from "lucide-react";
+import { BadgeCheck, Info, Loader, Loader2, Trash2, X } from "lucide-react";
 import {
   useApproveOrRejectAgentMutation,
   useDeleteUserMutation,
@@ -494,9 +494,15 @@ export default function UserManagement() {
               </button>
               <button
                 onClick={handleSendEmail}
-                className='flex-1 px-4 py-2 bg-[#2563EB] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors'
+                disabled={!emailForm.body || isApproving}
+                className='flex-1 px-4 py-2 bg-[#2563EB] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5'
               >
-                Reject
+                Reject{" "}
+                {isApproving ? (
+                  <Loader size={16} className='animate-spin' />
+                ) : (
+                  ""
+                )}
               </button>
             </div>
           </div>

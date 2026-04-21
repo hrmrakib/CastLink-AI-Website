@@ -112,11 +112,16 @@ export default function AIDynamicPage() {
   // FIX 1: read the full slice so we can react to changes
   const { user } = useAuth();
 
-  const [polasRequestMutation] = usePolasRequestMutation();
-  const [selfTapRequestMutation] = useSelfTapRequestMutation();
-  const [eCastingRequestMutation] = useECastingRequestMutation();
-  const [shortlistTalentMutation] = useShortlistTalentMutation();
-  const [bookTalentMutation] = useBookTalentMutation();
+  const [polasRequestMutation, { isLoading: polasLoading }] =
+    usePolasRequestMutation();
+  const [selfTapRequestMutation, { isLoading: selfTapLoading }] =
+    useSelfTapRequestMutation();
+  const [eCastingRequestMutation, { isLoading: eCastingLoading }] =
+    useECastingRequestMutation();
+  const [shortlistTalentMutation, { isLoading: shortlistLoading }] =
+    useShortlistTalentMutation();
+  const [bookTalentMutation, { isLoading: bookLoading }] =
+    useBookTalentMutation();
   const [generatingCastingLoading, setGeneratingCastingLoading] =
     useState(false);
 
@@ -127,6 +132,9 @@ export default function AIDynamicPage() {
     isLoading: isLoadingChat,
     refetch,
   } = useGetChatBySessionIdQuery(id);
+
+  const isGeneratedJob = data?.data?.generate_job;
+  console.log({ isGeneratedJob });
 
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
@@ -362,6 +370,10 @@ export default function AIDynamicPage() {
     // Reset skip flag so next attempt shows the modal again if fields are empty
     setIsSkipping(false);
     await runGenerateCasting();
+
+    setIsSkipping(false);
+    setJobTitle("");
+    setJobDescription("");
   };
 
   return (
@@ -553,7 +565,8 @@ export default function AIDynamicPage() {
                                           profile?.talent_id,
                                         )
                                       }
-                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      disabled={shortlistLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Like'
                                       title='Shortlists'
                                     >
@@ -570,7 +583,8 @@ export default function AIDynamicPage() {
                                       onClick={() =>
                                         handleselftapRequest(profile?.talent_id)
                                       }
-                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      disabled={selfTapLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Photo'
                                       title='Selftapes Request'
                                     >
@@ -582,7 +596,8 @@ export default function AIDynamicPage() {
                                           profile?.talent_id,
                                         )
                                       }
-                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      disabled={eCastingLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Call'
                                       title='E-Casting Request'
                                     >
@@ -592,7 +607,8 @@ export default function AIDynamicPage() {
                                       onClick={() =>
                                         handleTalentBooking(profile?.talent_id)
                                       }
-                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      disabled={bookLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Approve'
                                       title='Booking Request'
                                     >
@@ -602,7 +618,8 @@ export default function AIDynamicPage() {
                                       onClick={() =>
                                         handlePolasRequest(profile?.talent_id)
                                       }
-                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
+                                      disabled={polasLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Approve'
                                       title='Polas Request'
                                     >
@@ -617,6 +634,7 @@ export default function AIDynamicPage() {
                     )}
 
                   {message.sender === "ai" &&
+                    !isGeneratedJob &&
                     message.talents &&
                     message.talents.length > 0 && (
                       <button
