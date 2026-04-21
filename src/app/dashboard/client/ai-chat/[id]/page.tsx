@@ -81,6 +81,7 @@ interface TalentProfile {
   is_available?: boolean;
   approval_status?: string;
   is_available_on_request?: boolean;
+  available_dates?: string[];
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
@@ -109,6 +110,11 @@ export default function AIDynamicPage() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const sessionId = useSelector((state: any) => state.aiChat.sessionId);
+
+  const [availabilityModal, setAvailabilityModal] = useState(false);
+  const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
+    useState<TalentProfile | null>(null);
+
   // FIX 1: read the full slice so we can react to changes
   const { user } = useAuth();
 
@@ -573,6 +579,11 @@ export default function AIDynamicPage() {
                                       <Heart size={20} fill='currentColor' />
                                     </button>
                                     <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedAvailabilityTalent(profile);
+                                        setAvailabilityModal(true);
+                                      }}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
                                       aria-label='Schedule'
                                       title='Availability'
@@ -810,6 +821,50 @@ export default function AIDynamicPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Availability modal */}
+      <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>Available Dates</DialogTitle>
+            <DialogDescription>
+              {selectedAvailabilityTalent?.name}&apos;s available dates for
+              booking.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='py-2 space-y-2'>
+            {selectedAvailabilityTalent?.available_dates?.length ? (
+              selectedAvailabilityTalent.available_dates.map((date) => (
+                <div
+                  key={date}
+                  className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
+                >
+                  <Calendar size={16} className='text-[#2563EB] shrink-0' />
+                  <span className='text-sm font-medium text-gray-800'>
+                    {new Date(date + "T00:00:00").toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className='text-sm text-gray-500 text-center py-6'>
+                No available dates listed.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant='outline'>Close</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </main>
