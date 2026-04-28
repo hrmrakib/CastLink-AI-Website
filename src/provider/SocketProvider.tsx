@@ -40,7 +40,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     currentConversationId.current = conversationId;
 
     const ws = new WebSocket(
-      `ws://10.10.12.49:8002/ws/chat/${conversationId}/?token=${token}`,
+      `wss://api.poolofcast.com/ws/chat/${conversationId}/?token=${token}`,
     );
 
     ws.onopen = () => console.log("WebSocket connected");

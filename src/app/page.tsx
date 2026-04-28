@@ -1,5 +1,4 @@
 import CTASection from "@/components/home/CTASection";
-import FeaturesSection from "@/components/home/FeaturesSection";
 import HeroSection from "@/components/home/HeroSection";
 import PowerfulFeature from "@/components/home/PowerfulFeature";
 import RolesSection from "@/components/home/RolesSection";
@@ -11,7 +10,6 @@ export default function Home() {
       <HeroSection />
       <PowerfulFeature />
       <RolesSection />
-      <FeaturesSection />
       <CTASection />
       <SafetySection />
     </>
