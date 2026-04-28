@@ -293,7 +293,7 @@ function MessagingComponent() {
       created_at: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...(prev ?? []), optimistic]);
+    // setMessages((prev) => [...(prev ?? []), optimistic]);
 
     socket?.send(
       JSON.stringify({
