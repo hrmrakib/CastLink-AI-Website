@@ -71,7 +71,7 @@ export default function Navbar() {
                       alt='Daissy'
                     />
                   )}
-                  <AvatarFallback>Abul</AvatarFallback>
+                  <AvatarFallback>User</AvatarFallback>
                 </Avatar>
               </Link>
             ) : (
