@@ -22,17 +22,17 @@ export default function HeroSection() {
     {
       id: 1,
       alt: "Male talent headshot",
-      src: "/man.png",
+      src: "/t1.png",
     },
     {
       id: 2,
       alt: "Female talent headshot",
-      src: "/man.png",
+      src: "/t2.png",
     },
     {
       id: 3,
       alt: "Female talent headshot",
-      src: "/man.png",
+      src: "/t3.png",
     },
     {
       id: 4,
