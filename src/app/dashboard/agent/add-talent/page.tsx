@@ -75,6 +75,11 @@ function DateCalendarModal({
   onConfirm,
 }: DateCalendarModalProps) {
   const today = new Date();
+  const todayStr = toDateString(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDates, setSelectedDates] = useState<string[]>(initialDates);
@@ -97,6 +102,7 @@ function DateCalendarModal({
       setViewYear((y) => y - 1);
     } else setViewMonth((m) => m - 1);
   };
+
   const nextMonth = () => {
     if (viewMonth === 11) {
       setViewMonth(0);
@@ -133,7 +139,7 @@ function DateCalendarModal({
         <div className='flex items-center justify-between px-6 pt-5 pb-2'>
           <span className='font-semibold text-gray-900 text-sm flex items-center gap-2'>
             <Calendar className='w-4 h-4 text-[#2563EB]' />
-            Select Available Date(s)
+            Select Shoot Date(s)
           </span>
           <button
             onClick={onClose}
@@ -146,7 +152,10 @@ function DateCalendarModal({
         <div className='flex items-center justify-between px-6 py-3'>
           <button
             onClick={prevMonth}
-            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500'
+            disabled={
+              viewYear === today.getFullYear() && viewMonth === today.getMonth()
+            }
+            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed' // 👈 ADD disabled classes
           >
             <svg width='8' height='14' viewBox='0 0 8 14' fill='none'>
               <path
@@ -200,22 +209,28 @@ function DateCalendarModal({
                 </div>
               );
             }
+
             const dateStr = toDateString(viewYear, viewMonth, cell.day);
             const isSelected = selectedDates.includes(dateStr);
+            const isPast = dateStr < todayStr;
+
             return (
               <button
                 key={idx}
-                onClick={() => toggleDate(dateStr)}
+                onClick={() => !isPast && toggleDate(dateStr)}
+                disabled={isPast}
                 className='flex items-center justify-center h-10'
               >
                 <span
                   className={`
                   w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-150
-                  ${
-                    isSelected
-                      ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
-                  }
+                    ${
+                      isPast
+                        ? "text-gray-300 cursor-not-allowed"
+                        : isSelected
+                          ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
+                          : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
+                    }
                 `}
                 >
                   {cell.day}
@@ -473,7 +488,7 @@ export default function AddTalentPage() {
       shootDates.forEach((date) => {
         payload.append("available_date", date);
       });
-      
+
       // payload.append("available_date", JSON.stringify(shootDates));
       payload.append("character", role);
 
