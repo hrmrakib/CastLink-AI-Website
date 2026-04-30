@@ -170,9 +170,9 @@ function JobCard({
 export default function DraftJobsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 400);
+  const debouncedSearch = useDebounce(searchQuery, 999);
 
-  const { data, isLoading, isError, refetch } = useGetDeaftJobsQuery({
+  const { data, isFetching, isError, refetch } = useGetDeaftJobsQuery({
     search: debouncedSearch,
   });
   const [deleteDraftJobMutation] = useDeleteDraftJobMutation();
@@ -210,7 +210,7 @@ export default function DraftJobsPage() {
         onConfirm={handleConfirmDelete}
       />
 
-      <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100'>
+      <div className='min-h-screen bg-linear-to-br from-gray-50 to-gray-100'>
         <div className='mx-auto container py-8'>
           {/* Header */}
           <div className='mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
@@ -241,9 +241,8 @@ export default function DraftJobsPage() {
             </div>
           </div>
 
-          {/* Loading */}
           {/* Loading State */}
-          {isLoading && (
+          {isFetching && (
             <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
               {[...Array(6)].map((_, i) => (
                 <JobCardSkeleton key={i} />
@@ -252,7 +251,7 @@ export default function DraftJobsPage() {
           )}
 
           {/* Error */}
-          {isError && !isLoading && (
+          {isError && !isFetching && (
             <div className='py-12 text-center text-red-500'>
               Failed to load draft jobs.{" "}
               <button
@@ -265,7 +264,7 @@ export default function DraftJobsPage() {
           )}
 
           {/* Grid */}
-          {!isLoading && !isError && (
+          {!isFetching && (
             <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
               {draftJobs.length > 0 ? (
                 draftJobs.map((job) => (
