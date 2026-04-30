@@ -25,7 +25,7 @@ import AgentSidebar from "./AgentSidebar";
 import ClientSidebar from "./ClientSidebar";
 import AdminSidebar from "./AdminSidebar";
 
-// import { logout } from "@/service/authService";
+import { logout } from "@/service/authService";
 
 export default function DashboardSidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -39,10 +39,8 @@ export default function DashboardSidebar() {
     setSidebarView(pathname.split("/")[2]);
   }, [pathname]);
 
-  // console.log({ sidebarView });
-
   const handleLogout = async () => {
-    // await logout();
+    await logout();
     localStorage?.removeItem("access_token");
     localStorage?.removeItem("refresh_token");
     router.push("/login");

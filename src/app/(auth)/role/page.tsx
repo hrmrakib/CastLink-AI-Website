@@ -45,10 +45,6 @@ export default function RoleSelection() {
     }
   };
 
-  const handleProceed = (role: Role) => {
-    console.log(`Proceeding with role: ${role}`);
-  };
-
   return (
     <section className='w-full h-screen  bg-gray-50 py-16 md:py-24 flex items-center justify-center'>
       <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -66,7 +62,7 @@ export default function RoleSelection() {
             return (
               <div
                 key={card.id}
-                onClick={() => handleRoleSelect(card.id)}
+                // onClick={() => handleRoleSelect(card.id)}
                 className={`group relative p-8 md:p-10 rounded-2xl transition-all duration-300 ease-out text-left ${
                   isSelected
                     ? "border-2 border-blue-500 bg-white shadow-lg scale-105"
@@ -94,7 +90,7 @@ export default function RoleSelection() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleProceed(card.id);
+                    handleRoleSelect(card.id);
                   }}
                   className='absolute bottom-6 md:bottom-8 right-8 md:right-10 p-3 rounded-full bg-blue-500 text-white hover:bg-[#2563EB] transition-colors duration-200 transform group-hover:scale-110 cursor-pointer'
                   aria-label={`Proceed as ${card.title}`}

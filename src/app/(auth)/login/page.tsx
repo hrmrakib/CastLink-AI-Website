@@ -54,14 +54,11 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/accounts/login/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         },
       );
@@ -78,23 +75,39 @@ export default function LoginPage() {
         );
 
         await saveTokens(data?.access_token);
-        localStorage.setItem("access_token", data?.access_token); // also fixed key to match baseAPI
-        router.push(`/dashboard/${data?.user.role.toLowerCase()}`);
+        localStorage.setItem("access_token", data?.access_token);
+
+        const role = data?.user?.role?.toLowerCase()?.trim();
+
+        if (role) {
+          console.log(
+            "Login successful → Navigating to:",
+            `/dashboard/${role}`,
+          );
+
+          router.refresh();
+          setTimeout(() => {
+            router.replace(`/dashboard/${role}`);
+          }, 49);
+        } else {
+          toast.error("Role information is missing from server response");
+          console.error("Role missing:", data?.user);
+        }
       } else {
-        toast.error(data?.message);
+        toast.error(data?.message || "Login failed");
         setErrors((prev) => ({
           ...prev,
           email: data?.message || "Invalid email or password.",
         }));
       }
     } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Something went wrong. Please try again.");
       setErrors((prev) => ({
         ...prev,
         email: "Login failed. Please try again.",
       }));
     } finally {
-      // setEmail("");
-      // setPassword("");
       setIsLoading(false);
     }
   };

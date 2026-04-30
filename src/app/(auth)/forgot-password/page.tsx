@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -48,10 +49,8 @@ export default function ForgotPasswordPage() {
         toast.success(res?.message);
         router.push("/verify-otp?email=" + email + "&type=forgot-password");
       }
-      // In a real app, you'd redirect or handle authentication here
-    } catch (error) {
-      toast.error("Login failed. Please try again.");
-      // setErrors({ ...errors, email: "Login failed. Please try again." });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Email not found. Please try again.");
     } finally {
       setIsLoading(false);
     }

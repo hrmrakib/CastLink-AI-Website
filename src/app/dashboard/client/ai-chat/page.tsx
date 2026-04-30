@@ -82,6 +82,11 @@ function DateCalendarModal({
   onConfirm,
 }: DateCalendarModalProps) {
   const today = new Date();
+  const todayStr = toDateString(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDates, setSelectedDates] = useState<string[]>(initialDates);
@@ -104,6 +109,7 @@ function DateCalendarModal({
       setViewYear((y) => y - 1);
     } else setViewMonth((m) => m - 1);
   };
+
   const nextMonth = () => {
     if (viewMonth === 11) {
       setViewMonth(0);
@@ -153,7 +159,10 @@ function DateCalendarModal({
         <div className='flex items-center justify-between px-6 py-3'>
           <button
             onClick={prevMonth}
-            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500'
+            disabled={
+              viewYear === today.getFullYear() && viewMonth === today.getMonth()
+            }
+            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed' // 👈 ADD disabled classes
           >
             <svg width='8' height='14' viewBox='0 0 8 14' fill='none'>
               <path
@@ -207,22 +216,28 @@ function DateCalendarModal({
                 </div>
               );
             }
+
             const dateStr = toDateString(viewYear, viewMonth, cell.day);
             const isSelected = selectedDates.includes(dateStr);
+            const isPast = dateStr < todayStr;
+
             return (
               <button
                 key={idx}
-                onClick={() => toggleDate(dateStr)}
+                onClick={() => !isPast && toggleDate(dateStr)}
+                disabled={isPast}
                 className='flex items-center justify-center h-10'
               >
                 <span
                   className={`
                   w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-150
-                  ${
-                    isSelected
-                      ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
-                  }
+                    ${
+                      isPast
+                        ? "text-gray-300 cursor-not-allowed"
+                        : isSelected
+                          ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
+                          : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
+                    }
                 `}
                 >
                   {cell.day}
@@ -528,6 +543,7 @@ function AIChatInner() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className='w-full border border-gray-200 rounded-lg px-4 py-3 text-[#000000] bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
+                    placeholder='Berlin, Germany'
                   />
                 </div>
 
@@ -591,6 +607,7 @@ function AIChatInner() {
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                     className='w-full border border-gray-200 rounded-lg px-4 py-3 text-[#000000] bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
+                    placeholder='min - max (range allowed or just minimum)'
                   />
                 </div>
 
@@ -605,6 +622,7 @@ function AIChatInner() {
                     value={jobType}
                     onChange={(e) => setJobType(e.target.value)}
                     className='w-full border border-gray-200 rounded-lg px-4 py-3 text-[#000000] bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
+                    placeholder='Type of job'
                   />
                 </div>
               </div>

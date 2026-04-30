@@ -7,8 +7,11 @@ import useHideNavFooter from "../utils/NavFooterNone";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "../ui/skeleton";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Navbar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const hideNavbar = useHideNavFooter();
   const { user, profileLoading } = useAuth();
@@ -20,12 +23,25 @@ export default function Navbar() {
   const role = user?.role?.toLowerCase();
 
   const navLinks = [
-    { name: "Clients", href: "/dashboard/client" },
-    { name: "Agents", href: "/dashboard/agent" },
-    { name: "Casting Directors", href: "#casting" },
+    { name: "Clients", href: "/dashboard/client", role: "client" },
+    { name: "Agents", href: "/dashboard/agent", role: "agent" },
+    {
+      name: "Casting Directors",
+      href: "/dashboard/admin",
+      role: "admin",
+    },
   ];
 
   if (hideNavbar) return null;
+
+  const handleNavigate = (role: string) => {
+    if (role === "admin" && !user) {
+      toast.error("You are not logged in");
+      router.push("/login");
+    }
+
+    router.push(`/dashboard/${role}`);
+  };
 
   return (
     <nav className='bg-white'>
@@ -42,13 +58,14 @@ export default function Navbar() {
             {/* Desktop Navigation */}
             <div className='hidden md:flex items-center gap-8'>
               {navLinks.map((link) => (
-                <Link
+                <button
                   key={link.name}
-                  href={link.href}
-                  className='text-[#404145] hover:text-gray-900 transition-colors font-medium'
+                  onClick={() => handleNavigate(link.role)}
+                  disabled={user?.role == link.role}
+                  className={`text-[#404145] hover:text-gray-900 transition-colors font-medium ${user?.role !== link.role && "disabled:opacity-50 disabled:cursor-not-allowed"}`}
                 >
                   {link.name}
-                </Link>
+                </button>
               ))}
             </div>
           </div>
