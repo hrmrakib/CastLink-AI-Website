@@ -5,6 +5,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
-  // <RoleRedirect allowedRole='ADMIN'>{children}</RoleRedirect>;
+  return <RoleRedirect allowedRole='ADMIN'>{children}</RoleRedirect>;
 }

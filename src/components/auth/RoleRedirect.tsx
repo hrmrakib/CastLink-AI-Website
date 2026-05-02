@@ -46,7 +46,7 @@ export function RoleRedirect({ allowedRole, children }: RoleRedirectProps) {
     return (
       <div className='text-center flex items-center justify-center gap-2 py-20'>
         {profileLoading ? (
-          <p>
+          <p className='flex items-center gap-3 text-sm text-muted-foreground'>
             Checking access <Loader className='animate-spin' />
           </p>
         ) : null}

@@ -53,17 +53,19 @@ const Header = () => {
                     alt='Daissy'
                   />
                 )}
-                <AvatarFallback>Abul</AvatarFallback>
+                <AvatarFallback>User</AvatarFallback>
               </Avatar>
               <div className='hidden sm:block'>
                 <p className='text-base font-medium text-[#1E1E1E]'>
                   {user?.full_name}
                 </p>
-                <p className='text-sm text-[#606060]'>
-                  <span className='text-[#606060] font-medium'>
-                    ({user?.role})
-                  </span>
-                </p>
+                {user?.role && (
+                  <p className='text-sm text-[#606060]'>
+                    <span className='text-[#606060] font-medium'>
+                      ({user?.role})
+                    </span>
+                  </p>
+                )}
               </div>
             </Link>
           </div>
