@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import baseAPI from "@/redux/api/api";
 
 const adminAPI = baseAPI.injectEndpoints({
@@ -10,13 +11,18 @@ const adminAPI = baseAPI.injectEndpoints({
     }),
 
     getUserByRole: builder.query({
-      query: ({ role, is_verified }) => ({
-        url: `/accounts/user/user_list`,
-        params: {
-          role,
-          ...(is_verified !== undefined && { is_verified }),
-        },
-      }),
+      query: ({ role, is_active }) => {
+        // Build the params object dynamically
+        const params: any = {};
+
+        if (role) params.role = role;
+        if (is_active !== undefined) params.is_active = is_active;
+
+        return {
+          url: `/accounts/user/user_list`,
+          params: params,
+        };
+      },
       providesTags: ["Users"],
     }),
 

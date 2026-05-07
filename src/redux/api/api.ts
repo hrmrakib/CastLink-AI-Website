@@ -48,7 +48,7 @@ const customBaseQuery: BaseQueryFn<
       if (!isLoggingOut && pathname !== "/login") {
         isLoggingOut = true;
         localStorage?.removeItem("access_token");
-        toast.error("Session expired. Please login again."); 
+        toast.error("Session expired. Please login again.");
 
         setTimeout(() => {
           isLoggingOut = false;

@@ -94,14 +94,12 @@ export default function UserManagement() {
     useApproveOrRejectAgentMutation();
   const [deleteUserMutation, { isLoading: isDeleting }] =
     useDeleteUserMutation();
-  const { data, isFetching, refetch } = useGetUserByRoleQuery({
-    role: activeTab === "Pending" ? "Agent" : activeTab,
-    is_verified:
-      activeTab === "Agent"
-        ? true
-        : activeTab === "Pending"
-          ? false
-          : undefined,
+  const { data, isFetching } = useGetUserByRoleQuery({
+    // If Pending, don't pass a role (or pass undefined)
+    role: activeTab === "Pending" ? undefined : activeTab,
+
+    // is_active is false only when Pending, otherwise true (or undefined)
+    is_active: activeTab === "Pending" ? false : true,
   });
 
   const users: ApiUser[] = (data?.data ?? []).filter(
@@ -111,8 +109,6 @@ export default function UserManagement() {
   const handleDeleteUser = async () => {
     if (!deleteConfirmUser) return;
 
-    console.log({ deleteConfirmUser });
-    // return;
     try {
       const res = await deleteUserMutation(
         deleteConfirmUser?.user_id ?? 0,
@@ -121,7 +117,6 @@ export default function UserManagement() {
 
       if (res?.status) {
         toast.success("Deleted successfully!");
-        refetch();
       }
     } catch (error) {
       console.log(error);
@@ -137,14 +132,13 @@ export default function UserManagement() {
   ) => {
     try {
       const res = await approveOrRejectAgentMutation({
-        agent_id: id,
+        user_id: id,
         action,
         message,
       }).unwrap();
 
       if (res?.message) {
         toast.success(res?.message || "Approved successfully!");
-        refetch();
       }
     } catch (error) {
       console.log(error);
@@ -159,7 +153,7 @@ export default function UserManagement() {
     // await handleAcceptOrReject(selectedUser.user_id, "reject", emailForm.body);
     try {
       const res = await approveOrRejectAgentMutation({
-        agent_id: selectedUser.user_id,
+        user_id: selectedUser.user_id,
         action: "reject",
         message: emailForm.body,
       }).unwrap();
@@ -168,7 +162,6 @@ export default function UserManagement() {
 
       if (res?.message) {
         toast.success(res?.message || "Rejected and email sent successfully!");
-        refetch();
       }
     } catch (error) {
       console.log(error);
@@ -184,7 +177,7 @@ export default function UserManagement() {
       <div className='mx-auto container'>
         {/* Header */}
         <div className='mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
-          <h1 className='text-2xl font-bold text-gray-900'>Recent Users</h1>
+          <h1 className='text-2xl font-bold text-gray-900'>All Users</h1>
         </div>
 
         {/* Tabs */}
@@ -195,8 +188,8 @@ export default function UserManagement() {
               onClick={() => setActiveTab(tab)}
               className={`relative px-6 py-2.5 font-medium text-lg transition-colors ${
                 activeTab === tab
-                  ? "bg-white text-[#2563EB] rounded-md shadow-sm"
-                  : "text-[#2563EB] hover:text-[#084bdb]"
+                  ? "bg-white text-[#2563EB] rounded-md shadow-lg"
+                  : "text-[#2563EB] hover:text-[#084bdb] border border-gray-200 rounded-xl"
               }`}
             >
               {TAB_LABELS[tab]}
@@ -422,8 +415,9 @@ export default function UserManagement() {
                   {isApproving ? <Loader2 className='animate-spin' /> : ""}
                 </button>
                 <button
+                  disabled={!selectedUser || isApproving}
                   onClick={() => setShowEmailForm(true)}
-                  className='py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors'
+                  className='py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   Reject
                 </button>
@@ -525,6 +519,7 @@ export default function UserManagement() {
             </p>
             <div className='flex gap-3'>
               <button
+                disabled={isDeleting}
                 onClick={() => setDeleteConfirmUser(null)}
                 className='flex-1 rounded-lg border border-gray-300 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50'
               >

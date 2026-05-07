@@ -100,6 +100,11 @@ function SignupForm() {
 
     if (!validateForm()) return;
 
+    if (role !== "Client" && role !== "Agent") {
+      router.replace("/role");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload = {
@@ -120,6 +125,7 @@ function SignupForm() {
         // ✅ toast.success is fine — only toast.error on form pages causes the crash
         setSuccessMessage(res?.message);
         const emailCopy = formData.email;
+
         setFormData({
           agencyName: "",
           email: "",

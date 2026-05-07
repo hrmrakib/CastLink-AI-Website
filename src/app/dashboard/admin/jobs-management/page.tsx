@@ -251,7 +251,7 @@ export default function JobManagement() {
             </thead>
             <tbody className='divide-y divide-gray-200 bg-white'>
               {isFetching ? (
-                Array.from({ length: 6 }).map((_, i) => (
+                Array.from({ length: 12 }).map((_, i) => (
                   <TableRowSkeleton key={i} />
                 ))
               ) : jobs?.length === 0 ? (
