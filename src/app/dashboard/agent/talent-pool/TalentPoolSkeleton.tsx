@@ -76,7 +76,7 @@ export function TalentPoolSkeleton({ columns = 4 }) {
           {skeletonCards.map((_, idx) => (
             <div
               key={idx}
-              className='sk-card relative h-80 sm:h-96 overflow-hidden rounded-2xl bg-[#181818] shadow-lg'
+              className='sk-card relative h-80 sm:h-96 overflow-hidden rounded-2xl bg-[#18181883] shadow-lg'
             >
               {/* shimmer wash */}
               <div className='sk-shimmer-dark absolute inset-0 z-1' />

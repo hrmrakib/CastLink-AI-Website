@@ -425,6 +425,7 @@ export default function UpdateTalentPage() {
   });
 
   const singleTalent = data?.data;
+  console.log({ singleTalent });
 
   // Pre-populate form from fetched talent data
   useEffect(() => {
@@ -453,6 +454,8 @@ export default function UpdateTalentPage() {
       availability: singleTalent.is_available ?? true,
       availableOnRequest: singleTalent.is_available_on_request ?? false,
     });
+
+    setShootDates(singleTalent?.available_dates);
 
     // Pre-populate role/character
     if (singleTalent.character) {

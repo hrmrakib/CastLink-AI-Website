@@ -15,12 +15,14 @@ const talentAPI = baseAPI.injectEndpoints({
           params: cleanedParams,
         };
       },
+      providesTags: ["Talents"],
     }),
 
     getTalentById: build.query({
       query: (id) => ({
         url: `/agent/talents/${id}/`,
       }),
+      providesTags: ["Talents"],
     }),
 
     createTalent: build.mutation({
@@ -29,6 +31,7 @@ const talentAPI = baseAPI.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Talents"],
     }),
 
     updateTalent: build.mutation({
@@ -37,6 +40,15 @@ const talentAPI = baseAPI.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      invalidatesTags: ["Talents"],
+    }),
+
+    deleteTalent: build.mutation({
+      query: (id) => ({
+        url: `/agent/talents/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Talents"],
     }),
   }),
 });
@@ -46,5 +58,6 @@ export const {
   useGetTalentByIdQuery,
   useCreateTalentMutation,
   useUpdateTalentMutation,
+  useDeleteTalentMutation,
 } = talentAPI;
 export default talentAPI;

@@ -19,7 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetTalentQuery } from "@/redux/features/talent/talentAPI";
+import {
+  useDeleteTalentMutation,
+  useGetTalentQuery,
+} from "@/redux/features/talent/talentAPI";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { TalentPoolSkeleton } from "./TalentPoolSkeleton";
+import { toast } from "sonner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "";
 
@@ -38,6 +42,7 @@ export default function TalentVault() {
   const router = useRouter();
   const [gridColumns, setGridColumns] = useState(4);
   const [availability, setAvailability] = useState<AvailabilityFilter>("all");
+  const [deleteTalentMutation] = useDeleteTalentMutation();
 
   const [role, setRole] = useState("all");
 
@@ -76,6 +81,14 @@ export default function TalentVault() {
   });
 
   if (isFetching) return <TalentPoolSkeleton />;
+
+  const handleTalentDelete = async (talentId: string) => {
+    try {
+      await deleteTalentMutation(talentId).unwrap();
+    } catch (error: any) {
+      toast.error(error?.data?.message);
+    }
+  };
 
   return (
     <main className='min-h-screen bg-white rounded-xl!'>
@@ -254,7 +267,10 @@ export default function TalentVault() {
                       Edit Talent Details
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'>
+                    <DropdownMenuItem
+                      onClick={() => handleTalentDelete(talent.id)}
+                      className='cursor-pointer rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 gap-2 focus:bg-white/5 focus:text-white'
+                    >
                       <Trash size={13} className='text-rose-400 shrink-0' />
                       Delete Talent
                     </DropdownMenuItem>
