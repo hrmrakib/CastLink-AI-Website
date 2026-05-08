@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/refs */
 "use client";
 
@@ -774,7 +775,7 @@ const ScheduledCard = ({ meeting }: { meeting: Meeting }) => (
         </p>
       )}
     </div>
-    <span className='text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex-shrink-0'>
+    <span className='text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0'>
       Scheduled
     </span>
   </div>
@@ -814,6 +815,15 @@ export default function ECastingRoom() {
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
   const [createSessionMutation] = useCreateSessionMutation();
+
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    const tokenValue = localStorage.getItem("access_token");
+    if (tokenValue) {
+      setToken(tokenValue);
+    }
+  }, []);
 
   const handleStartMeeting = async () => {
     console.log("hello...........");
@@ -878,14 +888,20 @@ export default function ECastingRoom() {
               icon={<PlusIcon />}
               label='Join Meeting'
               color='bg-violet-600 hover:bg-violet-700 shadow-violet-400/40'
-              onClick={() => setModal("join")}
+              // onClick={() => setModal("join")}
+              onClick={() =>
+                window.open(
+                  `https://meet.poolofcast.com/?token=${token}`,
+                  "_blank",
+                )
+              }
             />
-            <ActionCard
+            {/* <ActionCard
               icon={<CalendarIcon />}
               label='Schedule'
               color='bg-emerald-500 hover:bg-emerald-600 shadow-emerald-400/40'
               onClick={() => setModal("schedule")}
-            />
+            /> */}
           </div>
         </div>
 

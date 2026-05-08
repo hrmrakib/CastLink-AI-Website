@@ -500,6 +500,7 @@ export default function AddTalentPage() {
       await createTalentMutation(payload).unwrap();
 
       setTalentData({ ...formData, uploadedImages: images.map((i) => i.file) });
+      setShootDates([]);
       setSubmitted(true);
     } catch (err: unknown) {
       console.error("Failed to create talent:", err);
