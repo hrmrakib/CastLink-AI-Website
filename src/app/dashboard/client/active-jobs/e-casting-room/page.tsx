@@ -890,10 +890,7 @@ export default function ECastingRoom() {
               color='bg-violet-600 hover:bg-violet-700 shadow-violet-400/40'
               // onClick={() => setModal("join")}
               onClick={() =>
-                window.open(
-                  `https://meet.poolofcast.com/?token=${token}`,
-                  "_blank",
-                )
+                window.open(`http://localhost:3001/?token=${token}`, "_blank")
               }
             />
             {/* <ActionCard

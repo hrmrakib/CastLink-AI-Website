@@ -39,6 +39,7 @@ interface FormData {
   uploadedImages: File[];
   availability: boolean; // true for available/on-request, false for unavailable
   availableOnRequest: boolean; // true only for the middle option
+  skills: string;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -398,6 +399,7 @@ const INITIAL_FORM: FormData = {
   uploadedImages: [],
   availability: true,
   availableOnRequest: false,
+  skills: "",
 };
 
 // Main Page Component
@@ -415,6 +417,32 @@ export default function AddTalentPage() {
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [createTalentMutation] = useCreateTalentMutation();
   const [role, setRole] = useState("lead_male");
+
+  // Logic to handle skill tags
+  const [skillInput, setSkillInput] = useState("");
+
+  const addSkill = (skill: string) => {
+    const trimmedSkill = skill.trim().replace(/,/g, "");
+    if (!trimmedSkill) return;
+
+    const currentSkills = formData.skills
+      ? formData.skills.split(",").map((s) => s.trim())
+      : [];
+    if (!currentSkills.includes(trimmedSkill)) {
+      const newSkills = [...currentSkills, trimmedSkill].join(", ");
+      setFormData((prev) => ({ ...prev, skills: newSkills }));
+    }
+    setSkillInput("");
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    const newSkills = formData.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== skillToRemove)
+      .join(", ");
+    setFormData((prev) => ({ ...prev, skills: newSkills }));
+  };
 
   // Mapping object for clean UI labels
   const roleLabels: Record<string, string> = {
@@ -481,6 +509,7 @@ export default function AddTalentPage() {
       payload.append("location", formData.location);
       payload.append("date_of_birth", formData.dateOfBirth);
       payload.append("is_available", String(formData.availability));
+      payload.append("skills", formData.skills);
       payload.append(
         "is_available_on_request",
         String(formData.availableOnRequest),
@@ -785,6 +814,59 @@ export default function AddTalentPage() {
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
                 />
               </div>
+            </div>
+
+            {/* Skills Section */}
+            <div className='space-y-3'>
+              <label className='block text-sm font-semibold text-slate-700 dark:text-slate-200'>
+                Skills
+              </label>
+              <div
+                className={`flex flex-wrap gap-2 p-2 border rounded-lg bg-white dark:bg-slate-700 focus-within:ring-2 focus-within:ring-blue-500 ${errors.skills ? "border-red-500" : "border-slate-300 dark:border-slate-600"}`}
+              >
+                {/* Displaying Tags */}
+                {formData.skills.split(",").map(
+                  (skill, index) =>
+                    skill.trim() && (
+                      <span
+                        key={index}
+                        className='flex items-center gap-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800'
+                      >
+                        {skill.trim()}
+                        <button
+                          type='button'
+                          onClick={() => removeSkill(skill.trim())}
+                          className='hover:text-blue-900 dark:hover:text-white transition-colors'
+                        >
+                          <X className='w-3 h-3' />
+                        </button>
+                      </span>
+                    ),
+                )}
+
+                {/* Input Field */}
+                <input
+                  type='text'
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+                      addSkill(skillInput);
+                    }
+                  }}
+                  onBlur={() => addSkill(skillInput)}
+                  placeholder={
+                    formData.skills
+                      ? "Add more..."
+                      : "Type skill and press Enter or comma"
+                  }
+                  className='flex-1 min-w-[120px] outline-none bg-transparent text-sm dark:text-white p-1'
+                />
+              </div>
+              <p className='text-xs text-slate-500 dark:text-slate-400'>
+                Common skills: Acting, Dancing, Singing, Swimming, Driving.
+              </p>
             </div>
 
             <div>
