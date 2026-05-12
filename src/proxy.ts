@@ -7,7 +7,7 @@ export default async function middleware(request: NextRequest) {
 
   if (
     pathname === "/login" ||
-    pathname === "/role" ||
+    // pathname === "/role" ||
     pathname.startsWith("/api")
   ) {
     return NextResponse.next();

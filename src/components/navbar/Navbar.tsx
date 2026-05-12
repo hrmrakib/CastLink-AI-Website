@@ -35,10 +35,10 @@ export default function Navbar() {
   if (hideNavbar) return null;
 
   const handleNavigate = (role: string) => {
-    if (role === "admin" && !user) {
-      toast.error("You are not logged in");
-      router.push("/login");
-    }
+    // if (role === "admin" && !user) {
+    //   toast.error("You are not logged in");
+    //   router.push("/login");
+    // }
 
     router.push(`/dashboard/${role}`);
   };

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 // @ts-ignore
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
@@ -11,9 +11,9 @@ import AppInitializer from "@/components/AppInitializer/AppInitializer";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const arial = Geist({
-  variable: "--font-arial",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 const geistSans = Geist({
@@ -39,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <body
-        className={`${arial.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
           <TooltipProvider>

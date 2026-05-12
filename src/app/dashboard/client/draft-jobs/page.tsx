@@ -173,7 +173,7 @@ export default function DraftJobsPage() {
   const debouncedSearch = useDebounce(searchQuery, 999);
 
   const { data, isFetching, isError, refetch } = useGetDeaftJobsQuery({
-    search: debouncedSearch,
+    search: debouncedSearch ?? "",
   });
   const [deleteDraftJobMutation] = useDeleteDraftJobMutation();
 

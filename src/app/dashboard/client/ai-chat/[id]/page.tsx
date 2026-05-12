@@ -105,10 +105,8 @@ export default function AIDynamicPage() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [aiChatCreateMutation] = useAiChatCreateMutation();
   const sessionId = useSelector((state: any) => state.aiChat.sessionId);
 
   const [availabilityModal, setAvailabilityModal] = useState(false);
@@ -132,6 +130,8 @@ export default function AIDynamicPage() {
     useState(false);
 
   const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
+  const [aiChatCreateMutation, { isLoading: aiChatCreateLoading }] =
+    useAiChatCreateMutation();
 
   const {
     data,
@@ -212,7 +212,7 @@ export default function AIDynamicPage() {
     }
 
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const res = await aiChatCreateMutation({
         session_id: sessionId ?? id,
         message: inputValue,
@@ -240,7 +240,7 @@ export default function AIDynamicPage() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       refetch();
-      setIsLoading(false);
+      // setIsLoading(false);
       textareaRef.current?.focus();
     }
   };
@@ -664,7 +664,7 @@ export default function AIDynamicPage() {
               ))}
 
             {/* Loading indicator */}
-            {(isLoading || isLoadingChat) && (
+            {(aiChatCreateLoading || isLoadingChat) && (
               <div className='flex gap-3 justify-start items-start'>
                 <div className='flex items-center justify-center gap-3 mt-4'>
                   <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
@@ -688,7 +688,7 @@ export default function AIDynamicPage() {
               value={inputValue}
               onChange={handleInput}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !isLoading) {
+                if (e.key === "Enter" && !e.shiftKey && !aiChatCreateLoading) {
                   e.preventDefault();
                   handleSendMessage();
                 }
@@ -705,7 +705,7 @@ export default function AIDynamicPage() {
             />
             <button
               onClick={handleSendMessage}
-              disabled={isLoading || !inputValue.trim()}
+              disabled={aiChatCreateLoading || !inputValue.trim()}
               className='
                 absolute bottom-2 right-2
                 w-12 h-12
