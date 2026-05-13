@@ -7,7 +7,7 @@ export default function AgentLayout({
 }) {
   return (
     <>
-      <RoleRedirect allowedRole='AGENT'>{children}</RoleRedirect>;
+      <RoleRedirect allowedRole='AGENT'>{children}</RoleRedirect>
     </>
   );
 }
