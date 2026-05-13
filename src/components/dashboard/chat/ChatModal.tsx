@@ -13,6 +13,7 @@ import {
   Phone,
   Check,
   ScanFace,
+  MessageCircleMore,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import {
@@ -33,9 +34,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
 
 interface TalentProfile {
   talent_id: number;
+  agent_id?: number;
   images: string[];
   is_active: boolean;
   name: string;
@@ -91,6 +94,7 @@ export default function ChatModalDetail({
   const [availabilityModal, setAvailabilityModal] = useState(false);
   const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
     useState<TalentProfile | null>(null);
+  const [createConversationMutation] = useCreateConversationMutation();
 
   console.log({ selectedAvailabilityTalent });
 
@@ -234,6 +238,18 @@ export default function ChatModalDetail({
       }
     } catch (error: any) {
       toast.error(error?.data?.status_message);
+    }
+  };
+
+  const handleCreateConversion = async (id: number) => {
+    try {
+      const res = await createConversationMutation({
+        user_id: id,
+      }).unwrap();
+
+      console.log(res);
+    } catch (error: any) {
+      console.log(error?.data?.message || "Fail to create new chat!");
     }
   };
 
@@ -426,6 +442,18 @@ export default function ChatModalDetail({
                   title='Polas Request'
                 >
                   <ScanFace size={20} />
+                </button>
+
+                <button
+                  onClick={() =>
+                    handleCreateConversion(talent?.agent_id as number)
+                  }
+                  disabled={polasLoading}
+                  className='p-2 md:p-3.5 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 transition-colors text-[#ffffff] hover:text-gray-100 border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer'
+                  aria-label='Approve'
+                  title='Direct message to agent'
+                >
+                  <MessageCircleMore size={20} />
                 </button>
               </div>
             </div>

@@ -319,8 +319,6 @@ function AIChatInner() {
     { skip: !draftId },
   );
 
-  console.log({ continueDraftJob });
-
   useEffect(() => {
     if (continueDraftJob) {
       setMessage(continueDraftJob?.data?.messages[0]?.content);

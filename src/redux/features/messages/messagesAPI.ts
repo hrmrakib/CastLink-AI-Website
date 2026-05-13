@@ -4,7 +4,7 @@ const messagesAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
     createConversation: builder.mutation({
       query: (body) => ({
-        url: "/chat/conversations/",
+        url: "/chat/conversation/",
         method: "POST",
         body,
       }),

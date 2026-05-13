@@ -14,6 +14,7 @@ import {
   ScanFace,
   Star,
   ShieldAlert,
+  MessageCircleMore,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -47,6 +48,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addTalentsToModal } from "@/redux/features/ai-chat/aiChatSlice";
 import { ChatSkeleton } from "@/components/loading/ChatSkeleton";
+import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
 interface Message {
   id: number;
   sender: "ai" | "user";
@@ -58,6 +60,7 @@ interface Message {
 
 interface TalentProfile {
   talent_id: number;
+  agent_id?: number;
   images: string[];
   is_active: boolean;
   name: string;
@@ -132,6 +135,7 @@ export default function AIDynamicPage() {
   const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
   const [aiChatCreateMutation, { isLoading: aiChatCreateLoading }] =
     useAiChatCreateMutation();
+  const [createConversationMutation] = useCreateConversationMutation();
 
   const {
     data,
@@ -382,6 +386,18 @@ export default function AIDynamicPage() {
     setJobDescription("");
   };
 
+  const handleCreateConversion = async (id: number) => {
+    try {
+      const res = await createConversationMutation({
+        user_id: id,
+      }).unwrap();
+
+      console.log(res);
+    } catch (error: any) {
+      console.log(error?.data?.message || "Fail to create new chat!");
+    }
+  };
+
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Chat Messages Area */}
@@ -625,6 +641,7 @@ export default function AIDynamicPage() {
                                     >
                                       <Check size={20} />
                                     </button>
+
                                     <button
                                       onClick={() =>
                                         handlePolasRequest(profile?.talent_id)
@@ -635,6 +652,20 @@ export default function AIDynamicPage() {
                                       title='Polas Request'
                                     >
                                       <ScanFace size={20} />
+                                    </button>
+
+                                    <button
+                                      onClick={() =>
+                                        handleCreateConversion(
+                                          profile?.agent_id as number,
+                                        )
+                                      }
+                                      disabled={polasLoading}
+                                      className='p-2 md:p-3.5 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 transition-colors text-[#ffffff] hover:text-gray-100 border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer'
+                                      aria-label='Approve'
+                                      title='Direct message to agent'
+                                    >
+                                      <MessageCircleMore size={20} />
                                     </button>
                                   </div>
                                 </div>
@@ -669,6 +700,15 @@ export default function AIDynamicPage() {
                 <div className='flex items-center justify-center gap-3 mt-4'>
                   <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
                   <p className='text-[#404145]'>AI is thinking...</p>
+                </div>
+              </div>
+            )}
+
+            {isLoadingChat && (
+              <div className='flex gap-3 justify-start items-start'>
+                <div className='flex items-center justify-center gap-3 mt-4'>
+                  <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#2563EB]'></div>
+                  <p className='text-[#404145]'>Receiving AI response ...</p>
                 </div>
               </div>
             )}

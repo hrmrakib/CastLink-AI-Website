@@ -15,6 +15,8 @@ import {
 import { SocketProvider, useSocket } from "@/provider/SocketProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { setConversations } from "@/redux/features/messages/conversationSlice";
 
 type TConversation = {
   conversation_id: number;
@@ -152,16 +154,24 @@ function MessagingComponent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileUploadWithMessageMutation, { isLoading: isUploadingWithMessage }] =
     useFileUploadWithMessageMutation();
+  const dispatch = useDispatch();
+
+  console.log({ selectedConversation });
 
   const {
     data: messagesData,
     refetch: refetchMessages,
     isFetching: messagesFetching,
-  } = useGetMessagesQuery({
-    conversationId: selectedConversation?.conversation_id || 2,
-    page: msgPage,
-    limit: msgLimit,
-  });
+  } = useGetMessagesQuery(
+    {
+      conversationId: selectedConversation?.conversation_id,
+      page: msgPage,
+      limit: msgLimit,
+    },
+    {
+      skip: !selectedConversation?.conversation_id,
+    },
+  );
 
   const { data: conversations, isFetching: conversationsFetching } =
     useGetMyConversationsQuery({
@@ -323,9 +333,19 @@ function MessagingComponent() {
     setNewMessage("");
   };
 
+  // TODO: testing
+
+  // const getConversations = useSelector((state)=> state.conversations.)
+  console.log(1);
+
   const handleSelectConversation = (conversation: TConversation) => {
     const updated = { ...conversation, unread_count: 0 };
-    setSelectedConversation(updated);
+    const updatedConversations = myConversations.map((item: any) =>
+      item.conversation_id === conversation.conversation_id ? updated : item,
+    );
+
+    // setSelectedConversation(updated);
+    dispatch(setConversations(updatedConversations));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

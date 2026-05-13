@@ -55,13 +55,15 @@ const customBaseQuery: BaseQueryFn<
           window.location.replace("/login");
         }, 400);
       }
-    } else if (status === 403) {
-      toast.error("You need to verify your email to use this feature.");
-      window.location.href = "/profile";
-    } else if (status === 402) {
-      toast.error("You need to upgrade your plan to use this feature.");
-      window.location.href = "/#upgrade-plan";
     }
+    //  else if (status === 403) {
+    //   toast.error("You need to verify your email to use this feature.");
+    //   window.location.href = "/profile";
+    // }
+    //  else if (status === 402) {
+    //   toast.error("You need to upgrade your plan to use this feature.");
+    //   window.location.href = "/#upgrade-plan";
+    // }
 
     return result;
   }
