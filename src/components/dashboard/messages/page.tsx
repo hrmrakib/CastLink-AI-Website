@@ -16,7 +16,11 @@ import { SocketProvider, useSocket } from "@/provider/SocketProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
-import { setConversations } from "@/redux/features/messages/conversationSlice";
+import {
+  clearConversation,
+  setConversation,
+} from "@/redux/features/messages/conversationSlice";
+import { RootState } from "@/redux/store";
 
 type TConversation = {
   conversation_id: number;
@@ -140,8 +144,12 @@ function MessagesSkeleton() {
 
 function MessagingComponent() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [selectedConversation, setSelectedConversation] =
-    useState<TConversation | null>(null);
+  // const [selectedConversation, setSelectedConversation] =
+  //   useState<TConversation | null>(null);
+  const selectedConversation = useSelector(
+    (state: RootState) => state.conversation,
+  );
+  const isConversationSelected = selectedConversation.conversation_id !== 0;
   const [messages, setMessages] = useState<Message[]>();
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,8 +163,6 @@ function MessagingComponent() {
   const [fileUploadWithMessageMutation, { isLoading: isUploadingWithMessage }] =
     useFileUploadWithMessageMutation();
   const dispatch = useDispatch();
-
-  console.log({ selectedConversation });
 
   const {
     data: messagesData,
@@ -334,18 +340,13 @@ function MessagingComponent() {
   };
 
   // TODO: testing
-
-  // const getConversations = useSelector((state)=> state.conversations.)
-  console.log(1);
-
   const handleSelectConversation = (conversation: TConversation) => {
     const updated = { ...conversation, unread_count: 0 };
-    const updatedConversations = myConversations.map((item: any) =>
-      item.conversation_id === conversation.conversation_id ? updated : item,
-    );
+
+    console.log(updated);
 
     // setSelectedConversation(updated);
-    dispatch(setConversations(updatedConversations));
+    dispatch(setConversation(updated));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -665,7 +666,7 @@ function MessagingComponent() {
             <div className='border-b border-border bg-background p-4 flex items-center gap-3 shrink-0'>
               {/* Back button — mobile only */}
               <button
-                onClick={() => setSelectedConversation(null)}
+                onClick={() => dispatch(clearConversation())}
                 className='lg:hidden text-blue-600 shrink-0'
                 aria-label='Back to conversations'
               >

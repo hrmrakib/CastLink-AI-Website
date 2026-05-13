@@ -1,9 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface LastMessage {
-  message: string;
-  sender_id: number;
+  attachment: string | null;
   created_at: string;
+  message_id: number;
+  message_type: string;
+  sender_id: number;
+  text: string;
 }
 
 export type TConversation = {
@@ -18,60 +21,39 @@ export type TConversation = {
   created_at: string;
 };
 
-interface ConversationState {
-  conversations: TConversation[];
-  activeConversationId: number | null;
-}
-
-const initialState: ConversationState = {
-  conversations: [],
-  activeConversationId: null,
+const initialState: TConversation = {
+  conversation_id: 0,
+  other_user_id: 0,
+  other_user_name: "",
+  other_user_email: "",
+  other_user_profile_pic: "",
+  last_message: {
+    attachment: null,
+    created_at: "",
+    message_id: 0,
+    message_type: "",
+    sender_id: 0,
+    text: "",
+  },
+  unread_count: 0,
+  updated_at: "",
+  created_at: "",
 };
 
 const conversationSlice = createSlice({
-  name: "conversations",
+  name: "conversation",
   initialState,
   reducers: {
-    // Set the entire list (e.g., after an API fetch)
-    setConversations: (state, action: PayloadAction<TConversation[]>) => {
-      state.conversations = action.payload;
+    setConversation: (state, action: PayloadAction<TConversation>) => {
+      return action.payload; // Correct way to replace the entire state object
     },
-    // Update a single conversation (e.g., when a new message arrives via Socket)
-    updateConversation: (state, action: PayloadAction<TConversation>) => {
-      const index = state.conversations.findIndex(
-        (c) => c.conversation_id === action.payload.conversation_id,
-      );
-      if (index !== -1) {
-        state.conversations[index] = action.payload;
-      } else {
-        state.conversations.unshift(action.payload); // Add to top if new
-      }
-    },
-    setActiveConversation: (state, action: PayloadAction<number | null>) => {
-      state.activeConversationId = action.payload;
-    },
-    clearConversations: (state) => {
-      state.conversations = [];
-      state.activeConversationId = null;
+
+    clearConversation: () => {
+      return initialState; // Reset back to the empty object structure
     },
   },
 });
 
-export const {
-  setConversations,
-  updateConversation,
-  setActiveConversation,
-  clearConversations,
-} = conversationSlice.actions;
-
-// Selectors for getting data
-// export const selectAllConversations = (state: RootState) =>
-//   state?.conversations?.conversations;
-// export const selectActiveId = (state: RootState) =>
-//   state.conversations.activeConversationId;
-// export const selectActiveConversation = (state: RootState) =>
-//   state.conversations.conversations.find(
-//     (c) => c.conversation_id === state.conversations.activeConversationId,
-//   );
+export const { setConversation, clearConversation } = conversationSlice.actions;
 
 export default conversationSlice.reducer;
