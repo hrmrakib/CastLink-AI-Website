@@ -15,7 +15,7 @@ const ClientSettingPage = () => {
         <div className='flex flex-col gap-6'>
           <Link
             className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
-            href='/dashboard/client/settings/profile'
+            href='/dashboard/admin/settings/profile'
           >
             <p className='flex items-center gap-2'>
               <CircleUserRound size={20} /> Personal Information
@@ -24,7 +24,7 @@ const ClientSettingPage = () => {
           </Link>
           <Link
             className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
-            href='/dashboard/client/settings/change-password'
+            href='/dashboard/admin/settings/change-password'
           >
             <p className='flex items-center gap-2'>
               <LockKeyhole size={20} /> Change password
@@ -33,7 +33,7 @@ const ClientSettingPage = () => {
           </Link>
           <Link
             className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
-            href='/dashboard/client/settings/terms-and-conditions'
+            href='/dashboard/admin/settings/terms-and-conditions'
           >
             <p className='flex items-center gap-2'>
               <BookText size={20} /> Terms & Conditions

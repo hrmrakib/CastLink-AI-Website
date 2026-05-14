@@ -30,7 +30,7 @@ import {
   useShortlistTalentMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import { useAuth } from "@/hooks/useAuth";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +49,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { addTalentsToModal } from "@/redux/features/ai-chat/aiChatSlice";
 import { ChatSkeleton } from "@/components/loading/ChatSkeleton";
 import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
+import { setConversation } from "@/redux/features/messages/conversationSlice";
 interface Message {
   id: number;
   sender: "ai" | "user";
@@ -101,6 +102,7 @@ export default function AIDynamicPage() {
   );
   const [jobSaving, setJobSaving] = useState(false);
   const [selectedTalentIndex, setSelectedTalentIndex] = useState(0);
+  const router = useRouter();
 
   const [isSkipping, setIsSkipping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -392,7 +394,31 @@ export default function AIDynamicPage() {
         user_id: id,
       }).unwrap();
 
-      console.log(res);
+      if (res?.status) {
+        const c_id = res?.data?.conversation_id;
+
+        const message = {
+          conversation_id: c_id,
+          other_user_id: 0,
+          other_user_name: "",
+          other_user_email: "",
+          other_user_profile_pic: "",
+          last_message: {
+            attachment: null,
+            created_at: "",
+            message_id: 0,
+            message_type: "",
+            sender_id: 0,
+            text: "",
+          },
+          unread_count: 0,
+          updated_at: "",
+          created_at: "",
+        };
+        dispatch(setConversation(message));
+
+        router.push("/dashboard/client/message");
+      }
     } catch (error: any) {
       console.log(error?.data?.message || "Fail to create new chat!");
     }
