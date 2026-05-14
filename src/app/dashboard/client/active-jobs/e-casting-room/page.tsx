@@ -848,7 +848,8 @@ export default function ECastingRoom() {
       />
     );
   }
-
+  const meet_app_url =
+    process.env.NEXT_PUBLIC_MEET_APP_URL || "https://meet.poolofcast.com";
   return (
     <div className='min-h-screen bg-[#F6F7F9] font-sans'>
       {/* Page */}
@@ -890,7 +891,7 @@ export default function ECastingRoom() {
               color='bg-violet-600 hover:bg-violet-700 shadow-violet-400/40'
               // onClick={() => setModal("join")}
               onClick={() =>
-                window.open(`http://localhost:3001/?token=${token}`, "_blank")
+                window.open(`${meet_app_url}/?token=${token}`, "_blank")
               }
             />
             {/* <ActionCard
