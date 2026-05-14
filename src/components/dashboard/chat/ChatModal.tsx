@@ -14,8 +14,9 @@ import {
   Check,
   ScanFace,
   MessageCircleMore,
+  Loader,
 } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useBookTalentMutation,
   useECastingRequestMutation,
@@ -35,6 +36,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
+import { setConversation } from "@/redux/features/messages/conversationSlice";
+import { useRouter } from "next/navigation";
 
 interface TalentProfile {
   talent_id: number;
@@ -95,6 +98,11 @@ export default function ChatModalDetail({
   const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
     useState<TalentProfile | null>(null);
   const [createConversationMutation] = useCreateConversationMutation();
+  const [loadingConversationId, setLoadingConversationId] = useState<
+    number | null
+  >(null);
+  const router = useRouter();
+  const dispatch = useDispatch();
 
   console.log({ selectedAvailabilityTalent });
 
@@ -114,8 +122,6 @@ export default function ChatModalDetail({
   const hasTalents = talentList.length > 0;
   const isFirst = currentTalentIndex === 0;
   const isLast = currentTalentIndex === talentList.length - 1;
-
-  console.log({ talent });
 
   // Reset image index when talent changes
   useEffect(() => {
@@ -243,13 +249,40 @@ export default function ChatModalDetail({
 
   const handleCreateConversion = async (id: number) => {
     try {
+      setLoadingConversationId(id);
       const res = await createConversationMutation({
         user_id: id,
       }).unwrap();
 
-      console.log(res);
+      if (res?.status) {
+        const c_id = res?.data?.conversation_id;
+
+        const message = {
+          conversation_id: c_id,
+          other_user_id: 0,
+          other_user_name: "",
+          other_user_email: "",
+          other_user_profile_pic: "",
+          last_message: {
+            attachment: null,
+            created_at: "",
+            message_id: 0,
+            message_type: "",
+            sender_id: 0,
+            text: "",
+          },
+          unread_count: 0,
+          updated_at: "",
+          created_at: "",
+        };
+        dispatch(setConversation(message));
+
+        router.push("/dashboard/client/message");
+      }
     } catch (error: any) {
       console.log(error?.data?.message || "Fail to create new chat!");
+    } finally {
+      setLoadingConversationId(null);
     }
   };
 
@@ -448,12 +481,16 @@ export default function ChatModalDetail({
                   onClick={() =>
                     handleCreateConversion(talent?.agent_id as number)
                   }
-                  disabled={polasLoading}
+                  disabled={loadingConversationId === talent?.agent_id}
                   className='p-2 md:p-3.5 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 transition-colors text-[#ffffff] hover:text-gray-100 border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer'
                   aria-label='Approve'
                   title='Direct message to agent'
                 >
-                  <MessageCircleMore size={20} />
+                  {loadingConversationId === talent?.agent_id ? (
+                    <Loader className='animate-spin' size={20} />
+                  ) : (
+                    <MessageCircleMore size={20} />
+                  )}
                 </button>
               </div>
             </div>

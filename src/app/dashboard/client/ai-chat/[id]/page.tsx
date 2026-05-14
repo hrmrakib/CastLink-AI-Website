@@ -15,6 +15,7 @@ import {
   Star,
   ShieldAlert,
   MessageCircleMore,
+  Loader,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -137,7 +138,12 @@ export default function AIDynamicPage() {
   const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
   const [aiChatCreateMutation, { isLoading: aiChatCreateLoading }] =
     useAiChatCreateMutation();
+  // const [createConversationMutation, { isLoading: isCreateConversation }] =
+  //   useCreateConversationMutation();
   const [createConversationMutation] = useCreateConversationMutation();
+  const [loadingConversationId, setLoadingConversationId] = useState<
+    number | null
+  >(null);
 
   const {
     data,
@@ -390,6 +396,7 @@ export default function AIDynamicPage() {
 
   const handleCreateConversion = async (id: number) => {
     try {
+      setLoadingConversationId(id);
       const res = await createConversationMutation({
         user_id: id,
       }).unwrap();
@@ -421,6 +428,8 @@ export default function AIDynamicPage() {
       }
     } catch (error: any) {
       console.log(error?.data?.message || "Fail to create new chat!");
+    } finally {
+      setLoadingConversationId(null);
     }
   };
 
@@ -686,12 +695,23 @@ export default function AIDynamicPage() {
                                           profile?.agent_id as number,
                                         )
                                       }
-                                      disabled={polasLoading}
+                                      disabled={
+                                        loadingConversationId ===
+                                        profile?.agent_id
+                                      }
                                       className='p-2 md:p-3.5 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 transition-colors text-[#ffffff] hover:text-gray-100 border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer'
                                       aria-label='Approve'
                                       title='Direct message to agent'
                                     >
-                                      <MessageCircleMore size={20} />
+                                      {loadingConversationId ===
+                                      profile?.agent_id ? (
+                                        <Loader
+                                          className='animate-spin'
+                                          size={20}
+                                        />
+                                      ) : (
+                                        <MessageCircleMore size={20} />
+                                      )}
                                     </button>
                                   </div>
                                 </div>

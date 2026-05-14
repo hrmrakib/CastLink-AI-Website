@@ -313,6 +313,13 @@ function AIChatInner() {
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draft_id");
+  const [currency, setCurrency] = useState("USD");
+
+  const currencies = [
+    { code: "USD", symbol: "$", label: "Dollar" },
+    { code: "EUR", symbol: "€", label: "Euro" },
+    { code: "ZAR", symbol: "R", label: "Rand" },
+  ];
 
   const { data: continueDraftJob } = useContinueDraftJobQuery(
     { draft_id: draftId },
@@ -600,6 +607,37 @@ function AIChatInner() {
                     <DollarSign className='w-4 h-4' />
                     Budget Range
                   </label>
+
+                  <div className='flex w-full border border-gray-200 rounded-lg overflow-hidden bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition'>
+                    {/* Currency Selector */}
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className='border-r border-gray-200 bg-transparent px-3 py-3 text-[#404145] font-medium text-sm focus:outline-none cursor-pointer'
+                    >
+                      {currencies.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.symbol} {c.code}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Budget Input */}
+                    <input
+                      type='text'
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      className='flex-1 px-4 py-3 text-[#000000] bg-transparent focus:outline-none'
+                      placeholder='min - max (range allowed or just minimum)'
+                    />
+                  </div>
+                </div>
+                {/* <div>
+                  <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
+                    <DollarSign className='w-4 h-4' />
+                    Budget Range
+                  </label>
+
                   <input
                     type='text'
                     value={budget}
@@ -607,7 +645,7 @@ function AIChatInner() {
                     className='w-full border border-gray-200 rounded-lg px-4 py-3 text-[#000000] bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
                     placeholder='min - max (range allowed or just minimum)'
                   />
-                </div>
+                </div> */}
 
                 {/* Job Type */}
                 <div>

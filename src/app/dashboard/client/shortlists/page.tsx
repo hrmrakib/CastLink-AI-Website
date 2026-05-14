@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -12,6 +12,7 @@ export interface Talent {
   created_at: string;
   location: string;
   agency_name: string | null;
+  image?: string;
 }
 
 export interface ShortlistJob {
@@ -67,6 +68,8 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       .toUpperCase()
       .slice(0, 2);
 
+  const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
+
   return (
     <div
       onClick={() =>
@@ -78,14 +81,14 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       <div className='mb-4 flex items-start justify-between'>
         <h3 className='text-xl font-bold text-black'>{shortlist.job_title}</h3>
         <span className='rounded-full bg-[#f0f0f093] px-3 py-1 text-sm font-semibold text-gray-700'>
-          {shortlist.talents.length} Talent
+          {shortlist?.talents.length} Talent
         </span>
       </div>
 
       {/* Description and label */}
       <div className='mb-4 space-y-1'>
         <p className='text-sm text-[#404145] mb-3 line-clamp-2'>
-          {shortlist.job_description}
+          {shortlist?.job_description}
         </p>
         <p className='text-sm font-medium text-[#000000]'>Talent Applied</p>
       </div>
@@ -94,9 +97,16 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       <div className='flex items-center gap-2 pb-4'>
         <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
           {shortlist?.talents?.slice(0, 3).map((talent) => (
-            <Avatar key={talent.talent_id}>
-              <AvatarFallback>{getInitials(talent.talent_name)}</AvatarFallback>
-            </Avatar>
+            <>
+              {talent?.image && (
+                <Avatar key={talent.talent_id}>
+                  <AvatarImage src={image_url + talent?.image} />
+                  <AvatarFallback>
+                    {getInitials(talent.talent_name)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </>
           ))}
         </div>
         {shortlist.talents.length > 3 && (
