@@ -13,20 +13,12 @@ import {
   Calendar,
   MapPin,
   DollarSign,
-  Loader2,
   ImageUp,
   CloudUpload,
   Copy,
   Check,
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +123,7 @@ function capitalize(str: string) {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function TalentRow({ talent }: { talent: Talent }) {
+function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
@@ -147,10 +139,11 @@ function TalentRow({ talent }: { talent: Talent }) {
    * Helper to construct FormData based on your API requirements:
    * job_id, talent_id, and files
    */
+
   const prepareFormData = (file: File) => {
     const formData = new FormData();
     // Ensure these keys match your backend exactly
-    formData.append("job_id", String(talent?.job_id));
+    formData.append("job_id", String(job_id));
     formData.append("talent_id", String(talent?.talent_id));
     formData.append("files", file);
     return formData;
@@ -166,9 +159,9 @@ function TalentRow({ talent }: { talent: Talent }) {
         await toast.promise(polasUploadMutation(formData).unwrap(), {
           loading: `Uploading Pola for ${talent.name}...`,
           success: "Pola uploaded successfully!",
-          error: "Failed to upload Pola.",
+          error: (err) => err?.data?.status_message ?? "Failed to upload Pola.",
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error("Pola upload error:", err);
       }
     }
@@ -184,7 +177,8 @@ function TalentRow({ talent }: { talent: Talent }) {
         await toast.promise(selftapUploadMutation(formData).unwrap(), {
           loading: `Uploading Self-tape for ${talent.name}...`,
           success: "Self-tape uploaded successfully!",
-          error: "Failed to upload video.",
+          error: (err) =>
+            err?.data?.status_message ?? "Failed to upload Pola.++++++",
         });
       } catch (err) {
         console.error("Video upload error:", err);
@@ -273,123 +267,6 @@ function TalentRow({ talent }: { talent: Talent }) {
             >
               Self-tape requested <CloudUpload size={16} />
             </button>
-          ) : (
-            "Suggestion"
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TalentRowOld({ talent }: { talent: Talent }) {
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null); // Dedicated video ref
-  const [copied, setCopied] = useState(false);
-  const [polasUploadMutation] = usePolasUploadMutation();
-  const [selftapUploadMutation] = useSelftapUploadMutation();
-
-  // Handle Image (Pola) Upload
-  const handlePolaClick = () => imageInputRef.current?.click();
-
-  // Trigger Video Picker
-  const handleVideoClick = () => videoInputRef.current?.click();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      console.log("Uploading image for talent:", talent.talent_id, file);
-      toast.success(`Uploading Pola for ${talent.name}...`);
-      // Implement your image upload API logic here
-    }
-  };
-
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      console.log("Uploading video:", file.name);
-      // Trigger the parent function with the talent data and the selected file
-      // onUploadVideo(talent, file);
-    }
-  };
-
-  // Handle Link Copy (E-casting)
-  const handleCopyLink = () => {
-    const link = `${window.location.origin}/casting/${talent.talent_id}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    toast.success("Casting link copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className='flex items-center gap-3 p-3 rounded-lg transition'>
-      <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
-        <AvatarImage src={resolveMedia(talent.images?.[0])} />
-        <AvatarFallback>
-          {talent?.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .slice(0, 2)}
-        </AvatarFallback>
-      </Avatar>
-      <div className='min-w-0 flex-1'>
-        <p className='font-semibold text-sm text-foreground truncate'>
-          {talent.name}
-        </p>
-        <p className='text-xs text-muted-foreground capitalize'>
-          {talent.role} · {talent.location}
-        </p>
-      </div>
-      <div className='text-right shrink-0'>
-        <div
-          className={`${talent.source_type === "selftape" && ""} ${
-            talent.source_type === "ecasting" && "bg-[#F4E8FF] text-[#7408D3]"
-          } ${talent.source_type === "pola" && "bg-[#FDF8E9] text-[#D3A008]"} ${talent.source_type === "suggestion" && "bg-yellow-500"} 
-             px-2.5 py-2 rounded-full text-xs font-semibold 
-          `}
-        >
-          <input
-            type='file'
-            ref={imageInputRef}
-            className='hidden'
-            accept='image/*'
-            onChange={handleFileChange}
-          />
-
-          <input
-            type='file'
-            ref={videoInputRef}
-            className='hidden'
-            accept='video/*'
-            onChange={handleVideoChange}
-          />
-
-          {talent.source_type === "pola" ? (
-            <button
-              onClick={handlePolaClick}
-              className='flex items-center gap-1'
-            >
-              Polas requested <ImageUp size={16} />
-            </button>
-          ) : talent.source_type === "ecasting" ? (
-            <button
-              onClick={handleCopyLink}
-              className='flex items-center gap-1'
-            >
-              E-casting requested <Copy size={16} />
-            </button>
-          ) : talent.source_type === "selftape" ? (
-            <>
-              <button
-                onClick={handleVideoClick}
-                className='flex items-center gap-1 bg-[#FDF8E9] text-[#D3A008]'
-              >
-                Self-tape requested
-                <CloudUpload size={16} />
-              </button>
-            </>
           ) : (
             "Suggestion"
           )}
@@ -563,9 +440,6 @@ export default function ActiveJobsPage() {
     );
   }
 
-  // TODO: test console
-  // const aiResult = jobData.ai_result!;
-  // const aiResult = data?.data?.ai_result;
   const aiResult = selectedJob?.ai_result as AiResult;
 
   const filteredTalents = aiResult?.suggested_talents?.map((talent: Talent) => {
@@ -601,6 +475,8 @@ export default function ActiveJobsPage() {
     // 4. Default: If no request exists, keep the original suggested talent info
     return { ...talent, source_type: "suggestion" };
   });
+
+  const job_id = selectedJob?.job_id;
 
   return (
     <div className='min-h-screen bg-white rounded-xl'>
@@ -939,7 +815,11 @@ export default function ActiveJobsPage() {
                       </h3>
                       <div className='space-y-1.5'>
                         {filteredTalents?.map((t) => (
-                          <TalentRow key={`sug-${t.talent_id}`} talent={t} />
+                          <TalentRow
+                            key={`sug-${t.talent_id}`}
+                            talent={t}
+                            job_id={job_id as string}
+                          />
                         ))}
                       </div>
                     </div>
@@ -1073,22 +953,6 @@ export default function ActiveJobsPage() {
                   )}
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              {/* <div className='flex flex-col sm:flex-row gap-4 pt-2'>
-                <Button className='flex-1 bg-[#0F1C2E] hover:bg-slate-800 text-white rounded-lg h-12 font-semibold'>
-                  Accept
-                </Button>
-                <Button className='flex-1 bg-[#CD0000] hover:bg-red-700 text-white rounded-lg h-12 font-semibold'>
-                  Decline
-                </Button>
-                <Button
-                  onClick={() => setIsUploadOpen(true)}
-                  className='flex-1 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg h-12 font-semibold'
-                >
-                  Respond
-                </Button>
-              </div> */}
             </>
           )}
         </DialogContent>
