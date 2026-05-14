@@ -39,6 +39,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     currentConversationId.current = conversationId;
 
+    console.log("inside provider", conversationId);
+
     const ws = new WebSocket(
       `wss://api.poolofcast.com/ws/chat/${conversationId}/?token=${token}`,
     );

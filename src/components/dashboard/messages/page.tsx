@@ -159,6 +159,9 @@ function MessagingComponent() {
     useFileUploadWithMessageMutation();
   const dispatch = useDispatch();
 
+  // TODO::::::::::: test
+  console.log({ selectedConversation });
+
   const {
     data: messagesData,
     refetch: refetchMessages,
@@ -183,7 +186,8 @@ function MessagingComponent() {
     });
 
   const myConversations = conversations?.data?.results || [];
-  const lastConversationId = useRef<number | null>(null);
+  // TODO: prev
+  // const lastConversationId = useRef<number | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -194,29 +198,56 @@ function MessagingComponent() {
     connect(selectedConversation.conversation_id);
   }, [selectedConversation, connect]);
 
+  // TODO: new
+  // Clears messages immediately when the user switches conversations
+  useEffect(() => {
+    setMessages(undefined);
+  }, [selectedConversation?.conversation_id]);
+
+  // TODO: new
   useEffect(() => {
     const incoming = messagesData?.data?.messages;
-    if (!Array.isArray(incoming) || incoming.length === 0) return;
+    if (!Array.isArray(incoming)) return;
 
-    const currentId = selectedConversation?.conversation_id ?? null;
-
-    if (currentId !== lastConversationId.current) {
-      lastConversationId.current = currentId;
-      setMessages(incoming);
-    } else {
-      setMessages((prev) => {
-        const merged = new Map<number, Message>();
-        incoming.forEach((m: Message) => merged.set(m.message_id, m));
-        (prev ?? []).forEach((m) => {
-          if (!merged.has(m.message_id)) merged.set(m.message_id, m);
-        });
-        return Array.from(merged.values()).sort(
-          (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-        );
+    setMessages((prev) => {
+      const merged = new Map<number, Message>();
+      // API is source of truth for persisted messages
+      incoming.forEach((m: Message) => merged.set(m.message_id, m));
+      // Keep WS-only messages not yet returned by the API
+      (prev ?? []).forEach((m) => {
+        if (!merged.has(m.message_id)) merged.set(m.message_id, m);
       });
-    }
-  }, [messagesData, selectedConversation?.conversation_id]);
+      return Array.from(merged.values()).sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      );
+    });
+  }, [messagesData]); // conversation_id removed — clearing is its own effect now
+
+  // TODO: prev
+  // useEffect(() => {
+  //   const incoming = messagesData?.data?.messages;
+  //   if (!Array.isArray(incoming) || incoming.length === 0) return;
+
+  //   const currentId = selectedConversation?.conversation_id ?? null;
+
+  //   if (currentId !== lastConversationId.current) {
+  //     lastConversationId.current = currentId;
+  //     setMessages(incoming);
+  //   } else {
+  //     setMessages((prev) => {
+  //       const merged = new Map<number, Message>();
+  //       incoming.forEach((m: Message) => merged.set(m.message_id, m));
+  //       (prev ?? []).forEach((m) => {
+  //         if (!merged.has(m.message_id)) merged.set(m.message_id, m);
+  //       });
+  //       return Array.from(merged.values()).sort(
+  //         (a, b) =>
+  //           new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  //       );
+  //     });
+  //   }
+  // }, [messagesData, selectedConversation?.conversation_id]);
 
   useEffect(() => {
     if (!socket) return;
