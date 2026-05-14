@@ -5,13 +5,24 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HeroSection() {
   const router = useRouter();
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const handleCreateJob = () => {
-    router.push("/dashboard/client/ai-chat");
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user?.role === "Client") {
+      router.push(`/dashboard/client/ai-chat`);
+      return;
+    }
+    toast.warning("Only client can create job here.");
   };
 
   const handleJoinAgent = () => {

@@ -2,13 +2,29 @@
 
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function CTASection() {
+  const router = useRouter();
   const [createJobClicked, setCreateJobClicked] = useState(false);
   const [joinAgentClicked, setJoinAgentClicked] = useState(false);
+  const { user } = useAuth();
+
+  console.log({ user });
 
   const handleCreateJob = () => {
     setCreateJobClicked(true);
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user?.role === "Client") {
+      router.push(`/dashboard/client/ai-chat`);
+      return;
+    }
+    toast.warning("Only client can create job here.");
     console.log("Create Job clicked");
     setTimeout(() => setCreateJobClicked(false), 200);
   };
@@ -16,6 +32,15 @@ export default function CTASection() {
   const handleJoinAgent = () => {
     setJoinAgentClicked(true);
     console.log("Join as Agent clicked");
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user?.email) {
+      toast.warning(`You are already login as ${user?.role}.`);
+      return;
+    }
+    router.push("/signup?role=Agent");
     setTimeout(() => setJoinAgentClicked(false), 200);
   };
 
