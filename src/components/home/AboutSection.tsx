@@ -17,7 +17,7 @@ const team: TeamMember[] = [
     name: "Sarah Mitchell",
     title: "CEO & Co-Founder",
     bio: "10+ years transforming the casting industry through technology and creative vision.",
-    photo: "/about1.jpeg",
+    photo: "/about1.jpg",
     linkedin: "#",
     twitter: "#",
   },
@@ -26,7 +26,7 @@ const team: TeamMember[] = [
     name: "James Okafor",
     title: "CTO & Co-Founder",
     bio: "AI architect and full-stack engineer passionate about building tools that empower creators.",
-    photo: "/about2.jpeg",
+    photo: "/about2.jpg",
     linkedin: "#",
     twitter: "#",
   },
@@ -35,8 +35,17 @@ const team: TeamMember[] = [
     name: "Priya Nambiar",
     title: "Head of Product",
     bio: "UX leader obsessed with crafting seamless experiences for talent, agents, and brands.",
-    photo: "/about3.jpeg",
+    photo: "/about3.jpg",
     linkedin: "#",
+  },
+  {
+    id: 4,
+    name: "Marcus Chen",
+    title: "Head of Talent Relations",
+    bio: "Former casting director dedicated to fostering global opportunities for underrepresented artists.",
+    photo: "/about4.jpg",
+    linkedin: "#",
+    twitter: "#",
   },
 ];
 
@@ -56,7 +65,7 @@ export default function AboutSection() {
         </div>
 
         {/* Team Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 container mx-auto'>
           {team.map((member) => (
             <div
               key={member.id}
