@@ -26,6 +26,7 @@ import ClientSidebar from "./ClientSidebar";
 import AdminSidebar from "./AdminSidebar";
 
 import { logout } from "@/service/authService";
+import { setUser } from "@/redux/features/auth/authSlice";
 
 export default function DashboardSidebar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -40,9 +41,11 @@ export default function DashboardSidebar() {
   }, [pathname]);
 
   const handleLogout = async () => {
+    setUser({ user: null, token: null });
     await logout();
     localStorage?.removeItem("access_token");
     localStorage?.removeItem("refresh_token");
+    window.location.reload();
     router.push("/login");
   };
 

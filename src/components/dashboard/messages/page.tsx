@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -392,7 +393,7 @@ function MessagingComponent() {
             return (
               <div
                 key={index}
-                className='relative group flex items-center gap-2 bg-muted rounded-lg p-2 pr-7 max-w-[160px] sm:max-w-40'
+                className='relative group flex items-center gap-2 bg-muted rounded-lg p-2 pr-7 max-w-40 sm:max-w-40'
               >
                 {isImage && previewUrl ? (
                   <img
@@ -518,7 +519,7 @@ function MessagingComponent() {
                       {message.attachment_url?.split(".").pop()}
                     </span>
                   </div>
-                  <p className='text-xs truncate max-w-[120px] sm:max-w-none'>
+                  <p className='text-xs truncate max-w-30 sm:max-w-none'>
                     {message.attachment_url?.split("/").pop()}
                   </p>
                 </a>
@@ -554,7 +555,7 @@ function MessagingComponent() {
   );
 
   return (
-    <div className='h-[100dvh] sm:h-[85vh] md:h-[80vh] bg-background flex overflow-hidden'>
+    <div className='h-dvh sm:h-[85vh] md:h-[80vh] bg-background flex overflow-hidden'>
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <div
         className={`

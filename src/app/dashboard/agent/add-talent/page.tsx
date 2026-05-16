@@ -416,7 +416,7 @@ export default function AddTalentPage() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [createTalentMutation] = useCreateTalentMutation();
-  const [role, setRole] = useState("lead_male");
+  const [role, setRole] = useState("Actor");
 
   // Logic to handle skill tags
   const [skillInput, setSkillInput] = useState("");
@@ -683,6 +683,79 @@ export default function AddTalentPage() {
             {/* Measurements Grid */}
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               {[
+                {
+                  id: "height",
+                  label: "Height",
+                  placeholder: "Height",
+                  unit: "cm",
+                },
+                {
+                  id: "waist",
+                  label: "Waist",
+                  placeholder: "Waist",
+                  unit: "cm",
+                },
+                { id: "bust", label: "Bust", placeholder: "Bust", unit: "cm" },
+                { id: "hips", label: "Hips", placeholder: "Hips", unit: "cm" },
+                {
+                  id: "dressSize",
+                  label: "Dress Size",
+                  placeholder: "Dress Size",
+                },
+                {
+                  id: "shoeSize",
+                  label: "Shoe Size",
+                  placeholder: "Shoe Size",
+                },
+              ].map((field) => (
+                <div key={field.id}>
+                  <label
+                    htmlFor={field.id}
+                    className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+                  >
+                    {field.label}{" "}
+                    {field.unit && (
+                      <span className='text-sm font-normal text-slate-600'>
+                        ({field.unit})
+                      </span>
+                    )}
+                  </label>
+
+                  {/* 1. Added a relative container shell for absolute unit alignment inside the field */}
+                  <div className='relative flex items-center'>
+                    <input
+                      type='text'
+                      id={field.id}
+                      name={field.id}
+                      value={formData[field.id as keyof FormData] as string}
+                      onChange={handleInputChange}
+                      placeholder={field.placeholder}
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${
+                        field.unit ? "pr-12" : "" // 2. Add extra padding on the right side if a unit tag is present
+                      } ${
+                        errors[field.id] ? "border-red-500" : "border-slate-300"
+                      }`}
+                    />
+
+                    {/* 3. Conditional Unit Suffix Tag Component */}
+                    {field.unit && (
+                      <span className='absolute right-4 text-sm font-medium text-slate-400 select-none pointer-events-none'>
+                        {field.unit}
+                      </span>
+                    )}
+                  </div>
+
+                  {errors[field.id] && (
+                    <p className='text-red-500 text-sm mt-1'>
+                      {errors[field.id]}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              {[
                 { id: "height", label: "Height", placeholder: "Height" },
                 { id: "waist", label: "Waist", placeholder: "Waist" },
                 { id: "bust", label: "Bust", placeholder: "Bust" },
@@ -723,7 +796,7 @@ export default function AddTalentPage() {
                   )}
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* Color and Type Fields */}
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -768,9 +841,9 @@ export default function AddTalentPage() {
             {/* Location Fields */}
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               {[
-                { id: "continent", label: "Continent", placeholder: "Asia" },
-                { id: "country", label: "Country", placeholder: "Bangladesh" },
-                { id: "location", label: "Location", placeholder: "Dhaka" },
+                { id: "continent", label: "Continent", placeholder: "Europe" },
+                { id: "country", label: "Country", placeholder: "Germany" },
+                { id: "location", label: "Location", placeholder: "Berlin" },
               ].map((field) => (
                 <div key={field.id}>
                   <label
@@ -999,15 +1072,31 @@ export default function AddTalentPage() {
                   className='w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width)'
                   align='start'
                 >
+                  {/* // Actor, Model, Character, influencer, perfomer, dancer, kid, plus size */}
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => setRole("lead_male")}>
-                      Lead Male
+                    <DropdownMenuItem onClick={() => setRole("Actor")}>
+                      Actor
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole("lead_female")}>
-                      Lead Female
+                    <DropdownMenuItem onClick={() => setRole("Model")}>
+                      Model
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole("extra")}>
-                      Extra
+                    <DropdownMenuItem onClick={() => setRole("Character")}>
+                      Character
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Influencer")}>
+                      Influencer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Perfomer")}>
+                      Perfomer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Dancer")}>
+                      Dancer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Kid")}>
+                      Kid
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Plus size")}>
+                      Plus size
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
