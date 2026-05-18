@@ -206,7 +206,7 @@ export default function TalentVault() {
   };
 
   return (
-    <main className='min-h-screen bg-white rounded-xl!'>
+    <main className='min-h-screen bg-white rounded-xl! p-6'>
       {/* Detail Modal */}
       {selectedTalent && (
         <TalentDetailModal
