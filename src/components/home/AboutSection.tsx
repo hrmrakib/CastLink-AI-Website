@@ -51,7 +51,10 @@ const team: TeamMember[] = [
 
 export default function AboutSection() {
   return (
-    <section className='w-full py-16 md:py-24 px-4 md:px-8 bg-[#F6F7F9]'>
+    <section
+      id='about'
+      className='w-full py-16 md:py-24 px-4 md:px-8 bg-[#F6F7F9]'
+    >
       <div className='container mx-auto'>
         {/* Header */}
         <div className='text-center mb-14 md:mb-20'>

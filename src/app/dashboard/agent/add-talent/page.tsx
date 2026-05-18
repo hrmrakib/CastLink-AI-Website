@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -417,6 +418,7 @@ export default function AddTalentPage() {
   const [shootDates, setShootDates] = useState<string[]>([]);
   const [createTalentMutation] = useCreateTalentMutation();
   const [role, setRole] = useState("Actor");
+  const router = useRouter();
 
   // Logic to handle skill tags
   const [skillInput, setSkillInput] = useState("");
@@ -544,11 +546,12 @@ export default function AddTalentPage() {
   };
 
   const handleCancel = () => {
-    setFormData(INITIAL_FORM);
-    setImages([]);
-    setSelectedFile(null);
-    setErrors({});
-    setSubmitError(null);
+    router.back();
+    // setFormData(INITIAL_FORM);
+    // setImages([]);
+    // setSelectedFile(null);
+    // setErrors({});
+    // setSubmitError(null);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1061,7 +1064,7 @@ export default function AddTalentPage() {
             <div className='w-full mb-10'>
               <DropdownMenu>
                 <Label className='mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200'>
-                  Character
+                  Talent type0
                 </Label>
                 <DropdownMenuTrigger asChild>
                   <Button variant='outline' className='w-full justify-between'>

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function Navbar() {
   const router = useRouter();
@@ -22,13 +23,22 @@ export default function Navbar() {
   const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
   const role = user?.role?.toLowerCase();
 
+  // const navLinks = [
+  //   { name: "Clients", href: "/dashboard/client", role: "client" },
+  //   { name: "Agents", href: "/dashboard/agent", role: "agent" },
+  //   {
+  //     name: "Casting Directors",
+  //     href: "/dashboard/admin",
+  //     role: "admin",
+  //   },
+  // ];
   const navLinks = [
-    { name: "Clients", href: "/dashboard/client", role: "client" },
-    { name: "Agents", href: "/dashboard/agent", role: "agent" },
+    { name: "Features", href: "/#features", role: "" },
+    { name: "Pricing", href: "/#pricing", role: "" },
     {
-      name: "Casting Directors",
-      href: "/dashboard/admin",
-      role: "admin",
+      name: "About Us",
+      href: "/#about",
+      role: "",
     },
   ];
 
@@ -39,33 +49,48 @@ export default function Navbar() {
     //   toast.error("You are not logged in");
     //   router.push("/login");
     // }
-
-    router.push(`/dashboard/${role}`);
+    // router.push(`/dashboard/${role}`);
   };
 
   return (
     <nav className='bg-white'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex justify-between items-center h-23.75'>
-          <div className='flex items-center gap-6 lg:gap-12'>
+        <div className='flex justify-between items-center h-23.75 gap-6'>
+          <div className='flex-1 flex items-center justify-between gap-6 lg:gap-12'>
             {/* Logo */}
             <div className='shrink-0'>
               <Link href='/' className='text-2xl font-bold text-[#000000]'>
-                Poolio
+                <h2 className='flex items-center'>
+                  <span className='pr-1 text-[#2563EB]'>Pool </span>{" "}
+                  <span> Of Cast</span>
+                  <span className='text-[#2563EB]'>.</span>
+                </h2>
+                <p className='text-[#000000] flex items-center justify-center gap-2 text-[10px]'>
+                  <span>Cast. </span>
+                  <span>Book.</span>
+                  <span>Manage. </span>
+                </p>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <div className='hidden md:flex items-center gap-8'>
+            <div className='hidden md:flex items-center justify-end gap-8'>
               {navLinks.map((link) => (
-                <button
+                <Link
                   key={link.name}
-                  onClick={() => handleNavigate(link.role)}
-                  disabled={user?.role == link.role}
-                  className={`text-[#404145] hover:text-gray-900 transition-colors font-medium ${user?.role !== link.role && "disabled:opacity-50 disabled:cursor-not-allowed"}`}
+                  href={link.href}
+                  className='text-[#404145] hover:text-gray-900 transition-colors font-medium'
                 >
                   {link.name}
-                </button>
+                </Link>
+                // <button
+                //   key={link.name}
+                //   onClick={() => handleNavigate(link.href)}
+                //   disabled={user?.role == link.role}
+                //   className={`text-[#404145] hover:text-gray-900 transition-colors font-medium ${user?.role !== link.role && "disabled:opacity-50 disabled:cursor-not-allowed"}`}
+                // >
+                //   {link.name}
+                // </button>
               ))}
             </div>
           </div>

@@ -33,7 +33,7 @@ const features = [
 
 export default function PowerfulFeature() {
   return (
-    <section className='w-full py-16 md:py-24 px-4'>
+    <section id='features' className='w-full py-16 md:py-24 px-4'>
       <div className='container mx-auto'>
         {/* Header */}
         <div className='text-center mb-16 md:mb-20'>
