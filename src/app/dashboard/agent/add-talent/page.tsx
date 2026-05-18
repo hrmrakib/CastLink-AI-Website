@@ -14,8 +14,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
@@ -1064,7 +1062,7 @@ export default function AddTalentPage() {
             <div className='w-full mb-10'>
               <DropdownMenu>
                 <Label className='mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200'>
-                  Talent type0
+                  Talent type
                 </Label>
                 <DropdownMenuTrigger asChild>
                   <Button variant='outline' className='w-full justify-between'>

@@ -3,10 +3,6 @@
 import { SidebarMenu } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  BanknoteArrowUp,
-  Medal,
-  FolderKanban,
-  MessageCircleMore,
   Users,
   BriefcaseBusiness,
   Rose,

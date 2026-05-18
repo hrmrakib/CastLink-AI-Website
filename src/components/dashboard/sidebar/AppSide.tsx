@@ -59,8 +59,6 @@ export default function DashboardSidebar() {
   ];
 
   const isHiddenRoute = hiddenRoutes.includes(pathname);
-  // ||
-  // pathname.startsWith("/dashboard/client/shortlists/");
 
   if (isHiddenRoute) return null;
 
@@ -69,12 +67,20 @@ export default function DashboardSidebar() {
       <div className='bg-sidebar-bg! md:bg-sidebar-bg!'>
         <Sidebar className='border-none  border-transparent shadow-2xl fixed left-0 h-full z-30 bg-sidebarBg! md:bg-sidebarBg!'>
           <SidebarContent>
-            <Link
-              href='/'
-              className='flex items-center justify-center gap-2 px-3 py-9'
-            >
-              <h2 className='text-2xl font-bold text-[#000000]'>Poolio</h2>
-            </Link>
+            <div className='flex items-center justify-center py-8'>
+              <Link href='/' className='text-2xl font-bold text-[#000000]'>
+                <h2 className='flex items-center'>
+                  <span className='pr-1 text-[#2563EB]'>Pool </span>{" "}
+                  <span> Of Cast</span>
+                  <span className='text-[#2563EB]'>.</span>
+                </h2>
+                <p className='text-[#000000] flex items-center justify-center gap-2 text-[10px]'>
+                  <span>Cast. </span>
+                  <span>Book.</span>
+                  <span>Manage. </span>
+                </p>
+              </Link>
+            </div>
 
             {sidebarView === "admin" && <AdminSidebar />}
             {sidebarView === "agent" && <AgentSidebar />}

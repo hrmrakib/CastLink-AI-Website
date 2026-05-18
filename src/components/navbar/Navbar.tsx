@@ -7,12 +7,8 @@ import useHideNavFooter from "../utils/NavFooterNone";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "../ui/skeleton";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import Image from "next/image";
 
 export default function Navbar() {
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const hideNavbar = useHideNavFooter();
   const { user, profileLoading } = useAuth();
@@ -43,14 +39,6 @@ export default function Navbar() {
   ];
 
   if (hideNavbar) return null;
-
-  const handleNavigate = (role: string) => {
-    // if (role === "admin" && !user) {
-    //   toast.error("You are not logged in");
-    //   router.push("/login");
-    // }
-    // router.push(`/dashboard/${role}`);
-  };
 
   return (
     <nav className='bg-white'>
