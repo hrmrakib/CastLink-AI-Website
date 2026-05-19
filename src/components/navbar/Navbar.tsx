@@ -41,7 +41,8 @@ export default function Navbar() {
   if (hideNavbar) return null;
 
   return (
-    <nav className='bg-white'>
+    // <nav className='bg-white sticky top-0 z-50'>
+    <nav className='bg-white/70 backdrop-blur-md sticky top-0 z-50 border-b border-white/20'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-23.75 gap-6'>
           <div className='flex-1 flex items-center justify-between gap-6 lg:gap-12'>
@@ -71,14 +72,6 @@ export default function Navbar() {
                 >
                   {link.name}
                 </Link>
-                // <button
-                //   key={link.name}
-                //   onClick={() => handleNavigate(link.href)}
-                //   disabled={user?.role == link.role}
-                //   className={`text-[#404145] hover:text-gray-900 transition-colors font-medium ${user?.role !== link.role && "disabled:opacity-50 disabled:cursor-not-allowed"}`}
-                // >
-                //   {link.name}
-                // </button>
               ))}
             </div>
           </div>

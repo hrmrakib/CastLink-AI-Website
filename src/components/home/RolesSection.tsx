@@ -204,7 +204,7 @@ export default function RolesSection() {
             <div
               key={role.id}
               onClick={() => setSelectedRole(role.id)}
-              className={`relative p-8 rounded-2xl border transition-all duration-300 cursor-pointer ${
+              className={`relative p-8 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col ${
                 role.id === selectedRole
                   ? "bg-blue-50 border-blue-200 shadow-lg"
                   : "bg-white border-gray-200 hover:shadow-lg"
@@ -245,7 +245,6 @@ export default function RolesSection() {
                 {role.features.map((feature, idx) => (
                   <li key={idx} className='flex items-start gap-3'>
                     <CheckCircle2 className='w-5 h-5 text-[#2563EB] shrink-0 mt-1' />
-
                     <div>
                       <span className='text-[#000000] text-sm font-bold'>
                         {feature.title}
@@ -261,7 +260,7 @@ export default function RolesSection() {
               {/* Button */}
               <Button
                 onClick={() => handleNavigate(role.id)}
-                className='w-full button'
+                className='w-full button mt-auto'
               >
                 {role.buttonText}
               </Button>
