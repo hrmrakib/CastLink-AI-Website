@@ -118,6 +118,16 @@ export default function AIDynamicPage() {
   const [availabilityModal, setAvailabilityModal] = useState(false);
   const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
     useState<TalentProfile | null>(null);
+  // 1. Add near your other useState declarations
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    action: (() => void) | null;
+  }>({ open: false, action: null });
+
+  // 2. Add this helper (place it alongside your other handlers)
+  const withConfirm = (action: () => void) => {
+    setConfirmModal({ open: true, action });
+  };
 
   // FIX 1: read the full slice so we can react to changes
   const { user } = useAuth();
@@ -617,9 +627,16 @@ export default function AIDynamicPage() {
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
+                                      // onClick={() =>
+                                      //   handleShortListTalent(
+                                      //     profile?.talent_id,
+                                      //   )
+                                      // }
                                       onClick={() =>
-                                        handleShortListTalent(
-                                          profile?.talent_id,
+                                        withConfirm(() =>
+                                          handleShortListTalent(
+                                            profile?.talent_id,
+                                          ),
                                         )
                                       }
                                       disabled={shortlistLoading}
@@ -629,6 +646,7 @@ export default function AIDynamicPage() {
                                     >
                                       <Heart size={20} fill='currentColor' />
                                     </button>
+
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -641,9 +659,14 @@ export default function AIDynamicPage() {
                                     >
                                       <Calendar size={20} />
                                     </button>
+
                                     <button
                                       onClick={() =>
-                                        handleselftapRequest(profile?.talent_id)
+                                        withConfirm(() =>
+                                          handleselftapRequest(
+                                            profile?.talent_id,
+                                          ),
+                                        )
                                       }
                                       disabled={selfTapLoading}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
@@ -652,10 +675,13 @@ export default function AIDynamicPage() {
                                     >
                                       <Camera size={20} />
                                     </button>
+
                                     <button
                                       onClick={() =>
-                                        handleECastingRequest(
-                                          profile?.talent_id,
+                                        withConfirm(() =>
+                                          handleECastingRequest(
+                                            profile?.talent_id,
+                                          ),
                                         )
                                       }
                                       disabled={eCastingLoading}
@@ -665,9 +691,14 @@ export default function AIDynamicPage() {
                                     >
                                       <Phone size={20} />
                                     </button>
+
                                     <button
                                       onClick={() =>
-                                        handleTalentBooking(profile?.talent_id)
+                                        withConfirm(() =>
+                                          handleTalentBooking(
+                                            profile?.talent_id,
+                                          ),
+                                        )
                                       }
                                       disabled={bookLoading}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
@@ -679,7 +710,11 @@ export default function AIDynamicPage() {
 
                                     <button
                                       onClick={() =>
-                                        handlePolasRequest(profile?.talent_id)
+                                        withConfirm(() =>
+                                          handlePolasRequest(
+                                            profile?.talent_id,
+                                          ),
+                                        )
                                       }
                                       disabled={polasLoading}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
@@ -950,6 +985,36 @@ export default function AIDynamicPage() {
             <DialogClose asChild>
               <Button variant='outline'>Close</Button>
             </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Confirm action modal ── */}
+      <Dialog
+        open={confirmModal.open}
+        onOpenChange={(open) => {
+          if (!open) setConfirmModal({ open: false, action: null });
+        }}
+      >
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>Confirm request</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to request this model?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='gap-2 pt-2'>
+            <DialogClose asChild>
+              <Button variant='outline'>No</Button>
+            </DialogClose>
+            <Button
+              onClick={() => {
+                confirmModal.action?.();
+                setConfirmModal({ open: false, action: null });
+              }}
+            >
+              Yes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
