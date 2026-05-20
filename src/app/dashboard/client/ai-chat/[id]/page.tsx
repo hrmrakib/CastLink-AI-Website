@@ -162,7 +162,8 @@ export default function AIDynamicPage() {
   } = useGetChatBySessionIdQuery(id);
 
   const isGeneratedJob = data?.data?.generate_job;
-  console.log({ isGeneratedJob });
+
+  console.log(data?.data?.messages);
 
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
@@ -774,6 +775,17 @@ export default function AIDynamicPage() {
                     )}
                 </div>
               ))}
+
+            {messages?.length === 0 &&
+              (aiChatCreateLoading || isLoadingChat) && (
+                <div className='flex gap-3 justify-center items-center h-[calc(80vh-64px)]'>
+                  <div className='flex items-center justify-center gap-3 mt-4'>
+                    <p className='text-[#404145] font-semibold'>
+                      No messages yet
+                    </p>
+                  </div>
+                </div>
+              )}
 
             {/* Loading indicator */}
             {(aiChatCreateLoading || isLoadingChat) && (
