@@ -433,8 +433,8 @@ function AIChatInner() {
         generate_job: true,
       }).unwrap();
 
-      if (res?.detail) {
-        toast.success(res?.detail || "Job created successfully!");
+      if (res?.status_message) {
+        toast.success(res?.status_message || "Job created successfully!");
       }
     } catch (error) {
       console.error(error);
