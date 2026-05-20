@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   useAiChatCreateMutation,
   useContinueDraftJobQuery,
+  useGenerateJobFromMessageMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import {
   Dialog,
@@ -311,6 +312,7 @@ function AIChatInner() {
 
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
+  const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draft_id");
   const [currency, setCurrency] = useState("USD");
@@ -418,7 +420,7 @@ function AIChatInner() {
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
-      const res = await aiChatCreateMutation({
+      const res = await generateJobFromMessageMutation({
         session_id: "",
         message,
         location,
