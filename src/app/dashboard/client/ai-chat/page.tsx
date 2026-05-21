@@ -14,6 +14,7 @@ import {
   ArrowRight,
   X,
   Loader2,
+  Euro,
 } from "lucide-react";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -606,7 +607,15 @@ function AIChatInner() {
                 {/* Budget */}
                 <div>
                   <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
-                    <DollarSign className='w-4 h-4' />
+                    {currency === "USD" ? (
+                      <DollarSign className='w-4 h-4' />
+                    ) : currency === "EUR" ? (
+                      <Euro className='w-4 h-4' />
+                    ) : (
+                      <span className='w-4 h-4 inline-flex items-center justify-center font-bold text-xs select-none'>
+                        R
+                      </span>
+                    )}
                     Budget Range
                   </label>
 
