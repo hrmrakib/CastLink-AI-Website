@@ -17,8 +17,10 @@ import {
   CloudUpload,
   Copy,
   Check,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -395,6 +397,8 @@ export default function ActiveJobsPage() {
   const [dateFilter, setDateFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useGetActiveJobsQuery({});
 
@@ -439,6 +443,23 @@ export default function ActiveJobsPage() {
       null
     );
   }
+
+  const openDeleteModal = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirm permanent delete handler
+  const handleConfirmDelete = () => {
+    if (selectedJobId) {
+      console.log(`Permanently deleting job with ID: ${selectedJobId}`);
+      // TODO: Place your RTK Query delete mutation trigger here:
+      // await deleteJob(selectedJobId).unwrap();
+
+      setIsDeleteModalOpen(false);
+      setSelectedJobId(null);
+    }
+  };
 
   const aiResult = selectedJob?.ai_result as AiResult;
 
@@ -611,13 +632,21 @@ export default function ActiveJobsPage() {
                             {capitalize(job.status)}
                           </Badge>
                         </td>
-                        <td className='px-6 py-4'>
+                        <td className='px-6 py-4 space-x-1.5'>
                           <Button
                             size='sm'
                             onClick={() => openJobDetail(job)}
                             className='bg-[#2563EB] hover:bg-blue-700'
                           >
                             <Eye className='h-4 w-4' />
+                          </Button>
+                          <Button
+                            size='sm'
+                            onClick={() => openDeleteModal(job.job_id)}
+                            className='bg-transparent hover:bg-transparent border border-[#2563EB] text-[#2563EB] hover:border-[#CD0000] hover:text-[#CD0000] transition-colors'
+                            // className='bg-[#CD0000] hover:bg-[#e20303]'
+                          >
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </td>
                       </tr>
@@ -685,6 +714,12 @@ export default function ActiveJobsPage() {
                     >
                       <Eye className='mr-2 h-4 w-4' />
                       View Details
+                    </Button>
+                    <Button
+                      onClick={() => openDeleteModal(job.job_id)}
+                      className='w-full bg-[#2563EB] hover:bg-blue-700'
+                    >
+                      <Trash2 className='mr-2 h-4 w-4' />
                     </Button>
                   </div>
                 );
@@ -825,106 +860,6 @@ export default function ActiveJobsPage() {
                     </div>
                   )}
 
-                  {/* Self-tapes */}
-                  {/* {selectedJob?.ai_result?.requested_selftapes?.length > 0 && (
-                    <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
-                      <h3 className='text-base font-bold text-foreground mb-4'>
-                        Self-tapes Requested
-                      </h3>
-                      <div className='space-y-3'>
-                        {selectedJob.ai_result.requested_selftapes.map((t) => (
-                          <div
-                            key={`tape-${t.talent_id}`}
-                            className='space-y-2'
-                          >
-                            <TalentRow talent={t} />
-                            {t.tapes && t.tapes.length > 0 && (
-                              <div className='pl-4 flex flex-wrap gap-2'>
-                                {t.tapes.map((tape, i) => (
-                                  <a
-                                    key={i}
-                                    href={resolveMedia(tape)}
-                                    target='_blank'
-                                    rel='noreferrer'
-                                    className='inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded'
-                                  >
-                                    <Video className='h-3 w-3' /> Tape {i + 1}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )} */}
-
-                  {/* Polas */}
-                  {/* {selectedJob.ai_result.requested_polas.length > 0 && (
-                    <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
-                      <h3 className='text-base font-bold text-foreground mb-4'>
-                        Polas Submitted
-                      </h3>
-                      <div className='space-y-3'>
-                        {selectedJob.ai_result.requested_polas.map((t) => (
-                          <div
-                            key={`pola-${t.talent_id}`}
-                            className='space-y-2'
-                          >
-                            <TalentRow talent={t} />
-                            {t.polas && t.polas.length > 0 && (
-                              <div className='pl-4 flex flex-wrap gap-2'>
-                                {t.polas.map((pola, i) => {
-                                  const isImage =
-                                    /\.(webp|jpg|jpeg|png)$/i.test(pola);
-                                  return isImage ? (
-                                    <a
-                                      key={i}
-                                      href={resolveMedia(pola)}
-                                      target='_blank'
-                                      rel='noreferrer'
-                                    >
-                                      <img
-                                        src={resolveMedia(pola)}
-                                        alt={`Pola ${i + 1}`}
-                                        className='h-16 w-16 object-cover rounded-lg border border-border hover:opacity-80 transition'
-                                      />
-                                    </a>
-                                  ) : (
-                                    <a
-                                      key={i}
-                                      href={resolveMedia(pola)}
-                                      target='_blank'
-                                      rel='noreferrer'
-                                      className='inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded'
-                                    >
-                                      <Camera className='h-3 w-3' /> Pola{" "}
-                                      {i + 1}
-                                    </a>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )} */}
-
-                  {/* E-castings */}
-                  {/* {selectedJob.ai_result.requested_ecastings.length > 0 && (
-                    <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
-                      <h3 className='text-base font-bold text-foreground mb-4'>
-                        E-castings Requested
-                      </h3>
-                      <div className='space-y-3'>
-                        {selectedJob.ai_result.requested_ecastings.map((t) => (
-                          <TalentRow key={`ec-${t.talent_id}`} talent={t} />
-                        ))}
-                      </div>
-                    </div>
-                  )} */}
-
                   {/* Agent info */}
                   {selectedJob.ai_result.suggested_talents?.[0] && (
                     <div className='bg-white dark:bg-slate-950 p-6 rounded-xl border-t-4 border-t-amber-400'>
@@ -955,6 +890,44 @@ export default function ActiveJobsPage() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── FIXED: Added Delete Confirmation Modal Layout ─────────────────── */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className='max-w-md border-0 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-lg'>
+          <DialogTitle className='sr-only'>Confirm Job Deletion</DialogTitle>
+          <div className='flex flex-col items-center text-center gap-4 mt-2'>
+            <div className='p-3 bg-red-50 dark:bg-red-950/30 rounded-full text-red-600 shrink-0'>
+              <AlertTriangle className='h-8 w-8' />
+            </div>
+            <div>
+              <h2 className='text-xl font-bold text-foreground leading-tight'>
+                Delete Job Posting?
+              </h2>
+              <p className='text-sm text-muted-foreground leading-relaxed mt-2'>
+                Are you sure you want to permanently delete this job assignment?
+                This action cannot be undone and will historical data associated
+                with it.
+              </p>
+            </div>
+          </div>
+
+          <div className='flex items-center gap-3 mt-6 justify-end w-full'>
+            <Button
+              variant='outline'
+              onClick={() => setIsDeleteModalOpen(false)}
+              className='flex-1 sm:flex-initial'
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              className='bg-[#CD0000] hover:bg-red-700 text-white flex-1 sm:flex-initial'
+            >
+              Delete Posting
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

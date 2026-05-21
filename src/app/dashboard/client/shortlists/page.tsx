@@ -1,9 +1,10 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sparkles } from "lucide-react";
+import { AlertTriangle, Sparkles, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
+import { useState } from "react";
 
 export interface Talent {
   talent_id: number;
@@ -58,6 +59,34 @@ function ShortlistCardSkeleton() {
 
 function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   const router = useRouter();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  const openDeleteModal = (e: React.MouseEvent, jobId: string) => {
+    e.stopPropagation();
+    setSelectedJobId(jobId);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirm permanent delete handler
+  const handleConfirmDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (selectedJobId) {
+      console.log(`Permanently deleting job with ID: ${selectedJobId}`);
+      // TODO: Place your RTK Query delete mutation trigger here:
+      // await deleteJob(selectedJobId).unwrap();
+
+      setIsDeleteModalOpen(false);
+      setSelectedJobId(null);
+    }
+  };
+
+  const handleCloseModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteModalOpen(false);
+    setSelectedJobId(null);
+  };
 
   // Derive initials from talent name for avatar fallback
   const getInitials = (name: string) =>
@@ -94,27 +123,72 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       </div>
 
       {/* Talent avatars */}
-      <div className='flex items-center gap-2 pb-4'>
-        <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
-          {shortlist?.talents?.slice(0, 3).map((talent) => (
-            <>
-              {talent?.image && (
-                <Avatar key={talent.talent_id}>
-                  <AvatarImage src={image_url + talent?.image} />
-                  <AvatarFallback>
-                    {getInitials(talent.talent_name)}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </>
-          ))}
+      <div className='flex items-center justify-between gap-2 pb-4'>
+        <div className='flex items-center gap-2'>
+          <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
+            {shortlist?.talents?.slice(0, 3).map((talent) => (
+              <>
+                {talent?.image && (
+                  <Avatar key={talent.talent_id}>
+                    <AvatarImage src={image_url + talent?.image} />
+                    <AvatarFallback>
+                      {getInitials(talent.talent_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </>
+            ))}
+          </div>
+          {shortlist.talents.length > 3 && (
+            <span className='text-xs text-gray-500 ml-1'>
+              +{shortlist.talents.length - 3} more
+            </span>
+          )}
         </div>
-        {shortlist.talents.length > 3 && (
-          <span className='text-xs text-gray-500 ml-1'>
-            +{shortlist.talents.length - 3} more
-          </span>
-        )}
+        <div>
+          <button onClick={(e) => openDeleteModal(e, String(shortlist.job_id))}>
+            <Trash2 className='w-6 h-6 text-[#FF0000]' strokeWidth={1.2} />
+          </button>
+        </div>
       </div>
+
+      {/* Warning Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity animate-fadeIn'>
+          <div className='bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-100 transform scale-100 transition-all'>
+            <div className='flex items-start gap-4'>
+              <div className='p-3 bg-red-50 rounded-full text-red-600 shrink-0'>
+                <AlertTriangle className='w-6 h-6' />
+              </div>
+              <div>
+                <h3 className='text-lg font-bold text-gray-900 mb-1'>
+                  Delete Permanent Card
+                </h3>
+                <p className='text-gray-600 text-sm leading-relaxed'>
+                  Are you sure you want to permanently delete this job post?
+                  This action cannot be undone and all associated application
+                  progress will be lost.
+                </p>
+              </div>
+            </div>
+
+            <div className='flex gap-3 justify-end mt-6'>
+              <button
+                onClick={(e) => handleCloseModal(e)}
+                className='px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={(e) => handleConfirmDelete(e)}
+                className='px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer'
+              >
+                Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

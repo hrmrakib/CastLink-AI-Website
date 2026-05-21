@@ -10,6 +10,8 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
@@ -76,6 +78,9 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(searchQuery, 900);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
   const { data, isLoading, isFetching } = useGetActiveJobsQuery({
     page: currentPage,
     limit: 10,
@@ -90,12 +95,27 @@ export default function Page() {
     total_pages: 1,
   };
 
-  console.log({ activeJobs });
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > pagination.total_pages) return;
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const openDeleteModal = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setIsModalOpen(true);
+  };
+
+  // Confirm permanent delete handler
+  const handleConfirmDelete = () => {
+    if (selectedJobId) {
+      console.log(`Permanently deleting job with ID: ${selectedJobId}`);
+      // TODO: Place your RTK Query delete mutation trigger here:
+      // await deleteJob(selectedJobId).unwrap();
+
+      setIsModalOpen(false);
+      setSelectedJobId(null);
+    }
   };
 
   return (
@@ -139,30 +159,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      {/* <div className='bg-transparent sticky top-20 z-30'>
-        <div className='container mx-auto px-4'>
-          <div className='flex gap-2 overflow-x-auto py-4'>
-            {["All", "Urgent", "This Week"].map((filter) => (
-              <button
-                key={filter}
-                onClick={() => {
-                  setSelectedFilter(filter);
-                  setCurrentPage(1);
-                }}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
-                  selectedFilter === filter
-                    ? "bg-[#2563EB] text-white"
-                    : "bg-white text-[#404145] hover:bg-gray-200"
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div> */}
-
       {/* Job Cards Grid */}
       <div className='container mx-auto px-4 py-8'>
         {/* Loading State */}
@@ -205,8 +201,15 @@ export default function Page() {
                 return (
                   <div
                     key={job.job_id}
-                    className='bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition'
+                    className='relative bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition'
                   >
+                    <button
+                      onClick={() => openDeleteModal(job.job_id)}
+                      className='absolute top-4 right-4'
+                    >
+                      <Trash2 className='w-5 h-5 text-[#6a6b72]' />
+                    </button>
+
                     {/* Title and Description */}
                     <h3 className='text-lg font-bold text-[#000000] mb-2'>
                       {job.title}
@@ -393,6 +396,47 @@ export default function Page() {
           </>
         )}
       </div>
+
+      {/* Warning Confirmation Modal */}
+      {isModalOpen && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity animate-fadeIn'>
+          <div className='bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-100 transform scale-100 transition-all'>
+            <div className='flex items-start gap-4'>
+              <div className='p-3 bg-red-50 rounded-full text-red-600 shrink-0'>
+                <AlertTriangle className='w-6 h-6' />
+              </div>
+              <div>
+                <h3 className='text-lg font-bold text-gray-900 mb-1'>
+                  Delete Permanent Card
+                </h3>
+                <p className='text-gray-600 text-sm leading-relaxed'>
+                  Are you sure you want to permanently delete this job post?
+                  This action cannot be undone and all associated application
+                  progress will be lost.
+                </p>
+              </div>
+            </div>
+
+            <div className='flex gap-3 justify-end mt-6'>
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedJobId(null);
+                }}
+                className='px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className='px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer'
+              >
+                Permanently Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
