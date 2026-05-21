@@ -284,7 +284,7 @@ export default function Page() {
                       <button
                         onClick={() =>
                           router.push(
-                            `/dashboard/client/active-jobs/e-casting-room/`,
+                            `/dashboard/client/active-jobs/e-casting-room/?job_id=${job.job_id}`,
                           )
                         }
                         className='flex-1 bg-[#2563EB] hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition text-sm cursor-pointer'

@@ -7,6 +7,7 @@ import {
   Medal,
   FolderKanban,
   MessageCircleMore,
+  Settings,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { NavItem } from "./CommonItem";
@@ -58,18 +59,9 @@ const AgentSidebar = () => {
           }
         />
 
-        {/* <NavItem
-          href='/dashboard/agent/calendar'
-          icon={FolderKanban}
-          label='Calendar'
-          active={
-            pathname === "/dashboard/agent/calendar" ||
-            pathname.startsWith("/dashboard/agent/calendar/")
-          }
-        /> */}
         <NavItem
           href='/dashboard/agent/message'
-          icon={FolderKanban}
+          icon={MessageCircleMore}
           label='Messages'
           active={
             pathname === "/dashboard/agent/message" ||
@@ -79,7 +71,7 @@ const AgentSidebar = () => {
 
         <NavItem
           href='/dashboard/agent/settings'
-          icon={MessageCircleMore}
+          icon={Settings}
           label='Settings'
           active={
             pathname === "/dashboard/agent/settings" ||

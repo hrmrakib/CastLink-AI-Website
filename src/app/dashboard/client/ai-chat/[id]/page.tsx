@@ -122,11 +122,12 @@ export default function AIDynamicPage() {
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
     action: (() => void) | null;
-  }>({ open: false, action: null });
+    label: string;
+  }>({ open: false, action: null, label: "" });
 
   // 2. Add this helper (place it alongside your other handlers)
-  const withConfirm = (action: () => void) => {
-    setConfirmModal({ open: true, action });
+  const withConfirm = (action: () => void, label: string) => {
+    setConfirmModal({ open: true, action, label });
   };
 
   // FIX 1: read the full slice so we can react to changes
@@ -628,18 +629,22 @@ export default function AIDynamicPage() {
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
-                                      // onClick={() =>
-                                      //   handleShortListTalent(
-                                      //     profile?.talent_id,
-                                      //   )
-                                      // }
                                       onClick={() =>
-                                        withConfirm(() =>
-                                          handleShortListTalent(
-                                            profile?.talent_id,
-                                          ),
+                                        withConfirm(
+                                          () =>
+                                            handleShortListTalent(
+                                              profile?.talent_id,
+                                            ),
+                                          "Shortlist",
                                         )
                                       }
+                                      // onClick={() =>
+                                      //   withConfirm(() =>
+                                      //     handleShortListTalent(
+                                      //       profile?.talent_id,
+                                      //     ),
+                                      //   )
+                                      // }
                                       disabled={shortlistLoading}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Like'
@@ -663,10 +668,12 @@ export default function AIDynamicPage() {
 
                                     <button
                                       onClick={() =>
-                                        withConfirm(() =>
-                                          handleselftapRequest(
-                                            profile?.talent_id,
-                                          ),
+                                        withConfirm(
+                                          () =>
+                                            handleselftapRequest(
+                                              profile?.talent_id,
+                                            ),
+                                          "Selftaps",
                                         )
                                       }
                                       disabled={selfTapLoading}
@@ -679,10 +686,12 @@ export default function AIDynamicPage() {
 
                                     <button
                                       onClick={() =>
-                                        withConfirm(() =>
-                                          handleECastingRequest(
-                                            profile?.talent_id,
-                                          ),
+                                        withConfirm(
+                                          () =>
+                                            handleECastingRequest(
+                                              profile?.talent_id,
+                                            ),
+                                          "E-casting",
                                         )
                                       }
                                       disabled={eCastingLoading}
@@ -695,10 +704,12 @@ export default function AIDynamicPage() {
 
                                     <button
                                       onClick={() =>
-                                        withConfirm(() =>
-                                          handleTalentBooking(
-                                            profile?.talent_id,
-                                          ),
+                                        withConfirm(
+                                          () =>
+                                            handleTalentBooking(
+                                              profile?.talent_id,
+                                            ),
+                                          "Booking",
                                         )
                                       }
                                       disabled={bookLoading}
@@ -711,10 +722,12 @@ export default function AIDynamicPage() {
 
                                     <button
                                       onClick={() =>
-                                        withConfirm(() =>
-                                          handlePolasRequest(
-                                            profile?.talent_id,
-                                          ),
+                                        withConfirm(
+                                          () =>
+                                            handlePolasRequest(
+                                              profile?.talent_id,
+                                            ),
+                                          "Polas",
                                         )
                                       }
                                       disabled={polasLoading}
@@ -959,6 +972,48 @@ export default function AIDynamicPage() {
 
       {/* Availability modal */}
       <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
+        <DialogContent className='sm:max-w-sm lg:max-w-lg max-h-[80vh] flex flex-col'>
+          <DialogHeader className='shrink-0'>
+            <DialogTitle>Available Dates</DialogTitle>
+            <DialogDescription>
+              {selectedAvailabilityTalent?.name}&apos;s available dates for
+              booking.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='py-2 space-y-2 overflow-y-auto flex-1 min-h-0'>
+            {selectedAvailabilityTalent?.available_dates?.length ? (
+              selectedAvailabilityTalent.available_dates.map((date) => (
+                <div
+                  key={date}
+                  className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
+                >
+                  <Calendar size={16} className='text-[#2563EB] shrink-0' />
+                  <span className='text-sm font-medium text-gray-800'>
+                    {new Date(date + "T00:00:00").toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className='text-sm text-gray-500 text-center py-6'>
+                No available dates listed.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className='shrink-0'>
+            <DialogClose asChild>
+              <Button variant='outline'>Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
         <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
             <DialogTitle>Available Dates</DialogTitle>
@@ -999,30 +1054,35 @@ export default function AIDynamicPage() {
             </DialogClose>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* ── Confirm action modal ── */}
       <Dialog
         open={confirmModal.open}
         onOpenChange={(open) => {
-          if (!open) setConfirmModal({ open: false, action: null });
+          if (!open) setConfirmModal({ open: false, action: null, label: "" });
         }}
       >
         <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
             <DialogTitle>Confirm request</DialogTitle>
             <DialogDescription>
-              Are you sure you want to request this model?
+              Are you sure you want to{" "}
+              <span className='font-semibold text-gray-800'>
+                {confirmModal.label}
+              </span>{" "}
+              this model?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className='gap-2 pt-2'>
+          <DialogFooter className='gap-4 pt-2'>
             <DialogClose asChild>
               <Button variant='outline'>No</Button>
             </DialogClose>
             <Button
+              className='bg-[#2563EB]'
               onClick={() => {
                 confirmModal.action?.();
-                setConfirmModal({ open: false, action: null });
+                setConfirmModal({ open: false, action: null, label: "" });
               }}
             >
               Yes
