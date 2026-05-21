@@ -1013,48 +1013,6 @@ export default function AIDynamicPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
-        <DialogContent className='sm:max-w-sm'>
-          <DialogHeader>
-            <DialogTitle>Available Dates</DialogTitle>
-            <DialogDescription>
-              {selectedAvailabilityTalent?.name}&apos;s available dates for
-              booking.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className='py-2 space-y-2'>
-            {selectedAvailabilityTalent?.available_dates?.length ? (
-              selectedAvailabilityTalent.available_dates.map((date) => (
-                <div
-                  key={date}
-                  className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
-                >
-                  <Calendar size={16} className='text-[#2563EB] shrink-0' />
-                  <span className='text-sm font-medium text-gray-800'>
-                    {new Date(date + "T00:00:00").toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <p className='text-sm text-gray-500 text-center py-6'>
-                No available dates listed.
-              </p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant='outline'>Close</Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
 
       {/* ── Confirm action modal ── */}
       <Dialog
@@ -1079,7 +1037,7 @@ export default function AIDynamicPage() {
               <Button variant='outline'>No</Button>
             </DialogClose>
             <Button
-              className='bg-[#2563EB]'
+              className='bg-[#2563EB] hover:bg-[#155aee] text-white'
               onClick={() => {
                 confirmModal.action?.();
                 setConfirmModal({ open: false, action: null, label: "" });

@@ -5,8 +5,10 @@ import {
   LayoutDashboard,
   BanknoteArrowUp,
   Medal,
-  FolderKanban,
   MessageCircleMore,
+  Settings,
+  NotepadTextDashed,
+  MousePointerClick,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { NavItem } from "./CommonItem";
@@ -51,7 +53,7 @@ const ClientSidebar = () => {
 
           <NavItem
             href='/dashboard/client/draft-jobs'
-            icon={Medal}
+            icon={NotepadTextDashed}
             label='Draft Jobs'
             active={
               pathname === "/dashboard/client/draft-jobs" ||
@@ -61,7 +63,7 @@ const ClientSidebar = () => {
 
           <NavItem
             href='/dashboard/client/shortlists'
-            icon={Medal}
+            icon={MousePointerClick}
             label='Shortlists'
             active={
               pathname === "/dashboard/client/shortlists" ||
@@ -69,19 +71,9 @@ const ClientSidebar = () => {
             }
           />
 
-          {/* <NavItem
-          href='/dashboard/client/jobs'
-          icon={Medal}
-          label='Jobs' 
-          active={
-            pathname === "/dashboard/client/jobs" ||
-            pathname.startsWith("/dashboard/client/jobs/")
-          }
-        /> */}
-
           <NavItem
             href='/dashboard/client/message'
-            icon={FolderKanban}
+            icon={MessageCircleMore}
             label='Messages'
             active={
               pathname === "/dashboard/client/message" ||
@@ -91,7 +83,7 @@ const ClientSidebar = () => {
 
           <NavItem
             href='/dashboard/client/settings'
-            icon={MessageCircleMore}
+            icon={Settings}
             label='Settings'
             active={
               pathname === "/dashboard/client/settings" ||

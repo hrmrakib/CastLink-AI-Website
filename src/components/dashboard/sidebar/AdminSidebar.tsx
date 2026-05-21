@@ -57,25 +57,6 @@ const AdminSidebar = () => {
             pathname.startsWith("/dashboard/admin/talent-management/")
           }
         />
-        {/* <NavItem
-          href='/dashboard/admin/room'
-          icon={Rose}
-          label='Room Management'
-          active={
-            pathname === "/dashboard/admin/room" ||
-            pathname.startsWith("/dashboard/admin/talent-management/")
-          }
-        /> */}
-
-        {/* <NavItem
-          href='/dashboard/admin/messege-ai-logs'
-          icon={MessageCircleMore}
-          label='Messege & AI Logs'
-          active={
-            pathname === "/dashboard/admin/messege-ai-logs" ||
-            pathname.startsWith("/dashboard/admin/messege-ai-logs/")
-          }
-        /> */}
 
         <NavItem
           href='/dashboard/admin/settings'
