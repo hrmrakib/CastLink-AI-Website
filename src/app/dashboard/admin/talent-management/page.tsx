@@ -2,13 +2,14 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Eye, X, Loader2 } from "lucide-react";
+import { Trash2, Eye, X, Loader2, Search } from "lucide-react";
 import {
   useApproveOrRejectTalentMutation,
   useDeleteTalentMutation,
   useGetTalentsQuery,
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
+import GlobalPagination from "@/components/pagination/GlobalPagination";
 
 type TalentTab = "approved" | "pending";
 
@@ -58,10 +59,12 @@ export default function TalentManagement() {
     useApproveOrRejectTalentMutation();
   const [deleteTalentMutation, { isLoading: isDeleting }] =
     useDeleteTalentMutation();
+  const [page, setPage] = useState(1);
   const { data, isFetching, refetch } = useGetTalentsQuery({
     approval_status: activeTab,
   });
   const talents: Talent[] = data?.data ?? [];
+  const totalPages = data?.total_pages ?? 5;
 
   console.log({ talents });
 
@@ -147,16 +150,29 @@ export default function TalentManagement() {
               </button>
             ))}
           </div>
-          {/* <div className='flex gap-2'>
-            <button className='flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium'>
-              <Filter size={18} />
-              <span className='hidden sm:inline'>Filter</span>
+          {/* Search */}
+          <div className='w-full lg:w-1/3 ml-auto flex flex-col gap-3 sm:flex-row sm:items-center'>
+            <div className='relative flex-1 items-end'>
+              <Search
+                size={16}
+                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
+              />
+              <input
+                type='text'
+                placeholder='Search jobs...'
+                // value={searchInput}
+                // onChange={(e) => setSearchInput(e.target.value)}
+                // onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className='w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
+              />
+            </div>
+            <button
+              // onClick={handleSearch}
+              className='rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
+            >
+              Search
             </button>
-            <button className='flex items-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-700 transition-colors font-medium'>
-              <Plus size={18} />
-              <span className='hidden sm:inline'>Add Talent</span>
-            </button>
-          </div> */}
+          </div>
         </div>
 
         {/* Table */}
@@ -250,6 +266,14 @@ export default function TalentManagement() {
             </table>
           </div>
         </div>
+
+        {!isFetching && totalPages > 1 && (
+          <GlobalPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(page) => setPage(page)}
+          />
+        )}
       </div>
 
       {/* ── Detail Modal ── */}

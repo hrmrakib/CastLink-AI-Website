@@ -29,56 +29,6 @@ export default function RolesSection() {
   const [selectedRole, setSelectedRole] = useState<string | null>("clients");
   const { user } = useAuth();
 
-  // const roles: RoleCard[] = [
-  //   {
-  //     id: "clients",
-  //     title: "For Clients",
-  //     icon: <Briefcase className='w-8 h-8' />,
-  //     description:
-  //       "Create casting jobs with AI, manage shortlists, review self-tapes, and book talent effortlessly.",
-  //     features: [
-  //       "AI-generated casting briefs",
-  //       "Smart talent matching",
-  //       "Virtual e-casting sessions",
-  //       "Real-time availability tracking",
-  //     ],
-  //     buttonText: "Get Started as Client",
-  //     buttonAction: () => console.log("Client signup clicked"),
-  //     highlight: true,
-  //   },
-  //   {
-  //     id: "agents",
-  //     title: "For Agents",
-  //     icon: <Briefcase className='w-8 h-8' />,
-  //     description:
-  //       "Manage casting requests, submit talent availability, upload self-tapes, and grow your ranking.",
-  //     features: [
-  //       "Centralized request management",
-  //       "Quick availability updates",
-  //       "Performance ranking system",
-  //       "Talent portfolio management",
-  //     ],
-  //     buttonText: "Get Started as Agent",
-  //     buttonAction: () => console.log("Agent signup clicked"),
-  //   },
-  //   {
-  //     id: "directors",
-  //     title: "Casting Directors",
-  //     icon: <Briefcase className='w-8 h-8' />,
-  //     description:
-  //       "Build your profile, discover opportunities, submit self-tapes, and land your next big role.",
-  //     features: [
-  //       "Professional profile builder",
-  //       "Job opportunity notifications",
-  //       "Easy self-tape submissions",
-  //       "Booking management",
-  //     ],
-  //     buttonText: "Casting Directors",
-  //     buttonAction: () => console.log("Director signup clicked"),
-  //     badge: "D",
-  //   },
-  // ];
-
   const roles: RoleCard[] = [
     {
       id: "client",
@@ -111,7 +61,7 @@ export default function RolesSection() {
             "Manage bookings, confirmations, and schedules with ease.",
         },
       ],
-      buttonText: "Get Started as Client",
+      buttonText: "Get Started",
       buttonAction: () => console.log("Client signup clicked"),
       highlight: true,
     },
@@ -142,7 +92,7 @@ export default function RolesSection() {
             "Manage and present your talent with professional profiles.",
         },
       ],
-      buttonText: "Get Started as Agent",
+      buttonText: "Get Started",
       buttonAction: () => console.log("Agent signup clicked"),
     },
     {
@@ -169,7 +119,7 @@ export default function RolesSection() {
           description: "Organize selections and manage bookings seamlessly.",
         },
       ],
-      buttonText: "Casting Directors",
+      buttonText: "Get Started",
       buttonAction: () => console.log("Director signup clicked"),
       badge: "D",
     },
@@ -194,7 +144,7 @@ export default function RolesSection() {
             Built for Everyone in Casting
           </h2>
           <p className='text-[#404145] text-lg'>
-            Choose your role and discover how Poolio transforms your workflow
+            Turn simple prompts into clear, structured casting briefs.
           </p>
         </div>
 

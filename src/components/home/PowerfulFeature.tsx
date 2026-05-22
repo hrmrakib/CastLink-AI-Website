@@ -1,32 +1,38 @@
-import { Briefcase } from "lucide-react";
+import {
+  Briefcase,
+  BriefcaseConveyorBelt,
+  CalendarClock,
+  MessageSquareLock,
+  ScanFace,
+} from "lucide-react";
 
 const features = [
   {
     id: 1,
     title: "Prompt-based job creation",
-    description: "Transform simple prompts into detailed casting briefs",
-    icon: Briefcase,
+    description: "Turn simple prompts into clear,structured casting briefs.",
+    icon: BriefcaseConveyorBelt,
     colorClass: "bg-blue-600",
   },
   {
     id: 2,
-    title: "AI talent matching",
-    description: "See AI-generated faces matching your role description",
-    icon: Briefcase,
+    title: "AI smart talent matching",
+    description: "Let Al find you a perfect match for your project",
+    icon: ScanFace,
     colorClass: "bg-blue-700",
   },
   {
     id: 3,
-    title: "Agent-only communication",
-    description: "Receive and review audition tapes in one place",
-    icon: Briefcase,
+    title: "Communication",
+    description: "Keep all your communication in one place",
+    icon: MessageSquareLock,
     colorClass: "bg-blue-800",
   },
   {
     id: 4,
     title: "Availability tracking",
-    description: "Conduct live casting sessions remotely",
-    icon: Briefcase,
+    description: "Check Availability and Book",
+    icon: CalendarClock,
     colorClass: "bg-purple-600",
   },
 ];

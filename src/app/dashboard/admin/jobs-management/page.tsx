@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Info, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useJobManagementQuery } from "@/redux/features/admin/adminAPI";
+import GlobalPagination from "@/components/pagination/GlobalPagination";
 
 interface ShootDate {
   id: number;
@@ -171,7 +172,9 @@ export default function JobManagement() {
     if (!deleteConfirmJob) return;
     try {
       // const res = await deleteJobMutation(deleteConfirmJob.job_id).unwrap();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
     setDeleteConfirmJob(null);
   };
 
@@ -188,9 +191,8 @@ export default function JobManagement() {
           </div>
         </div>
 
-        {/* ── Filters ── */}
+        {/* Search */}
         <div className='w-1/3 ml-auto mb-6 flex flex-col gap-3 sm:flex-row sm:items-center'>
-          {/* Search */}
           <div className='relative flex-1 items-end'>
             <Search
               size={16}
@@ -211,19 +213,6 @@ export default function JobManagement() {
           >
             Search
           </button>
-
-          {/* Status filter */}
-          {/* <select
-            value={status}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            className='rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s === "all" ? "All Statuses" : capitalize(s)}
-              </option>
-            ))}
-          </select> */}
         </div>
 
         {/* ── Desktop Table ── */}
@@ -372,6 +361,13 @@ export default function JobManagement() {
 
         {/* ── Pagination ── */}
         {!isFetching && totalPages > 1 && (
+          <GlobalPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(page) => setPage(page)}
+          />
+        )}
+        {/* {!isFetching && totalPages > 1 && (
           <div className='mt-6 flex items-center justify-center gap-2'>
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -403,7 +399,7 @@ export default function JobManagement() {
               <ChevronRight size={16} />
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* ── Detail Modal ── */}

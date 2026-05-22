@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, Info, Loader, Loader2, Trash2, X } from "lucide-react";
+import {
+  BadgeCheck,
+  Info,
+  Loader,
+  Loader2,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   useApproveOrRejectAgentMutation,
   useDeleteUserMutation,
   useGetUserByRoleQuery,
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
+import GlobalPagination from "@/components/pagination/GlobalPagination";
 
 interface ApiUser {
   user_id: number;
@@ -84,6 +93,7 @@ export default function UserManagement() {
   const [activeTab, setActiveTab] = useState<"Client" | "Agent" | "Pending">(
     "Pending",
   );
+  const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<ApiUser | null>(
     null,
@@ -101,6 +111,7 @@ export default function UserManagement() {
     // is_active is false only when Pending, otherwise true (or undefined)
     is_active: activeTab === "Pending" ? false : true,
   });
+  const totalPages = data?.total_pages ?? 5;
 
   const users: ApiUser[] = (data?.data ?? []).filter(
     (u: ApiUser) => !deletedIds.includes(u.user_id),
@@ -180,21 +191,47 @@ export default function UserManagement() {
           <h1 className='text-2xl font-bold text-gray-900'>All Users</h1>
         </div>
 
-        {/* Tabs */}
-        <div className='mb-6 flex gap-4'>
-          {(["Client", "Agent", "Pending"] as const).map((tab) => (
+        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2'>
+          {/* Tabs */}
+          <div className='mb-6 flex gap-4'>
+            {(["Client", "Agent", "Pending"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`relative px-6 py-2.5 font-medium text-lg transition-colors ${
+                  activeTab === tab
+                    ? "bg-white text-[#2563EB] rounded-md shadow-lg"
+                    : "text-[#2563EB] hover:text-[#084bdb] border border-gray-200 rounded-xl"
+                }`}
+              >
+                {TAB_LABELS[tab]}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className='w-full lg:w-1/3 ml-auto flex flex-col gap-3 sm:flex-row sm:items-center'>
+            <div className='relative flex-1 items-end'>
+              <Search
+                size={16}
+                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
+              />
+              <input
+                type='text'
+                placeholder='Search jobs...'
+                // value={searchInput}
+                // onChange={(e) => setSearchInput(e.target.value)}
+                // onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className='w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
+              />
+            </div>
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`relative px-6 py-2.5 font-medium text-lg transition-colors ${
-                activeTab === tab
-                  ? "bg-white text-[#2563EB] rounded-md shadow-lg"
-                  : "text-[#2563EB] hover:text-[#084bdb] border border-gray-200 rounded-xl"
-              }`}
+              // onClick={handleSearch}
+              className='rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
             >
-              {TAB_LABELS[tab]}
+              Search
             </button>
-          ))}
+          </div>
         </div>
 
         {/* ── Desktop Table ── */}
@@ -339,6 +376,14 @@ export default function UserManagement() {
             ))
           )}
         </div>
+
+        {!isFetching && totalPages > 1 && (
+          <GlobalPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(page) => setPage(page)}
+          />
+        )}
       </div>
 
       {/* ── Detail Modal ── */}

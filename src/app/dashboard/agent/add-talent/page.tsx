@@ -418,6 +418,8 @@ export default function AddTalentPage() {
   const [role, setRole] = useState("Actor");
   const router = useRouter();
 
+  console.log({ role });
+
   // Logic to handle skill tags
   const [skillInput, setSkillInput] = useState("");
 
@@ -442,13 +444,6 @@ export default function AddTalentPage() {
       .filter((s) => s !== skillToRemove)
       .join(", ");
     setFormData((prev) => ({ ...prev, skills: newSkills }));
-  };
-
-  // Mapping object for clean UI labels
-  const roleLabels: Record<string, string> = {
-    lead_male: "Lead Male",
-    lead_female: "Lead Female",
-    extra: "Extra",
   };
 
   const validateForm = () => {
@@ -605,9 +600,6 @@ export default function AddTalentPage() {
       </main>
     );
   }
-
-  console.log({ shootDates });
-  console.log(JSON.stringify(shootDates));
 
   return (
     <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
@@ -935,7 +927,7 @@ export default function AddTalentPage() {
                       ? "Add more..."
                       : "Type skill and press Enter or comma"
                   }
-                  className='flex-1 min-w-[120px] outline-none bg-transparent text-sm dark:text-white p-1'
+                  className='flex-1 min-w-30 outline-none bg-transparent text-sm dark:text-white p-1'
                 />
               </div>
               <p className='text-xs text-slate-500 dark:text-slate-400'>
@@ -1066,7 +1058,7 @@ export default function AddTalentPage() {
                 </Label>
                 <DropdownMenuTrigger asChild>
                   <Button variant='outline' className='w-full justify-between'>
-                    {roleLabels[role] || "Select Role"}
+                    {role || "Select Role"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent

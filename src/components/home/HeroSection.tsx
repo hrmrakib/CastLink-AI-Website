@@ -76,9 +76,9 @@ export default function HeroSection() {
         {/* Subheading */}
         <div className='mb-10 text-center'>
           <p className='mx-auto max-w-2xl text-lg leading-relaxed text-[#404145] md:text-xl'>
-            Streamline your casting process from job creation to booking.
-            Connect clients, agents, and talents seamlessly with intelligent
-            automation.
+            From prompt to booking, Pool Of Cast simplifies casting by
+            connecting you with the right actors and models worldwide in real
+            time.
           </p>
         </div>
 
