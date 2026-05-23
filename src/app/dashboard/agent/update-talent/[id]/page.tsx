@@ -94,6 +94,12 @@ function DateCalendarModal({
   onConfirm,
 }: DateCalendarModalProps) {
   const today = new Date();
+  // FIX: add todayStr for past-date comparison
+  const todayStr = toDateString(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDates, setSelectedDates] = useState<string[]>(initialDates);
@@ -161,9 +167,13 @@ function DateCalendarModal({
         </div>
 
         <div className='flex items-center justify-between px-6 py-3'>
+          {/* FIX: added disabled guard to prevent going before current month */}
           <button
             onClick={prevMonth}
-            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500'
+            disabled={
+              viewYear === today.getFullYear() && viewMonth === today.getMonth()
+            }
+            className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed'
           >
             <svg width='8' height='14' viewBox='0 0 8 14' fill='none'>
               <path
@@ -217,20 +227,30 @@ function DateCalendarModal({
                 </div>
               );
             }
+
             const dateStr = toDateString(viewYear, viewMonth, cell.day);
             const isSelected = selectedDates.includes(dateStr);
+            // FIX: disable and style past dates
+            const isPast = dateStr < todayStr;
+
             return (
               <button
                 key={idx}
-                onClick={() => toggleDate(dateStr)}
+                onClick={() => !isPast && toggleDate(dateStr)}
+                disabled={isPast}
                 className='flex items-center justify-center h-10'
               >
                 <span
-                  className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-150 ${
-                    isSelected
-                      ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
-                  }`}
+                  className={`
+                    w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-150
+                    ${
+                      isPast
+                        ? "text-gray-300 cursor-not-allowed"
+                        : isSelected
+                          ? "bg-[#2563EB] text-white shadow-md shadow-blue-200"
+                          : "text-gray-700 hover:bg-blue-50 hover:text-[#2563EB]"
+                    }
+                  `}
                 >
                   {cell.day}
                 </span>
@@ -264,11 +284,14 @@ function DateCalendarModal({
               onClose();
             }}
             disabled={selectedDates.length === 0}
-            className={`w-full py-3.5 rounded-2xl text-base font-semibold transition-all duration-200 ${
-              selectedDates.length > 0
-                ? "bg-[#2563EB] text-white hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-200"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`}
+            className={`
+              w-full py-3.5 rounded-2xl text-base font-semibold transition-all duration-200
+              ${
+                selectedDates.length > 0
+                  ? "bg-[#2563EB] text-white hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-200"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }
+            `}
           >
             Set Date
           </button>
@@ -413,7 +436,8 @@ export default function UpdateTalentPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [shootDates, setShootDates] = useState<string[]>([]);
-  const [role, setRole] = useState("lead_male");
+  // FIX: default role to "Actor" to match Add page
+  const [role, setRole] = useState("Actor");
 
   // Logic to handle skill tags
   const [skillInput, setSkillInput] = useState("");
@@ -441,11 +465,7 @@ export default function UpdateTalentPage() {
     setFormData((prev) => ({ ...prev, skills: newSkills }));
   };
 
-  const roleLabels: Record<string, string> = {
-    lead_male: "Lead Male",
-    lead_female: "Lead Female",
-    extra: "Extra",
-  };
+  // FIX: removed roleLabels map — no longer needed
 
   const [updateTalentMutation] = useUpdateTalentMutation();
 
@@ -485,9 +505,9 @@ export default function UpdateTalentPage() {
       skills: singleTalent.skills ?? "",
     });
 
-    setShootDates(singleTalent?.available_dates);
+    setShootDates(singleTalent?.available_dates ?? []);
 
-    // Pre-populate role/character
+    // Pre-populate role/character — works directly since values now match dropdown
     if (singleTalent.character) {
       setRole(singleTalent.character);
     }
@@ -571,7 +591,9 @@ export default function UpdateTalentPage() {
         "is_available_on_request",
         String(formData.availableOnRequest),
       );
+
       payload.append("character", role);
+      payload.append("skills", formData.skills);
 
       shootDates.forEach((date) => {
         payload.append("available_date", date);
@@ -610,11 +632,6 @@ export default function UpdateTalentPage() {
 
   const handleCancel = () => {
     router.back();
-    // setFormData(INITIAL_FORM);
-    // setImages([]);
-    // setSelectedFile(null);
-    // setErrors({});
-    // setSubmitError(null);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -740,13 +757,23 @@ export default function UpdateTalentPage() {
               )}
             </div>
 
-            {/* Measurements Grid */}
+            {/* FIX: Measurements Grid — added unit (cm) suffix tags, matching Add page */}
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               {[
-                { id: "height", label: "Height", placeholder: "Height" },
-                { id: "waist", label: "Waist", placeholder: "Waist" },
-                { id: "bust", label: "Bust", placeholder: "Bust" },
-                { id: "hips", label: "Hips", placeholder: "Hips" },
+                {
+                  id: "height",
+                  label: "Height",
+                  placeholder: "Height",
+                  unit: "cm",
+                },
+                {
+                  id: "waist",
+                  label: "Waist",
+                  placeholder: "Waist",
+                  unit: "cm",
+                },
+                { id: "bust", label: "Bust", placeholder: "Bust", unit: "cm" },
+                { id: "hips", label: "Hips", placeholder: "Hips", unit: "cm" },
                 {
                   id: "dressSize",
                   label: "Dress Size",
@@ -763,19 +790,33 @@ export default function UpdateTalentPage() {
                     htmlFor={field.id}
                     className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
                   >
-                    {field.label}
+                    {field.label}{" "}
+                    {field.unit && (
+                      <span className='text-sm font-normal text-slate-600'>
+                        ({field.unit})
+                      </span>
+                    )}
                   </label>
-                  <input
-                    type='text'
-                    id={field.id}
-                    name={field.id}
-                    value={formData[field.id as keyof FormData] as string}
-                    onChange={handleInputChange}
-                    placeholder={field.placeholder}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${
-                      errors[field.id] ? "border-red-500" : "border-slate-300"
-                    }`}
-                  />
+                  <div className='relative flex items-center'>
+                    <input
+                      type='text'
+                      id={field.id}
+                      name={field.id}
+                      value={formData[field.id as keyof FormData] as string}
+                      onChange={handleInputChange}
+                      placeholder={field.placeholder}
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${
+                        field.unit ? "pr-12" : ""
+                      } ${
+                        errors[field.id] ? "border-red-500" : "border-slate-300"
+                      }`}
+                    />
+                    {field.unit && (
+                      <span className='absolute right-4 text-sm font-medium text-slate-400 select-none pointer-events-none'>
+                        {field.unit}
+                      </span>
+                    )}
+                  </div>
                   {errors[field.id] && (
                     <p className='text-red-500 text-sm mt-1'>
                       {errors[field.id]}
@@ -921,7 +962,7 @@ export default function UpdateTalentPage() {
                       ? "Add more..."
                       : "Type skill and press Enter or comma"
                   }
-                  className='flex-1 min-w-[120px] outline-none bg-transparent text-sm dark:text-white p-1'
+                  className='flex-1 min-w-30 outline-none bg-transparent text-sm dark:text-white p-1'
                 />
               </div>
               <p className='text-xs text-slate-500 dark:text-slate-400'>
@@ -1040,30 +1081,47 @@ export default function UpdateTalentPage() {
               </div>
             </div>
 
-            {/* Character Dropdown */}
+            {/* FIX: Talent type dropdown — label, options, and display value all match Add page */}
             <div className='w-full mb-10'>
               <DropdownMenu>
                 <Label className='mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200'>
-                  Character
+                  Talent type
                 </Label>
                 <DropdownMenuTrigger asChild>
+                  {/* FIX: show role directly (not via roleLabels) */}
                   <Button variant='outline' className='w-full justify-between'>
-                    {roleLabels[role] || "Select Role"}
+                    {role || "Select Role"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   className='w-(--radix-dropdown-menu-trigger-width) min-w-(--radix-dropdown-menu-trigger-width)'
                   align='start'
                 >
+                  {/* FIX: replaced lead_male/female/extra with full Add-page option set */}
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => setRole("lead_male")}>
-                      Lead Male
+                    <DropdownMenuItem onClick={() => setRole("Actor")}>
+                      Actor
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole("lead_female")}>
-                      Lead Female
+                    <DropdownMenuItem onClick={() => setRole("Model")}>
+                      Model
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole("extra")}>
-                      Extra
+                    <DropdownMenuItem onClick={() => setRole("Character")}>
+                      Character
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Influencer")}>
+                      Influencer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Perfomer")}>
+                      Perfomer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Dancer")}>
+                      Dancer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Kid")}>
+                      Kid
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRole("Plus size")}>
+                      Plus size
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>

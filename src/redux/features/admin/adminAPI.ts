@@ -29,6 +29,15 @@ const adminAPI = baseAPI.injectEndpoints({
       providesTags: ["Users"],
     }),
 
+    updateUserStatus: builder.mutation({
+      query: ({ userId, is_active }) => ({
+        url: `/accounts/user/${userId}/`,
+        method: "PATCH",
+        body: { is_active },
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
     jobManagement: builder.query({
       query: (params) => ({
         url: "/jobs/active_jobs/",
@@ -89,6 +98,7 @@ export const {
   useJobManagementQuery,
   useGetTalentsQuery,
   useDeleteUserMutation,
+  useUpdateUserStatusMutation,
   useApproveOrRejectAgentMutation,
   useApproveOrRejectTalentMutation,
   useDeleteTalentMutation,

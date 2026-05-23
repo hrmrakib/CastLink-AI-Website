@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import {
   BadgeCheck,
   Info,
@@ -14,6 +14,7 @@ import {
   useApproveOrRejectAgentMutation,
   useDeleteUserMutation,
   useGetUserByRoleQuery,
+  useUpdateUserStatusMutation,
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
@@ -112,6 +113,8 @@ export default function UserManagement() {
 
   const searchDebounce = useDebounce(searchInput, 800);
 
+  const [updateUserStatusMutation, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
   const { data, isFetching } = useGetUserByRoleQuery({
     // If Pending, don't pass a role (or pass undefined)
     role: activeTab === "Pending" ? undefined : activeTab,
@@ -195,10 +198,22 @@ export default function UserManagement() {
     }
   };
 
-  // const handleSearch = () => {
-  //   setSearchQuery(searchInput);
-  //   setPage(1);
-  // };
+  const handleToggleStatus = async (user: ApiUser) => {
+    try {
+      const res = await updateUserStatusMutation({
+        userId: user.user_id,
+        is_active: !user.is_active,
+      }).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Status updated!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update status.");
+    } finally {
+      setSelectedUser(null);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -500,10 +515,25 @@ export default function UserManagement() {
                 </button>
               </div>
             ) : (
-              <div className='px-6 pb-6 pt-4'>
+              <div className='p-6 border-t bg-gray-50 grid grid-cols-2 gap-3'>
                 <button
+                  onClick={() => handleToggleStatus(selectedUser)}
+                  disabled={isUpdatingStatus}
+                  className={`flex items-center justify-center gap-1.5 py-2.5 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedUser.is_active
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-green-600 hover:bg-green-700 text-white"
+                  }`}
+                >
+                  {selectedUser.is_active ? "Deactivate" : "Activate"}
+                  {isUpdatingStatus && (
+                    <Loader2 size={16} className='animate-spin' />
+                  )}
+                </button>
+                <button
+                  disabled={!selectedUser || isUpdatingStatus}
                   onClick={() => setSelectedUser(null)}
-                  className='w-full rounded-full bg-[#2563EB] py-2.5 font-semibold text-white transition-colors hover:bg-blue-700'
+                  className='py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition-colors'
                 >
                   Close
                 </button>
