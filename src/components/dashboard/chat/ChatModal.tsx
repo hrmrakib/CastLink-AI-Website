@@ -101,10 +101,21 @@ export default function ChatModalDetail({
   const [loadingConversationId, setLoadingConversationId] = useState<
     number | null
   >(null);
+
+  // 1. Add near your other useState declarations
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    action: (() => void) | null;
+    label: string;
+  }>({ open: false, action: null, label: "" });
+
+  // 2. Add this helper (place it alongside your other handlers)
+  const withConfirm = (action: () => void, label: string) => {
+    setConfirmModal({ open: true, action, label });
+  };
+
   const router = useRouter();
   const dispatch = useDispatch();
-
-  console.log({ selectedAvailabilityTalent });
 
   useEffect(() => {
     setCurrentTalentIndex(initialIndex);
@@ -415,7 +426,12 @@ export default function ChatModalDetail({
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  onClick={() => handleShortListTalent(talent?.talent_id)}
+                  onClick={() =>
+                    withConfirm(
+                      () => handleShortListTalent(talent?.talent_id),
+                      "Shortlist",
+                    )
+                  }
                   disabled={shortlistLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Like'
@@ -438,7 +454,12 @@ export default function ChatModalDetail({
                 </button>
 
                 <button
-                  onClick={() => handleselftapRequest(talent?.talent_id)}
+                  onClick={() =>
+                    withConfirm(
+                      () => handleselftapRequest(talent?.talent_id),
+                      "Selftaps",
+                    )
+                  }
                   disabled={selfTapLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Photo'
@@ -448,7 +469,12 @@ export default function ChatModalDetail({
                 </button>
 
                 <button
-                  onClick={() => handleECastingRequest(talent?.talent_id)}
+                  onClick={() =>
+                    withConfirm(
+                      () => handleECastingRequest(talent?.talent_id),
+                      "E-casting",
+                    )
+                  }
                   disabled={eCastingLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Call'
@@ -458,7 +484,12 @@ export default function ChatModalDetail({
                 </button>
 
                 <button
-                  onClick={() => handleTalentBooking(talent?.talent_id)}
+                  onClick={() =>
+                    withConfirm(
+                      () => handleTalentBooking(talent?.talent_id),
+                      "Booking",
+                    )
+                  }
                   disabled={bookLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Approve'
@@ -468,7 +499,12 @@ export default function ChatModalDetail({
                 </button>
 
                 <button
-                  onClick={() => handlePolasRequest(talent?.talent_id)}
+                  onClick={() =>
+                    withConfirm(
+                      () => handlePolasRequest(talent?.talent_id),
+                      "Polas",
+                    )
+                  }
                   disabled={polasLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Approve'
@@ -538,6 +574,41 @@ export default function ChatModalDetail({
             <DialogClose asChild>
               <Button variant='outline'>Close</Button>
             </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Confirm action modal ── */}
+      <Dialog
+        open={confirmModal.open}
+        onOpenChange={(open) => {
+          if (!open) setConfirmModal({ open: false, action: null, label: "" });
+        }}
+      >
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>Confirm request</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to{" "}
+              <span className='font-semibold text-gray-800'>
+                {confirmModal.label}
+              </span>{" "}
+              this model?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='gap-4 pt-2'>
+            <DialogClose asChild>
+              <Button variant='outline'>No</Button>
+            </DialogClose>
+            <Button
+              className='bg-[#2563EB] hover:bg-[#155aee] text-white'
+              onClick={() => {
+                confirmModal.action?.();
+                setConfirmModal({ open: false, action: null, label: "" });
+              }}
+            >
+              Yes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

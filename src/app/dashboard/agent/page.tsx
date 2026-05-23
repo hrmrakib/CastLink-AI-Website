@@ -58,6 +58,8 @@ export default function Home() {
   };
   const recentActivity = data?.data?.recent_activity || [];
 
+  console.log({ recentActivity });
+
   const base_url = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
   if (isLoading) return <Skeleton />;
@@ -115,14 +117,14 @@ export default function Home() {
               {!isLoading &&
                 recentActivity.map((activity: any, index: number) => (
                   <div
-                    key={index}
+                    key={activity.id ?? index}
                     className='flex gap-4 pb-4 border-b border-border last:border-b-0'
                   >
                     {/* Avatar */}
                     <div className='shrink-0'>
                       <img
-                        src={base_url + activity?.images[0]}
-                        alt={activity.name}
+                        src={base_url + activity.sender?.profile_pic}
+                        alt={activity.sender?.full_name}
                         width={40}
                         height={40}
                         className='w-10 h-10 md:w-12 md:h-12 rounded-full object-cover'
@@ -134,15 +136,15 @@ export default function Home() {
                       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4'>
                         <div>
                           <p className='font-semibold text-foreground text-sm md:text-base'>
-                            {activity.name}
+                            {activity.sender?.full_name}
                           </p>
                           <p className='text-xs md:text-sm text-muted-foreground'>
-                            {activity.time}
+                            {activity.created_at}
                           </p>
                         </div>
                       </div>
                       <p className='text-sm md:text-base text-foreground/80 mt-1'>
-                        {activity.action}
+                        {activity.event}
                       </p>
                     </div>
                   </div>

@@ -130,11 +130,11 @@ export default function Page() {
   const { data: response, isLoading } = useGetClientOverviewQuery({});
   const data = response?.data;
 
-  console.log({ data });
-
   const stats = data?.stats;
   const recentJobs = data?.recent_jobs ?? [];
   const recentActivity = data?.recent_activity ?? [];
+
+  console.log({ recentActivity });
 
   return (
     <main className='min-h-screen bg-transparent'>

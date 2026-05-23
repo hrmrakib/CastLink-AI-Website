@@ -781,9 +781,7 @@ export default function AIDynamicPage() {
                         className='order-1 md:order-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg px-6 py-3 font-medium transition flex items-center justify-center gap-2'
                       >
                         <Sparkles className='w-4 h-4' />
-                        {generatingCastingLoading
-                          ? "Generating..."
-                          : "Generate Casting"}
+                        {generatingCastingLoading ? "Saving..." : "Save Job"}
                       </button>
                     )}
                 </div>
@@ -870,6 +868,7 @@ export default function AIDynamicPage() {
         </div>
       </div>
 
+      {/* Talent detail modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
           {selectedTalent && (
