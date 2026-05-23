@@ -3,9 +3,10 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Info, Trash2, Search, X } from "lucide-react";
 import { useJobManagementQuery } from "@/redux/features/admin/adminAPI";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
+import useDebounce from "@/hooks/useDebounce";
 
 interface ShootDate {
   id: number;
@@ -140,17 +141,19 @@ function StatusBadge({ status }: { status: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function JobManagement() {
-  const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
+
   const limit = 10;
+
+  const debounceSearch = useDebounce(searchInput, 800);
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [deleteConfirmJob, setDeleteConfirmJob] = useState<Job | null>(null);
   const [deletedIds, setDeletedIds] = useState<number[]>([]);
 
-  const queryParams: Record<string, unknown> = { page, limit };
-  if (search) queryParams.search = search;
+  const queryParams: Record<string, unknown> = { page, page_size: limit };
+  if (debounceSearch) queryParams.search = debounceSearch;
 
   const { data, isFetching } = useJobManagementQuery(queryParams);
 
@@ -158,13 +161,8 @@ export default function JobManagement() {
     (j: Job) => !deletedIds.includes(j.job_id),
   );
 
-  const pagination = data?.pagination;
-  const totalPages = pagination?.total_pages ?? 1;
-
-  const handleSearch = () => {
-    setSearch(searchInput);
-    setPage(1);
-  };
+  const totalPages = data?.meta?.total_pages ?? 1;
+  const total = data?.meta?.total ?? 0;
 
   console.log({ deleteConfirmJob });
 
@@ -185,14 +183,12 @@ export default function JobManagement() {
         <div className='mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
           <h1 className='text-2xl font-bold text-gray-900'>Job Management</h1>
           <div className='text-sm text-gray-700'>
-            {pagination
-              ? `Total job${pagination.total !== 1 ? "s:" : ":"} ${pagination.total}`
-              : ""}
+            {total ? `Total job${total !== 1 ? "s:" : ":"} ${total}` : ""}
           </div>
         </div>
 
         {/* Search */}
-        <div className='w-1/3 ml-auto mb-6 flex flex-col gap-3 sm:flex-row sm:items-center'>
+        <div className='w-1/4 ml-auto mb-6 flex flex-col gap-3 sm:flex-row sm:items-center'>
           <div className='relative flex-1 items-end'>
             <Search
               size={16}
@@ -202,17 +198,18 @@ export default function JobManagement() {
               type='text'
               placeholder='Search jobs...'
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setPage(1);
+              }}
               className='w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
             />
+            <X
+              onClick={() => setSearchInput("")}
+              size={16}
+              className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400'
+            />
           </div>
-          <button
-            onClick={handleSearch}
-            className='rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
-          >
-            Search
-          </button>
         </div>
 
         {/* ── Desktop Table ── */}
@@ -364,42 +361,12 @@ export default function JobManagement() {
           <GlobalPagination
             currentPage={page}
             totalPages={totalPages}
-            onPageChange={(page) => setPage(page)}
+            onPageChange={(page) => {
+              setPage(page);
+              setSearchInput("");
+            }}
           />
         )}
-        {/* {!isFetching && totalPages > 1 && (
-          <div className='mt-6 flex items-center justify-center gap-2'>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed'
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${
-                  p === page
-                    ? "bg-[#2563EB] text-white"
-                    : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed'
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )} */}
       </div>
 
       {/* ── Detail Modal ── */}

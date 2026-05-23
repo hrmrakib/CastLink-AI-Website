@@ -10,6 +10,7 @@ import {
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
+import useDebounce from "@/hooks/useDebounce";
 
 type TalentTab = "approved" | "pending";
 
@@ -54,19 +55,27 @@ export default function TalentManagement() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [emailForm, setEmailForm] = useState({ body: "" });
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+
+  const searchDebounce = useDebounce(searchInput, 800);
 
   const [approveOrRejectTalentMutation, { isLoading: isApproving }] =
     useApproveOrRejectTalentMutation();
   const [deleteTalentMutation, { isLoading: isDeleting }] =
     useDeleteTalentMutation();
   const [page, setPage] = useState(1);
+
+  const limit = 10;
+
   const { data, isFetching, refetch } = useGetTalentsQuery({
     approval_status: activeTab,
+    page: page,
+    page_size: limit,
+    search: searchDebounce,
   });
   const talents: Talent[] = data?.data ?? [];
-  const totalPages = data?.total_pages ?? 5;
 
-  console.log({ talents });
+  const totalPages = data?.meta?.total_pages ?? 1;
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
@@ -139,7 +148,10 @@ export default function TalentManagement() {
             {TAB_CONFIG.map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key)}
+                onClick={() => {
+                  setActiveTab(key);
+                  setPage(1);
+                }}
                 className={`px-4 py-2 whitespace-nowrap rounded-lg font-medium transition-colors ${
                   activeTab === key
                     ? "bg-[#2563EB] text-white"
@@ -160,18 +172,20 @@ export default function TalentManagement() {
               <input
                 type='text'
                 placeholder='Search jobs...'
-                // value={searchInput}
-                // onChange={(e) => setSearchInput(e.target.value)}
-                // onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setPage(1);
+                }}
                 className='w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
               />
+
+              <X
+                onClick={() => setSearchInput("")}
+                size={16}
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400'
+              />
             </div>
-            <button
-              // onClick={handleSearch}
-              className='rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
-            >
-              Search
-            </button>
           </div>
         </div>
 
@@ -271,7 +285,10 @@ export default function TalentManagement() {
           <GlobalPagination
             currentPage={page}
             totalPages={totalPages}
-            onPageChange={(page) => setPage(page)}
+            onPageChange={(page) => {
+              setPage(page);
+              setSearchInput("");
+            }}
           />
         )}
       </div>

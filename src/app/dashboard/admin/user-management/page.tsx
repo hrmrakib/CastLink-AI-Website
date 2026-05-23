@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   BadgeCheck,
   Info,
@@ -17,6 +17,7 @@ import {
 } from "@/redux/features/admin/adminAPI";
 import { toast } from "sonner";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
+import useDebounce from "@/hooks/useDebounce";
 
 interface ApiUser {
   user_id: number;
@@ -98,20 +99,31 @@ export default function UserManagement() {
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<ApiUser | null>(
     null,
   );
+  const [searchInput, setSearchInput] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
   const [deletedIds] = useState<number[]>([]);
 
   const [approveOrRejectAgentMutation, { isLoading: isApproving }] =
     useApproveOrRejectAgentMutation();
   const [deleteUserMutation, { isLoading: isDeleting }] =
     useDeleteUserMutation();
+
+  const limit = 10;
+
+  const searchDebounce = useDebounce(searchInput, 800);
+
   const { data, isFetching } = useGetUserByRoleQuery({
     // If Pending, don't pass a role (or pass undefined)
     role: activeTab === "Pending" ? undefined : activeTab,
 
     // is_active is false only when Pending, otherwise true (or undefined)
     is_active: activeTab === "Pending" ? false : true,
+    page: page,
+    page_size: limit,
+    search: searchDebounce,
   });
-  const totalPages = data?.total_pages ?? 5;
+
+  const totalPages = data?.meta?.total_pages ?? 1;
 
   const users: ApiUser[] = (data?.data ?? []).filter(
     (u: ApiUser) => !deletedIds.includes(u.user_id),
@@ -183,6 +195,11 @@ export default function UserManagement() {
     }
   };
 
+  // const handleSearch = () => {
+  //   setSearchQuery(searchInput);
+  //   setPage(1);
+  // };
+
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='mx-auto container'>
@@ -197,7 +214,11 @@ export default function UserManagement() {
             {(["Client", "Agent", "Pending"] as const).map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setPage(1);
+                  setSearchInput("");
+                }}
                 className={`relative px-6 py-2.5 font-medium text-lg transition-colors ${
                   activeTab === tab
                     ? "bg-white text-[#2563EB] rounded-md shadow-lg"
@@ -210,7 +231,7 @@ export default function UserManagement() {
           </div>
 
           {/* Search */}
-          <div className='w-full lg:w-1/3 ml-auto flex flex-col gap-3 sm:flex-row sm:items-center'>
+          <div className='w-full lg:w-1/4 ml-auto flex flex-col gap-3 sm:flex-row sm:items-center'>
             <div className='relative flex-1 items-end'>
               <Search
                 size={16}
@@ -219,18 +240,26 @@ export default function UserManagement() {
               <input
                 type='text'
                 placeholder='Search jobs...'
-                // value={searchInput}
-                // onChange={(e) => setSearchInput(e.target.value)}
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setPage(1);
+                }}
                 // onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className='w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]'
               />
+              <X
+                onClick={() => setSearchInput("")}
+                size={16}
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400'
+              />
             </div>
-            <button
-              // onClick={handleSearch}
+            {/* <button
+              onClick={handleSearch}
               className='rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700'
             >
               Search
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -381,7 +410,10 @@ export default function UserManagement() {
           <GlobalPagination
             currentPage={page}
             totalPages={totalPages}
-            onPageChange={(page) => setPage(page)}
+            onPageChange={(page) => {
+              setPage(page);
+              setSearchInput("");
+            }}
           />
         )}
       </div>

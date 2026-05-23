@@ -31,7 +31,7 @@ export default function Footer() {
   };
 
   const handleLinkClick = (label: string) => {
-    console.log(`[v0] Clicked footer link: ${label}`);
+    console.log(`Clicked footer link: ${label}`);
   };
 
   return (

@@ -11,12 +11,15 @@ const adminAPI = baseAPI.injectEndpoints({
     }),
 
     getUserByRole: builder.query({
-      query: ({ role, is_active }) => {
+      query: ({ role, is_active, page, page_size, search }) => {
         // Build the params object dynamically
         const params: any = {};
 
         if (role) params.role = role;
         if (is_active !== undefined) params.is_active = is_active;
+        if (page !== undefined) params.page = page;
+        if (page_size !== undefined) params.page_size = page_size;
+        if (search) params.search = search;
 
         return {
           url: `/accounts/user/user_list`,
