@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -13,6 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetClientOverviewQuery } from "@/redux/features/client/clientOverview";
+import { getImageUrl } from "@/lib/imagePath";
 
 export interface ClientOverviewStats {
   active_jobs: number;
@@ -32,10 +34,17 @@ export interface ClientOverviewJob {
   session_id: string;
 }
 
-export interface ClientOverviewActivity {
-  name: string;
-  action: string;
-  time: string;
+interface ClientOverviewActivity {
+  id: number;
+  event: string;
+  sender: {
+    user_id: number;
+    full_name: string;
+    email: string;
+    phone: string;
+    profile_pic: string;
+  };
+  created_at: string;
 }
 
 export interface ClientOverviewData {
@@ -339,21 +348,31 @@ export default function Page() {
                 ) : (
                   recentActivity.map(
                     (activity: ClientOverviewActivity, index: number) => (
-                      <div key={index} className='flex gap-4'>
-                        <div
-                          className={`${
-                            AVATAR_COLORS[index % AVATAR_COLORS.length]
-                          } w-10 h-10 rounded-full flex items-center justify-center shrink-0`}
-                        >
-                          <User className='w-5 h-5 text-white' />
-                        </div>
+                      <div key={activity.id} className='flex gap-4'>
+                        {activity.sender.profile_pic ? (
+                          <img
+                            src={getImageUrl(activity.sender.profile_pic)}
+                            alt={activity.sender.full_name}
+                            className='w-10 h-10 rounded-full object-cover shrink-0'
+                          />
+                        ) : (
+                          <div
+                            className={`${
+                              AVATAR_COLORS[index % AVATAR_COLORS.length]
+                            } w-10 h-10 rounded-full flex items-center justify-center shrink-0`}
+                          >
+                            <User className='w-5 h-5 text-white' />
+                          </div>
+                        )}
                         <div className='flex-1 min-w-0'>
                           <p className='text-base font-medium text-[#000000]'>
-                            <span className='font-bold'>{activity.name}</span>{" "}
-                            {activity.action}
+                            <span className='font-bold'>
+                              {activity.sender.full_name}
+                            </span>{" "}
+                            {activity.event}
                           </p>
                           <p className='text-xs text-muted-[#000000] mt-1'>
-                            {activity.time}
+                            {activity.created_at}
                           </p>
                         </div>
                       </div>

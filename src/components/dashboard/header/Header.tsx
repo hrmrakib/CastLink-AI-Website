@@ -7,6 +7,7 @@ import getGreeting from "@/components/utils/getGreeting";
 import useDashboardHeader from "@/components/utils/hideDashboardHeader";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
+import { getImageUrl } from "@/lib/imagePath";
 
 const Header = () => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
@@ -49,7 +50,8 @@ const Header = () => {
                     className='h-12 w-12 rounded-full!'
                     width={55}
                     height={55}
-                    src={image_url! + user?.profile_pic}
+                    src={getImageUrl(user?.profile_pic)}
+                    // src={image_url! + user?.profile_pic}
                     alt='Daissy'
                   />
                 )}
