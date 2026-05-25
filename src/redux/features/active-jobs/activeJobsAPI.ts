@@ -16,9 +16,18 @@ const activeJobsAPI = baseAPI.injectEndpoints({
         method: "GET",
       }),
     }),
+    deleteActiveJob: builder.mutation({
+      query: (job_id) => ({
+        url: `/jobs/active_jobs/${job_id}/`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetActiveJobsQuery, useGetActiveJobDetailsQuery } =
-  activeJobsAPI;
+export const {
+  useGetActiveJobsQuery,
+  useGetActiveJobDetailsQuery,
+  useDeleteActiveJobMutation,
+} = activeJobsAPI;
 export default activeJobsAPI;

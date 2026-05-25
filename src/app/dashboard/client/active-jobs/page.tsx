@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -14,8 +15,12 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
+import {
+  useDeleteActiveJobMutation,
+  useGetActiveJobsQuery,
+} from "@/redux/features/active-jobs/activeJobsAPI";
 import useDebounce from "@/hooks/useDebounce";
+import { toast } from "sonner";
 
 interface Job {
   job_id: string;
@@ -81,6 +86,7 @@ export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
+  const [deleteActiveJobMutation] = useDeleteActiveJobMutation();
   const { data, isLoading, isFetching } = useGetActiveJobsQuery({
     page: currentPage,
     limit: 10,
@@ -107,11 +113,14 @@ export default function Page() {
   };
 
   // Confirm permanent delete handler
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedJobId) {
-      console.log(`Permanently deleting job with ID: ${selectedJobId}`);
-      // TODO: Place your RTK Query delete mutation trigger here:
-      // await deleteJob(selectedJobId).unwrap();
+      try {
+        await deleteActiveJobMutation(selectedJobId).unwrap();
+      } catch (error: any) {
+        toast.error(error?.data?.status_message);
+        console.error("Error deleting job:", error);
+      }
 
       setIsModalOpen(false);
       setSelectedJobId(null);
