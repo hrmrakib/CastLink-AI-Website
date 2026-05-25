@@ -128,6 +128,14 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         body: data,
       }),
     }),
+
+    // delete active job
+    deleteActiveJob: builder.mutation({
+      query: (job_id) => ({
+        url: `/api/jobs/delete-job-id/?job_id=${job_id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -146,5 +154,6 @@ export const {
   usePolasRequestMutation,
   usePolasUploadMutation,
   useSelftapUploadMutation,
+  useDeleteActiveJobMutation,
 } = aiChatAPI;
 export default aiChatAPI;

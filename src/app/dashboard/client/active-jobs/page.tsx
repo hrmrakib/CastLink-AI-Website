@@ -13,14 +13,13 @@ import {
   ChevronRight,
   Trash2,
   AlertTriangle,
+  Loader,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  useDeleteActiveJobMutation,
-  useGetActiveJobsQuery,
-} from "@/redux/features/active-jobs/activeJobsAPI";
+import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
 import useDebounce from "@/hooks/useDebounce";
 import { toast } from "sonner";
+import { useDeleteActiveJobMutation } from "@/redux/features/ai-chat/aiChatAPI";
 
 interface Job {
   job_id: string;
@@ -86,7 +85,8 @@ export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  const [deleteActiveJobMutation] = useDeleteActiveJobMutation();
+  const [deleteActiveJobMutation, { isLoading: isDeleting }] =
+    useDeleteActiveJobMutation();
   const { data, isLoading, isFetching } = useGetActiveJobsQuery({
     page: currentPage,
     limit: 10,
@@ -428,19 +428,22 @@ export default function Page() {
 
             <div className='flex gap-3 justify-end mt-6'>
               <button
+                disabled={isDeleting}
                 onClick={() => {
                   setIsModalOpen(false);
                   setSelectedJobId(null);
                 }}
-                className='px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer'
+                className='px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Cancel
               </button>
               <button
+                disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className='px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer'
+                className='flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                Permanently Delete
+                Permanently Delete{" "}
+                {isDeleting && <Loader className='animate-spin' size={16} />}
               </button>
             </div>
           </div>
