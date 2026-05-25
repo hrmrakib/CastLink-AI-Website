@@ -16,8 +16,6 @@ const Header = () => {
 
   const { user } = useAuth();
 
-  const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
-
   const segments = pathname.split("/");
   const role = segments[2];
 

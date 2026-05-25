@@ -109,6 +109,7 @@ export default function AIDynamicPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [jobModal, setJobModal] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
+  const [jobRole, setJobRole] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -360,6 +361,7 @@ export default function AIDynamicPage() {
       const res = await generateJobFromMessageMutation({
         session_id: id,
         title: jobTitle,
+        casting_roles: jobRole,
         description: jobDescription,
         generate_job: true,
       }).unwrap();
@@ -527,7 +529,7 @@ export default function AIDynamicPage() {
                                       width={600}
                                       height={600}
                                       unoptimized
-                                      className='w-full h-120 object-cover'
+                                      className='w-full h-120 object-cover object-top'
                                     />
 
                                     {/* FIX 5 continued: overlay shows correct hidden count */}
@@ -638,13 +640,6 @@ export default function AIDynamicPage() {
                                           "Shortlist",
                                         )
                                       }
-                                      // onClick={() =>
-                                      //   withConfirm(() =>
-                                      //     handleShortListTalent(
-                                      //       profile?.talent_id,
-                                      //     ),
-                                      //   )
-                                      // }
                                       disabled={shortlistLoading}
                                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                                       aria-label='Like'
@@ -908,6 +903,21 @@ export default function AIDynamicPage() {
                   placeholder='e.g. Senior Fashion Model'
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                  className='h-11 border border-gray-300'
+                />
+              </Field>
+
+              <Field>
+                <Label htmlFor='title' className='text-sm font-semibold'>
+                  Job Role
+                </Label>
+                <Input
+                  id='title'
+                  name='title'
+                  placeholder='e.g. Fashion Model'
+                  value={jobRole}
+                  onChange={(e) => setJobRole(e.target.value)}
                   required
                   className='h-11 border border-gray-300'
                 />
