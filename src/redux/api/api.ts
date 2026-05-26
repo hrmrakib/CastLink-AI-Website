@@ -112,7 +112,15 @@ const customBaseQuery: BaseQueryFn<
 export const baseAPI = createApi({
   reducerPath: "api",
   baseQuery: customBaseQuery,
-  tagTypes: ["Post", "Settings", "Profile", "Users", "Jobs", "Talents"],
+  tagTypes: [
+    "Post",
+    "Settings",
+    "Profile",
+    "Users",
+    "Jobs",
+    "Talents",
+    "ActiveJobs",
+  ],
   endpoints: () => ({}),
 });
 

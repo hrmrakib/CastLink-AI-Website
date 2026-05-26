@@ -146,12 +146,12 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           )}
         </div>
         <div>
-          <button
+          {/* <button
             onClick={(e) => openDeleteModal(e, String(shortlist.job_id))}
             className='p-3'
           >
             <Trash2 className='w-6 h-6 text-[#FF0000]' strokeWidth={1.2} />
-          </button>
+          </button> */}
         </div>
       </div>
 

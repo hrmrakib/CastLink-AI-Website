@@ -16,6 +16,7 @@ const aiBaseQuery = fetchBaseQuery({
 export const aiBaseAPI = createApi({
   reducerPath: "aiApi",
   baseQuery: aiBaseQuery,
+  tagTypes: ["ActiveJobs"],
   endpoints: () => ({}),
 });
 
@@ -132,9 +133,10 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
     // delete active job
     deleteActiveJob: builder.mutation({
       query: (job_id) => ({
-        url: `/api/jobs/delete-job-id/?job_id=${job_id}`,
+        url: `/api/jobs/delete-job-id?job_id=${job_id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["ActiveJobs"],
     }),
   }),
 });

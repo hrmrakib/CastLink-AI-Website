@@ -8,6 +8,7 @@ const activeJobsAPI = baseAPI.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: ["ActiveJobs"],
     }),
 
     getActiveJobDetails: builder.query({
@@ -15,6 +16,7 @@ const activeJobsAPI = baseAPI.injectEndpoints({
         url: `/jobs/active_jobs/${job_id}/`,
         method: "GET",
       }),
+      providesTags: ["ActiveJobs"],
     }),
   }),
 });
