@@ -22,7 +22,6 @@ import {
   Check,
   ScanFace,
   Loader,
-  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -40,21 +39,172 @@ import autoTable from "jspdf-autotable";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Types matching actual API shape ──────────────────────────────────────────
 
-interface ApiTalent {
-  talent_id: number;
-  talent_name: string;
-  talent_role: string;
-  available_dates: string[];
-  location: string;
-  agency_name: string;
+export interface TalentImage {
+  image_id: number;
   image: string;
+  is_primary: boolean;
+  uploaded_at: string;
+}
+
+export interface TalentInfo {
+  talent_id: number;
+  name: string;
+  gender: string;
+  role: string;
+  character: string;
+  height: string;
+  waist: string;
+  bust: string;
+  hips: string;
+  dress_size: string;
+  shoe_size: string;
+  hair_colour: string;
+  eye_colour: string;
+  skin_color: string;
+  hair_type: string;
+  continent: string;
+  country: string;
+  location: string;
+  skills: string;
+  is_available: boolean;
+  images: TalentImage[];
+}
+
+export interface ShortlistedTalent {
+  shortlisted_id: number;
+  session_id: string;
+  created_at: string;
+  talent_info: TalentInfo;
+}
+
+export interface ShortlistJobDetail {
+  job_id: string;
+  title: string;
+  description: string;
+  casting_roles: string;
+  location: string;
+  budget_min: string;
+  budget_max: string;
+  job_type: string;
+  status: string;
+  applicants_count: number;
+  shortlisted_count: number;
+  selftapes_count: number;
+  ecastings_count: number;
+  polas_count: number;
+  created_at: string;
+  updated_at: string;
+  shortlisted_talents: ShortlistedTalent[];
+}
+
+// ── Internal normalised UI shape ─────────────────────────────────────────────
+
+interface Talent {
+  id: string; // shortlisted_id as string (unique per shortlist entry)
+  talent_id: number;
+  name: string;
+  role: string;
+  character: string;
+  gender: string;
+  location: string;
+  country: string;
+  height: string;
+  waist: string;
+  bust: string;
+  hips: string;
+  dress_size: string;
+  shoe_size: string;
+  hair_colour: string;
+  eye_colour: string;
+  skin_color: string;
+  hair_type: string;
+  skills: string;
+  is_available: boolean;
+  primaryImage: string; // resolved absolute URL
+  images: TalentImage[];
   created_at: string;
 }
 
-interface Talent extends ApiTalent {
-  id: string;
+type GroupKey = "lead_male" | "lead_female" | "extra" | "other";
+
+interface GroupedTalents {
+  lead_male: Talent[];
+  lead_female: Talent[];
+  extra: Talent[];
+  other: Talent[]; // fallback for any unknown character value
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function getPrimaryImage(images: TalentImage[]): string {
+  if (!images || images.length === 0) return "";
+  return (images.find((img) => img.is_primary) ?? images[0]).image;
+}
+
+/** Images from the internal API already carry absolute http URLs — pass them through unchanged. */
+function resolveImageUrl(url: string): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${BASE_URL}${url}`;
+}
+
+function normalise(raw: ShortlistedTalent): Talent {
+  const ti = raw.talent_info;
+  return {
+    id: String(raw.shortlisted_id),
+    talent_id: ti.talent_id,
+    name: ti.name,
+    role: ti.role,
+    character: ti.character,
+    gender: ti.gender,
+    location: ti.location,
+    country: ti.country,
+    height: ti.height,
+    waist: ti.waist,
+    bust: ti.bust,
+    hips: ti.hips,
+    dress_size: ti.dress_size,
+    shoe_size: ti.shoe_size,
+    hair_colour: ti.hair_colour,
+    eye_colour: ti.eye_colour,
+    skin_color: ti.skin_color,
+    hair_type: ti.hair_type,
+    skills: ti.skills,
+    is_available: ti.is_available,
+    primaryImage: resolveImageUrl(getPrimaryImage(ti.images)),
+    images: ti.images,
+    created_at: raw.created_at,
+  };
+}
+
+function groupTalents(talents: ShortlistedTalent[]): GroupedTalents {
+  const groups: GroupedTalents = {
+    lead_male: [],
+    lead_female: [],
+    extra: [],
+    other: [],
+  };
+  for (const raw of talents) {
+    const t = normalise(raw);
+    const char = (raw.talent_info.character ?? "")
+      .toLowerCase()
+      .replace(/\s+/g, "_");
+    if (char === "lead_male") groups.lead_male.push(t);
+    else if (char === "lead_female") groups.lead_female.push(t);
+    else if (char === "extra") groups.extra.push(t);
+    else groups.other.push(t);
+  }
+  return groups;
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -94,21 +244,7 @@ function PageSkeleton() {
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function toTalentList(arr: ApiTalent[]): Talent[] {
-  return arr.map((t) => ({ ...t, id: String(t.talent_id) }));
-}
-
-// ── Talent Group Section ──────────────────────────────────────────────────────
+// ── Talent Group ──────────────────────────────────────────────────────────────
 
 interface TalentGroupProps {
   title: string;
@@ -166,10 +302,10 @@ function TalentGroup({
 
             {/* Avatar */}
             <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
-              {talent.image ? (
+              {talent.primaryImage ? (
                 <Image
-                  src={`${BASE_URL}${talent.image}`}
-                  alt={talent.talent_name}
+                  src={talent.primaryImage}
+                  alt={talent.name}
                   fill
                   unoptimized
                   className='object-cover'
@@ -184,25 +320,30 @@ function TalentGroup({
             {/* Info */}
             <div className='flex-1 min-w-0'>
               <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
-                {talent.talent_name}
+                {talent.name}
               </h3>
               <div className='flex items-center gap-5 flex-wrap'>
                 <p className='text-[#2563EB] text-sm'>
                   Added: {formatDate(talent.created_at)}
                 </p>
+                {talent.is_available && (
+                  <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
+                    Available
+                  </span>
+                )}
               </div>
               <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
                 <span className='flex items-center gap-1'>
                   <MapPin size={14} />
-                  {talent.location}
+                  {talent.location}, {talent.country}
                 </span>
-                <span className='flex items-center gap-1'>
+                <span className='flex items-center gap-1 capitalize'>
                   <Briefcase size={14} />
-                  {talent.talent_role}
+                  {talent.role}
                 </span>
-                <span className='flex items-center gap-1'>
+                <span className='flex items-center gap-1 capitalize'>
                   <UserRound size={14} />
-                  {talent.agency_name}
+                  {talent.character}
                 </span>
               </div>
             </div>
@@ -237,32 +378,20 @@ function TalentGroup({
   );
 }
 
-// ── Types for grouped state ───────────────────────────────────────────────────
-
-type GroupKey = "lead_male" | "lead_female" | "extra";
-
-interface GroupedTalents {
-  lead_male: Talent[];
-  lead_female: Talent[];
-  extra: Talent[];
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ShortlistDetailPage() {
-  const router = useRouter();
   const params = useParams();
-  const id = Number(params.id);
+  const id = params.id as string;
 
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
-
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [grouped, setGrouped] = useState<GroupedTalents>({
     lead_male: [],
     lead_female: [],
     extra: [],
+    other: [],
   });
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
@@ -272,29 +401,27 @@ export default function ShortlistDetailPage() {
 
   // Populate grouped state whenever API data arrives
   useEffect(() => {
-    const characters = data?.data?.characters;
-    if (!characters) return;
-    setGrouped({
-      lead_male: toTalentList(characters.lead_male ?? []),
-      lead_female: toTalentList(characters.lead_female ?? []),
-      extra: toTalentList(characters.extra ?? []),
-    });
+    if (!data) return;
+    // Support both { data: job } and job returned directly
+    const job: ShortlistJobDetail = data?.data ?? data;
+    const talents: ShortlistedTalent[] = job?.shortlisted_talents ?? [];
+    setGrouped(groupTalents(talents));
   }, [data]);
 
-  // Total talent count (all groups combined)
   const totalCount =
     grouped.lead_male.length +
     grouped.lead_female.length +
-    grouped.extra.length;
+    grouped.extra.length +
+    grouped.other.length;
 
-  // All talents flattened (for PDF)
   const allTalents = [
     ...grouped.lead_male,
     ...grouped.lead_female,
     ...grouped.extra,
+    ...grouped.other,
   ];
 
-  // ── Drag-and-drop (within group) ──────────────────────────────────────────
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────
 
   const handleDragStart = (id: string) => setDraggedItem(id);
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
@@ -305,7 +432,7 @@ export default function ShortlistDetailPage() {
       const list = [...prev[groupKey]];
       const from = list.findIndex((t) => t.id === draggedItem);
       const to = list.findIndex((t) => t.id === targetId);
-      if (from === -1 || to === -1) return prev; // dragged across groups — ignore
+      if (from === -1 || to === -1) return prev;
       const [moved] = list.splice(from, 1);
       list.splice(to, 0, moved);
       return { ...prev, [groupKey]: list };
@@ -313,7 +440,7 @@ export default function ShortlistDetailPage() {
     setDraggedItem(null);
   };
 
-  // ── Actions ────────────────────────────────────────────────────────────────
+  // ── Actions ───────────────────────────────────────────────────────────────
 
   const handleDeleteTalent = (id: string, groupKey: GroupKey) => {
     setGrouped((prev) => ({
@@ -323,7 +450,6 @@ export default function ShortlistDetailPage() {
   };
 
   const handleViewTalent = (talent: Talent) => {
-    setAvailableDates(talent.available_dates ?? []);
     setSelectedTalent(talent);
     setIsOpen(true);
   };
@@ -367,13 +493,16 @@ export default function ShortlistDetailPage() {
 
     autoTable(doc, {
       startY: 46,
-      head: [["#", "Name", "Role", "Agency", "Location", "Added"]],
+      head: [
+        ["#", "Name", "Role", "Character", "Location", "Country", "Added"],
+      ],
       body: allTalents.map((t, i) => [
         i + 1,
-        t.talent_name,
-        t.talent_role,
-        t.agency_name,
+        t.name,
+        t.role,
+        t.character,
         t.location,
+        t.country,
         formatDate(t.created_at),
       ]),
       headStyles: {
@@ -386,7 +515,7 @@ export default function ShortlistDetailPage() {
       alternateRowStyles: { fillColor: [239, 246, 255] },
       columnStyles: {
         0: { halign: "center", cellWidth: 10 },
-        5: { cellWidth: 24 },
+        6: { cellWidth: 24 },
       },
       margin: { left: 14, right: 14 },
       didDrawPage: (hookData) => {
@@ -414,10 +543,13 @@ export default function ShortlistDetailPage() {
     return () => clearTimeout(timer);
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Derive job meta ───────────────────────────────────────────────────────
 
-  const jobTitle = data?.data?.job_title ?? "Shortlist";
-  const jobDescription = data?.data?.job_description ?? "";
+  const job: ShortlistJobDetail | undefined = data?.data ?? data;
+  const jobTitle = job?.title ?? "Shortlist";
+  const jobDescription = job?.description?.trim() ?? "";
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -440,14 +572,6 @@ export default function ShortlistDetailPage() {
           )}
 
           <div className='flex flex-wrap items-end justify-end mt-6'>
-            {/* <button
-              onClick={() => router.back()}
-              className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-            >
-              <ArrowLeft size={18} />
-              Go Back
-            </button> */}
-
             <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -536,6 +660,17 @@ export default function ShortlistDetailPage() {
               onView={handleViewTalent}
               onDelete={handleDeleteTalent}
             />
+            <TalentGroup
+              title='Other'
+              groupKey='other'
+              talents={grouped.other}
+              draggedItem={draggedItem}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onView={handleViewTalent}
+              onDelete={handleDeleteTalent}
+            />
           </>
         )}
       </div>
@@ -574,10 +709,44 @@ export default function ShortlistDetailPage() {
                     </h1>
                     <div className='space-y-1.5'>
                       {[
-                        { label: "Name", value: selectedTalent.talent_name },
-                        { label: "Role", value: selectedTalent.talent_role },
-                        { label: "Agent", value: selectedTalent.agency_name },
-                        { label: "Location", value: selectedTalent.location },
+                        { label: "Name", value: selectedTalent.name },
+                        { label: "Role", value: selectedTalent.role },
+                        { label: "Character", value: selectedTalent.character },
+                        { label: "Gender", value: selectedTalent.gender },
+                        {
+                          label: "Location",
+                          value: `${selectedTalent.location}, ${selectedTalent.country}`,
+                        },
+                        {
+                          label: "Height",
+                          value: selectedTalent.height
+                            ? `${selectedTalent.height} cm`
+                            : "—",
+                        },
+                        { label: "Waist", value: selectedTalent.waist || "—" },
+                        { label: "Bust", value: selectedTalent.bust || "—" },
+                        { label: "Hips", value: selectedTalent.hips || "—" },
+                        {
+                          label: "Dress size",
+                          value: selectedTalent.dress_size || "—",
+                        },
+                        {
+                          label: "Shoe size",
+                          value: selectedTalent.shoe_size || "—",
+                        },
+                        {
+                          label: "Hair",
+                          value: `${selectedTalent.hair_colour} / ${selectedTalent.hair_type}`,
+                        },
+                        { label: "Eyes", value: selectedTalent.eye_colour },
+                        { label: "Skin", value: selectedTalent.skin_color },
+                        ...(selectedTalent.skills
+                          ? [{ label: "Skills", value: selectedTalent.skills }]
+                          : []),
+                        {
+                          label: "Available",
+                          value: selectedTalent.is_available ? "Yes" : "No",
+                        },
                         {
                           label: "Added",
                           value: formatDate(selectedTalent.created_at),
@@ -598,13 +767,14 @@ export default function ShortlistDetailPage() {
                     </div>
                   </div>
 
-                  {/* Right — image */}
+                  {/* Right — images */}
                   <div className='flex flex-col gap-4'>
+                    {/* Primary image */}
                     <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
-                      {selectedTalent.image ? (
+                      {selectedTalent.primaryImage ? (
                         <Image
-                          src={`${BASE_URL}${selectedTalent.image}`}
-                          alt={selectedTalent.talent_name}
+                          src={selectedTalent.primaryImage}
+                          alt={selectedTalent.name}
                           fill
                           unoptimized
                           className='object-cover'
@@ -615,6 +785,28 @@ export default function ShortlistDetailPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Additional image thumbnails */}
+                    {selectedTalent.images.length > 1 && (
+                      <div className='flex gap-2 flex-wrap'>
+                        {selectedTalent.images
+                          .filter((img) => !img.is_primary)
+                          .map((img) => (
+                            <div
+                              key={img.image_id}
+                              className='relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0'
+                            >
+                              <Image
+                                src={resolveImageUrl(img.image)}
+                                alt={selectedTalent.name}
+                                fill
+                                unoptimized
+                                className='object-cover'
+                              />
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -690,8 +882,8 @@ export default function ShortlistDetailPage() {
         </div>
       )}
 
-      {/* ── Availability Date Modal ── */}
-      {isDateModalOpen && (
+      {/* ── Availability Modal ── */}
+      {isDateModalOpen && selectedTalent && (
         <div
           className='fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm'
           onClick={() => setIsDateModalOpen(false)}
@@ -703,7 +895,7 @@ export default function ShortlistDetailPage() {
             <div className='flex justify-between items-center mb-4'>
               <h3 className='text-lg font-bold text-gray-900 flex items-center gap-2'>
                 <Calendar size={20} className='text-blue-600' />
-                Available Dates
+                Availability
               </h3>
               <button
                 onClick={() => setIsDateModalOpen(false)}
@@ -714,27 +906,18 @@ export default function ShortlistDetailPage() {
             </div>
 
             <div className='space-y-2 max-h-60 overflow-y-auto pr-2'>
-              {availableDates.length > 0 ? (
-                availableDates.map((date, index) => (
-                  <div
-                    key={index}
-                    className='flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100'
-                  >
-                    <span className='text-blue-900 font-medium'>
-                      {new Date(date).toLocaleDateString("en-GB", {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "long",
-                      })}
-                    </span>
-                    <span className='text-[10px] uppercase tracking-wider font-bold text-blue-500 bg-white px-2 py-1 rounded shadow-sm'>
-                      Available
-                    </span>
-                  </div>
-                ))
+              {selectedTalent.is_available ? (
+                <div className='flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100'>
+                  <span className='text-green-900 font-medium'>
+                    {selectedTalent.name} is currently available
+                  </span>
+                  <span className='text-[10px] uppercase tracking-wider font-bold text-green-600 bg-white px-2 py-1 rounded shadow-sm'>
+                    Available
+                  </span>
+                </div>
               ) : (
                 <p className='text-center text-gray-500 py-4'>
-                  No dates available.
+                  Not currently available.
                 </p>
               )}
             </div>

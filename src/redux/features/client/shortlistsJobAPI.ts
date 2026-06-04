@@ -8,7 +8,7 @@ const shortlistsJobAPI = baseAPI.injectEndpoints({
 
     getSingleShortlistJob: build.query({
       query: (id) => ({
-        url: `/client/talents/shortlisted/?job_id=${id}`,
+        url: `/client/talents/shortlisted/${id}`,
         method: "GET",
       }),
     }),

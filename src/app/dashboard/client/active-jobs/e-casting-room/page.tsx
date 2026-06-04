@@ -3,8 +3,8 @@
 "use client";
 
 import { useCreateSessionMutation } from "@/redux/features/e-casting/eCastingRoomAPI";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Meeting {
@@ -809,7 +809,9 @@ const ActionCard = ({
 );
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function ECastingRoom() {
+function ECastingRoomContent() {
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get("job_id");
   const router = useRouter();
   const [modal, setModal] = useState<"new" | "join" | "schedule" | null>(null);
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
@@ -850,6 +852,7 @@ export default function ECastingRoom() {
   }
   const meet_app_url =
     process.env.NEXT_PUBLIC_MEET_APP_URL || "https://meet.poolofcast.com";
+
   return (
     <div className='min-h-screen bg-[#F6F7F9] font-sans'>
       {/* Page */}
@@ -891,7 +894,10 @@ export default function ECastingRoom() {
               color='bg-violet-600 hover:bg-violet-700 shadow-violet-400/40'
               // onClick={() => setModal("join")}
               onClick={() =>
-                window.open(`${meet_app_url}/?token=${token}`, "_blank")
+                window.open(
+                  `${meet_app_url}/?token=${token}&job_id=${jobId}`,
+                  "_blank",
+                )
               }
             />
             {/* <ActionCard
@@ -938,5 +944,13 @@ export default function ECastingRoom() {
         />
       )}
     </div>
+  );
+}
+
+export default function EcastingRoom() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ECastingRoomContent />
+    </Suspense>
   );
 }

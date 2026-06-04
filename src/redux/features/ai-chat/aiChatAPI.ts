@@ -138,6 +138,14 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
       }),
       invalidatesTags: ["ActiveJobs"],
     }),
+
+    // delete shortlist
+    deleteShortlist: builder.mutation({
+      query: ({ job_id, talent_id }) => ({
+        url: `/api/talents/delete-shortlist?job_id=${job_id}&talent_id=${talent_id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -157,5 +165,6 @@ export const {
   usePolasUploadMutation,
   useSelftapUploadMutation,
   useDeleteActiveJobMutation,
+  useDeleteShortlistMutation,
 } = aiChatAPI;
 export default aiChatAPI;
