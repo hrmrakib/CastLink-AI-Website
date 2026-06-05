@@ -3,6 +3,7 @@
 "use client";
 
 import { useCreateSessionMutation } from "@/redux/features/e-casting/eCastingRoomAPI";
+import { useGetRecordingQuery } from "@/redux/features/recording/recordingAPI";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, Suspense } from "react";
 
@@ -817,8 +818,13 @@ function ECastingRoomContent() {
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
   const [createSessionMutation] = useCreateSessionMutation();
-
   const [token, setToken] = useState("");
+
+  const { data: recordingVideoData } = useGetRecordingQuery(jobId, {
+    skip: !jobId,
+  });
+
+  console.log({ recordingVideoData });
 
   useEffect(() => {
     const tokenValue = localStorage.getItem("access_token");
@@ -857,7 +863,7 @@ function ECastingRoomContent() {
     <div className='min-h-screen bg-[#F6F7F9] font-sans'>
       {/* Page */}
       <div className='container mx-auto px-4 sm:px-6 py-6 sm:py-10'>
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between flex-wrap'>
           {/* Back */}
           <button
             onClick={() => router.back()}
@@ -895,7 +901,7 @@ function ECastingRoomContent() {
               // onClick={() => setModal("join")}
               onClick={() =>
                 window.open(
-                  `${meet_app_url}/?token=${token}&job_id=${jobId}`,
+                  `${meet_app_url}/?token=${token}&jobId=${jobId}`,
                   "_blank",
                 )
               }
@@ -943,14 +949,195 @@ function ECastingRoomContent() {
           onScheduled={handleScheduled}
         />
       )}
+
+      {/* Recording Videos */}
+      {recordingVideoData?.data && recordingVideoData.data.length > 0 && (
+        <div className='mt-8'>
+          <div className='flex items-center justify-between mb-3'>
+            <p className='text-xs font-semibold text-slate-500 uppercase tracking-widest'>
+              Meeting Recordings
+            </p>
+            <span className='text-[11px] text-slate-400'>
+              {recordingVideoData.data.reduce(
+                (acc: number, m: { meeting_records: string[] }) =>
+                  acc + m.meeting_records.length,
+                0,
+              )}{" "}
+              total
+            </span>
+          </div>
+
+          <div className='space-y-4'>
+            {recordingVideoData.data.map(
+              (meeting: {
+                id: number;
+                job: number;
+                title: string;
+                code: string;
+                meeting_records: string[];
+              }) => (
+                <div
+                  key={meeting.id}
+                  className='bg-white rounded-2xl p-4 shadow-sm border border-slate-100'
+                >
+                  {/* Meeting meta */}
+                  <div className='flex items-center gap-3 mb-4'>
+                    <div className='w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-500'>
+                      <VideoIcon />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-[13px] font-semibold text-slate-800 truncate'>
+                        {meeting.title}
+                      </p>
+                      <p className='text-[11px] text-slate-400 font-mono'>
+                        {meeting.code}
+                      </p>
+                    </div>
+                    <div className='flex items-center gap-1.5 shrink-0'>
+                      {meeting.meeting_records.some((u) =>
+                        u.includes(".m3u8"),
+                      ) && (
+                        <span className='text-[10px] font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full'>
+                          HLS
+                        </span>
+                      )}
+                      <span className='text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full'>
+                        {meeting.meeting_records.length}{" "}
+                        {meeting.meeting_records.length !== 1
+                          ? "recordings"
+                          : "recording"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Videos */}
+                  <div
+                    className={`grid gap-3 ${
+                      meeting.meeting_records.length === 1
+                        ? "grid-cols-1"
+                        : "grid-cols-1 sm:grid-cols-2"
+                    }`}
+                  >
+                    {meeting.meeting_records.map((url, idx) => (
+                      <RecordingVideoCard
+                        key={idx}
+                        url={url}
+                        title={meeting.title}
+                        index={idx}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+// ─── HLS Video Player ─────────────────────────────────────────────────────────
+const HLSPlayer = ({ src, title }: { src: string; title: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (src.endsWith(".m3u8")) {
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Safari — native HLS support
+        video.src = src;
+      } else {
+        import("hls.js").then(({ default: Hls }) => {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+            return () => hls.destroy();
+          }
+        });
+      }
+    } else {
+      video.src = src;
+    }
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      controls
+      className='w-full h-full object-cover'
+      title={title}
+      playsInline
+    />
+  );
+};
+
+// ─── Recording Video Card ─────────────────────────────────────────────────────
+const RecordingVideoCard = ({
+  url,
+  title,
+  index,
+}: {
+  url: string;
+  title: string;
+  index: number;
+}) => {
+  const isHLS = url.includes(".m3u8");
+  const isYouTube = url.includes("youtube.com") || url.includes("youtu.be");
+
+  const getYouTubeEmbedUrl = (rawUrl: string) => {
+    try {
+      const u = new URL(rawUrl);
+      if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) {
+        return `https://www.youtube.com/embed/${u.searchParams.get("v")}`;
+      }
+      if (u.hostname === "youtu.be") {
+        return `https://www.youtube.com/embed${u.pathname}`;
+      }
+    } catch {}
+    return rawUrl;
+  };
+
+  return (
+    <div className='rounded-xl overflow-hidden bg-slate-900 aspect-video relative group'>
+      {isHLS ? (
+        <HLSPlayer src={url} title={`${title} – Recording ${index + 1}`} />
+      ) : isYouTube ? (
+        <iframe
+          src={getYouTubeEmbedUrl(url)}
+          title={`${title} – Recording ${index + 1}`}
+          className='w-full h-full'
+          allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+          allowFullScreen
+        />
+      ) : (
+        // Fallback: raw mp4 or other direct video
+        <video
+          src={url}
+          controls
+          playsInline
+          className='w-full h-full object-cover'
+          title={`${title} – Recording ${index + 1}`}
+        />
+      )}
+
+      {/* Index badge */}
+      <div className='absolute top-2 left-2 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full pointer-events-none group-hover:opacity-0 transition-opacity'>
+        Recording {index + 1}
+      </div>
+    </div>
+  );
+};
 
 export default function EcastingRoom() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ECastingRoomContent />
+
+      <div>h2</div>
     </Suspense>
   );
 }
