@@ -137,6 +137,8 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   const handlePolaClick = () => imageInputRef.current?.click();
   const handleVideoClick = () => videoInputRef.current?.click();
 
+  const meet_url = process.env.NEXT_PUBLIC_MEET_APP_URL;
+
   /**
    * Helper to construct FormData based on your API requirements:
    * job_id, talent_id, and files
@@ -189,7 +191,8 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   };
 
   const handleCopyLink = () => {
-    const link = `${window.location.origin}/casting/${talent.talent_id}`;
+    // const link = `${window.location.origin}/casting/${talent.talent_id}`;
+    const link = `${meet_url}/channel/${job_id}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success("Casting link copied!");
