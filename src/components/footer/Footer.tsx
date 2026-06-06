@@ -44,7 +44,22 @@ export default function Footer() {
         >
           {/* Brand Column */}
           <div className='space-y-4'>
-            <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3>
+            {/* <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3> */}
+            {/* Logo */}
+            <div className='shrink-0'>
+              <Link href='/' className='text-2xl font-bold text-[#000000]'>
+                <h2 className='flex items-center'>
+                  <span className='pr-1 text-[#2563EB]'>Pool </span>{" "}
+                  <span> Of Cast</span>
+                  <span className='text-[#2563EB]'>.</span>
+                </h2>
+                <p className='text-[#000000] flex items-center justify-start gap-2 text-[10px]'>
+                  <span>Cast. </span>
+                  <span>Book.</span>
+                  <span>Manage. </span>
+                </p>
+              </Link>
+            </div>
             <p className='max-w-80 text-base leading-relaxed text-[#404145]'>
               AI-powered casting platform connecting clients, agents, and
               talents seamlessly.
