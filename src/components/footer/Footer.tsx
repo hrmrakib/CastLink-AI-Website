@@ -38,15 +38,12 @@ export default function Footer() {
     <footer className='w-full bg-gray-50'>
       <div className='mx-auto container px-4 pt-10 pb-6'>
         {/* Footer Content Grid */}
-        <div
-          className='pl-6 sm:pl-0 sm:flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap space-y-8 sm:space-y-0'
-          // className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
-        >
+        <div className='pl-6 sm:pl-0 sm:flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap space-y-8 sm:space-y-0'>
           {/* Brand Column */}
           <div className='space-y-4'>
-            {/* <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3> */}
+            <h3 className='text-2xl font-bold text-[#000000]'>Poolio</h3>
             {/* Logo */}
-            <div className='shrink-0'>
+            {/* <div className='shrink-0'>
               <Link href='/' className='text-2xl font-bold text-[#000000]'>
                 <h2 className='flex items-center'>
                   <span className='pr-1 text-[#2563EB]'>Pool </span>{" "}
@@ -59,7 +56,7 @@ export default function Footer() {
                   <span>Manage. </span>
                 </p>
               </Link>
-            </div>
+            </div> */}
             <p className='max-w-80 text-base leading-relaxed text-[#404145]'>
               AI-powered casting platform connecting clients, agents, and
               talents seamlessly.
