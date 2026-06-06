@@ -819,6 +819,7 @@ function ECastingRoomContent() {
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
   const [createSessionMutation] = useCreateSessionMutation();
   const [token, setToken] = useState("");
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const { data: recordingVideoData } = useGetRecordingQuery(jobId, {
     skip: !jobId,
@@ -856,6 +857,14 @@ function ECastingRoomContent() {
       />
     );
   }
+
+  const copyUrl = (liveURL: string) => {
+    const url = `${liveURL}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    setCopiedCode(liveURL);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
   const meet_app_url =
     process.env.NEXT_PUBLIC_MEET_APP_URL || "https://meet.poolofcast.com";
 
@@ -982,7 +991,7 @@ function ECastingRoomContent() {
                 >
                   {/* Meeting meta */}
                   <div className='flex items-center gap-3 mb-4'>
-                    <div className='w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-500'>
+                    <div className='w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 text-blue-500'>
                       <VideoIcon />
                     </div>
                     <div className='min-w-0 flex-1'>
@@ -993,7 +1002,7 @@ function ECastingRoomContent() {
                         {meeting.code}
                       </p>
                     </div>
-                    <div className='flex items-center gap-1.5 shrink-0'>
+                    <div className='flex items-center gap-1.5 md:gap-2.5 shrink-0'>
                       {meeting.meeting_records.some((u) =>
                         u.includes(".m3u8"),
                       ) && (
@@ -1007,6 +1016,19 @@ function ECastingRoomContent() {
                           ? "recordings"
                           : "recording"}
                       </span>
+                      <button
+                        onClick={() => copyUrl(meeting.meeting_records[0])}
+                        className='flex items-center gap-1 text-xs text-slate-500 hover:text-blue-500 transition-colors'
+                      >
+                        {copiedCode === meeting.meeting_records[0] ? (
+                          <CheckIcon />
+                        ) : (
+                          <CopyIcon />
+                        )}
+                        {copiedCode === meeting.meeting_records[0]
+                          ? "Copied!"
+                          : "Copy URL"}
+                      </button>
                     </div>
                   </div>
 
