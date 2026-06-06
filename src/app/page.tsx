@@ -14,6 +14,8 @@ export default function Home() {
       <RolesSection />
       <CTASection />
       <AboutSection />
+      <SafetySection />
+
       <div>
         <Image
           src='/join-pool.png'
@@ -24,7 +26,6 @@ export default function Home() {
           style={{ width: "100%", height: "auto" }}
         />
       </div>
-      <SafetySection />
     </>
   );
 }
