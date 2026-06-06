@@ -6,8 +6,8 @@ import {
   AlertTriangle,
   Sparkles,
   MapPin,
+  Calendar,
   Briefcase,
-  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -17,67 +17,41 @@ import { getImageUrl } from "@/lib/imagePath";
 
 // ─── Interfaces matching actual API shape ─────────────────────────────────────
 
-export interface TalentImage {
-  image_id: number;
-  image: string;
-  is_primary: boolean;
-  uploaded_at: string;
-}
-
-export interface TalentInfo {
+export interface ApiTalent {
   talent_id: number;
-  name: string;
-  gender: string;
-  role: string;
+  talent_name: string;
+  talent_role: string;
   character: string;
-  height: string;
-  waist: string;
-  bust: string;
-  hips: string;
-  dress_size: string;
-  shoe_size: string;
-  hair_colour: string;
-  eye_colour: string;
-  skin_color: string;
-  hair_type: string;
-  continent: string;
-  country: string;
+  available_dates: string[];
   location: string;
-  skills: string;
-  is_available: boolean;
-  images: TalentImage[];
-}
-
-export interface ShortlistedTalent {
-  shortlisted_id: number;
-  session_id: string;
+  agency_name: string | null;
+  image: string;
   created_at: string;
-  talent_info: TalentInfo;
 }
 
 export interface ShortlistJob {
-  job_id: string;
-  title: string;
-  description: string;
-  casting_roles: string;
-  location: string;
-  budget_min: string;
-  budget_max: string;
-  job_type: string;
-  status: "active" | "inactive" | string;
-  applicants_count: number;
-  shortlisted_count: number;
-  selftapes_count: number;
-  ecastings_count: number;
-  polas_count: number;
-  created_at: string;
-  updated_at: string;
-  shortlisted_talents: ShortlistedTalent[];
+  job_id: number | null;
+  job_title: string | null;
+  job_description: string | null;
+  talents: ApiTalent[];
+}
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    total_items: number;
+    total_pages: number;
+    current_page: number;
+    next: string | null;
+    previous: string | null;
+    per_page: number;
+  };
+  data: ShortlistJob[];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Get initials from a talent's name */
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -87,28 +61,25 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-/** Get the primary image URL, falling back to the first image */
-function getPrimaryImage(images: TalentImage[]): string {
-  if (!images || images.length === 0) return "";
-  return (images.find((img) => img.is_primary) ?? images[0]).image;
-}
-
-/** Format budget range */
-function formatBudget(min: string, max: string): string {
-  const minVal = parseFloat(min);
-  const maxVal = parseFloat(max);
-  if (minVal === maxVal) return `৳${minVal.toLocaleString()}`;
-  return `৳${minVal.toLocaleString()} – ৳${maxVal.toLocaleString()}`;
-}
-
-/** Deduplicate shortlisted talents by talent_id */
-function uniqueByTalentId(talents: ShortlistedTalent[]): ShortlistedTalent[] {
+/** Deduplicate talents by talent_id */
+function uniqueByTalentId(talents: ApiTalent[]): ApiTalent[] {
   return talents.filter(
-    (t, idx, arr) =>
-      arr.findIndex(
-        (x) => x.talent_info.talent_id === t.talent_info.talent_id,
-      ) === idx,
+    (t, idx, arr) => arr.findIndex((x) => x.talent_id === t.talent_id) === idx,
   );
+}
+
+/** Format a date string like "2026-05-21" → "May 21" */
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Summarise available_dates into a compact label */
+function summarizeDates(dates: string[]): string {
+  if (!dates || dates.length === 0) return "No available dates";
+  if (dates.length === 1) return formatDate(dates[0]);
+  const sorted = [...dates].sort();
+  return `${formatDate(sorted[0])} – ${formatDate(sorted[sorted.length - 1])}`;
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -123,7 +94,6 @@ function ShortlistCardSkeleton() {
       <div className='mb-4 space-y-2'>
         <div className='h-4 w-full rounded bg-gray-200' />
         <div className='h-4 w-5/6 rounded bg-gray-200' />
-        <div className='h-4 w-1/3 rounded bg-gray-200' />
       </div>
       <div className='flex items-center gap-2 pb-4'>
         <div className='flex -space-x-2'>
@@ -140,15 +110,55 @@ function ShortlistCardSkeleton() {
   );
 }
 
+// ─── Talent Row ───────────────────────────────────────────────────────────────
+
+function TalentRow({ talent }: { talent: ApiTalent }) {
+  return (
+    <div className='flex items-center gap-3 py-2'>
+      <Avatar className='h-9 w-9 shrink-0'>
+        <AvatarImage src={getImageUrl(talent.image)} alt={talent.talent_name} />
+        <AvatarFallback className='text-xs'>
+          {getInitials(talent.talent_name)}
+        </AvatarFallback>
+      </Avatar>
+      <div className='min-w-0 flex-1'>
+        <p className='truncate text-sm font-semibold text-gray-900'>
+          {talent.talent_name}
+        </p>
+        <p className='truncate text-xs text-gray-500 capitalize'>
+          {talent.character} · {talent.talent_role}
+        </p>
+      </div>
+      <div className='flex shrink-0 flex-col items-end gap-0.5'>
+        {talent.location && (
+          <span className='flex items-center gap-1 text-xs text-gray-400'>
+            <MapPin className='h-3 w-3' />
+            {talent.location}
+          </span>
+        )}
+        <span className='flex items-center gap-1 text-xs text-gray-400'>
+          <Calendar className='h-3 w-3' />
+          {summarizeDates(talent.available_dates)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
 function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [deleteShortlistMutation] = useDeleteShortlistMutation();
+  const [expanded, setExpanded] = useState(false);
 
-  const openDeleteModal = (e: React.MouseEvent, jobId: string) => {
+  const isOrphaned = shortlist.job_id === null;
+  const uniqueTalents = uniqueByTalentId(shortlist.talents ?? []);
+  const visibleTalents = expanded ? uniqueTalents : uniqueTalents.slice(0, 3);
+
+  const openDeleteModal = (e: React.MouseEvent, jobId: number) => {
     e.stopPropagation();
     setSelectedJobId(jobId);
     setIsDeleteModalOpen(true);
@@ -156,10 +166,10 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 
   const handleConfirmDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (selectedJobId) {
+    if (selectedJobId !== null) {
       try {
         await deleteShortlistMutation({
-          job_id: selectedJobId,
+          job_id: String(selectedJobId),
           talent_id: 1,
         }).unwrap();
       } catch (error: any) {
@@ -177,118 +187,113 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
     setSelectedJobId(null);
   };
 
-  const uniqueTalents = uniqueByTalentId(shortlist.shortlisted_talents ?? []);
-
-  console.log(getPrimaryImage(uniqueTalents[0].talent_info.images));
+  const handleCardClick = () => {
+    if (!isOrphaned && shortlist.job_id !== null) {
+      router.push(`/dashboard/client/shortlists/${shortlist.job_id}`);
+    }
+  };
 
   return (
     <div
-      onClick={() =>
-        router.push(`/dashboard/client/shortlists/${shortlist.job_id}`)
-      }
-      className='group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-gray-300'
+      onClick={handleCardClick}
+      className={`group rounded-lg border bg-white p-6 shadow-sm transition-all ${
+        isOrphaned
+          ? "border-dashed border-gray-300 cursor-default"
+          : "border-gray-200 cursor-pointer hover:shadow-md hover:border-gray-300"
+      }`}
     >
       {/* Header */}
       <div className='mb-3 flex items-start justify-between gap-2'>
-        <h3 className='text-xl font-bold text-black leading-tight'>
-          {shortlist.title}
-        </h3>
-        <div className='flex flex-col items-end gap-1 shrink-0'>
-          <span className='rounded-full bg-[#f0f0f093] px-3 py-1 text-sm font-semibold text-gray-700 whitespace-nowrap'>
-            {shortlist.shortlisted_count} Shortlisted
+        <div className='min-w-0'>
+          <h3 className='truncate text-xl font-bold leading-tight text-black'>
+            {shortlist.job_title ?? "Unassigned Shortlist"}
+          </h3>
+          {isOrphaned && (
+            <span className='mt-1 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600'>
+              No job linked
+            </span>
+          )}
+        </div>
+        <div className='flex shrink-0 flex-col items-end gap-1'>
+          <span className='rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700 whitespace-nowrap'>
+            {uniqueTalents.length} Shortlisted
           </span>
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-              shortlist.status === "active"
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-500"
-            }`}
-          >
-            {shortlist.status}
-          </span>
+          {!isOrphaned && (
+            <button
+              onClick={(e) => openDeleteModal(e, shortlist.job_id!)}
+              className='rounded px-2 py-0.5 text-xs text-red-400 opacity-0 transition hover:text-red-600 group-hover:opacity-100'
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Meta: location, job type, casting roles */}
-      <div className='mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500'>
-        {shortlist.location && (
-          <span className='flex items-center gap-1'>
-            <MapPin className='w-3.5 h-3.5' />
-            {shortlist.location}
-          </span>
-        )}
-        {shortlist.job_type && (
-          <span className='flex items-center gap-1 capitalize'>
-            <Briefcase className='w-3.5 h-3.5' />
-            {shortlist.job_type}
-          </span>
-        )}
-        {shortlist.casting_roles && (
-          <span className='flex items-center gap-1'>
-            <Users className='w-3.5 h-3.5' />
-            {shortlist.casting_roles}
-          </span>
-        )}
-      </div>
+      {/* Job meta */}
+      {shortlist.job_id !== null && (
+        <div className='mb-3 flex items-center gap-2 text-xs text-gray-400'>
+          <Briefcase className='h-3.5 w-3.5' />
+          <span>Job #{shortlist.job_id}</span>
+        </div>
+      )}
 
       {/* Description */}
-      {shortlist.description?.trim() && (
-        <p className='text-sm text-[#404145] mb-3 line-clamp-2'>
-          {shortlist.description}
+      {shortlist.job_description?.trim() && (
+        <p className='mb-3 line-clamp-2 text-sm text-[#404145]'>
+          {shortlist.job_description}
         </p>
       )}
 
-      {/* Budget */}
-      <p className='text-sm font-semibold text-gray-800 mb-3'>
-        {formatBudget(shortlist.budget_min, shortlist.budget_max)}
-      </p>
-
-      {/* Stats row */}
-      <div className='flex flex-wrap gap-3 mb-4'>
-        {[
-          { label: "Applicants", value: shortlist.applicants_count },
-          { label: "Self-tapes", value: shortlist.selftapes_count },
-          { label: "eCastings", value: shortlist.ecastings_count },
-          { label: "Polas", value: shortlist.polas_count },
-        ].map(({ label, value }) => (
-          <div
-            key={label}
-            className='flex flex-col items-center bg-gray-50 rounded-md px-3 py-1.5 min-w-[60px]'
-          >
-            <span className='text-base font-bold text-black leading-none'>
-              {value}
-            </span>
-            <span className='text-[11px] text-gray-500 mt-0.5'>{label}</span>
-          </div>
-        ))}
+      {/* Avatar strip */}
+      <div className='mb-3 flex items-center gap-2'>
+        <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
+          {uniqueTalents.slice(0, 4).map((talent) => (
+            <Avatar key={talent.talent_id}>
+              <AvatarImage
+                src={getImageUrl(talent.image)}
+                alt={talent.talent_name}
+              />
+              <AvatarFallback className='text-xs'>
+                {getInitials(talent.talent_name)}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+        {uniqueTalents.length > 4 && (
+          <span className='ml-1 text-xs text-gray-500'>
+            +{uniqueTalents.length - 4} more
+          </span>
+        )}
+        {uniqueTalents.length === 0 && (
+          <span className='text-xs italic text-gray-400'>No talents yet</span>
+        )}
       </div>
 
-      {/* Talent avatars */}
-      <div className='flex items-center justify-between gap-2 pt-2 border-t border-gray-100'>
-        <div className='flex items-center gap-2'>
-          <p className='text-sm font-medium text-[#000000] mr-1'>Shortlisted</p>
-          <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
-            {uniqueTalents.slice(0, 3).map((talent) => (
-              <Avatar key={talent.shortlisted_id}>
-                <AvatarImage
-                  src={getImageUrl(getPrimaryImage(talent.talent_info.images))}
-                  alt={talent.talent_info.name}
-                />
-                <AvatarFallback>
-                  {getInitials(talent.talent_info.name)}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-          </div>
-          {uniqueTalents.length > 3 && (
-            <span className='text-xs text-gray-500 ml-1'>
-              +{uniqueTalents.length - 3} more
-            </span>
-          )}
-          {uniqueTalents.length === 0 && (
-            <span className='text-xs text-gray-400 italic'>No talents yet</span>
-          )}
+      {/* Divider */}
+      <div className='border-t border-gray-100 pt-3'>
+        {/* Talent list */}
+        <div
+          className='divide-y divide-gray-50'
+          onClick={(e) => e.stopPropagation()}
+        >
+          {visibleTalents.map((talent) => (
+            <TalentRow key={talent.talent_id} talent={talent} />
+          ))}
         </div>
+
+        {uniqueTalents.length > 3 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded((v) => !v);
+            }}
+            className='mt-2 w-full rounded-md py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition'
+          >
+            {expanded
+              ? "Show less"
+              : `Show ${uniqueTalents.length - 3} more talents`}
+          </button>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -306,10 +311,9 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                 <p className='text-gray-600 text-sm leading-relaxed'>
                   Are you sure you want to permanently delete{" "}
                   <span className='font-semibold text-gray-800'>
-                    &ldquo;{shortlist.title}&rdquo;
+                    &ldquo;{shortlist.job_title}&rdquo;
                   </span>
-                  ? This action cannot be undone and all associated application
-                  progress will be lost.
+                  ? This action cannot be undone.
                 </p>
               </div>
             </div>
@@ -339,7 +343,9 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 export default function ShortlistsPage() {
   const router = useRouter();
   const { data, isLoading } = useGetShortlistsJobQuery({});
-  const shortlists: ShortlistJob[] = data || [];
+
+  // The API wraps data in { data: ShortlistJob[] }
+  const shortlists: ShortlistJob[] = (data as ApiResponse)?.data ?? data ?? [];
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -372,8 +378,12 @@ export default function ShortlistsPage() {
         {!isLoading && (
           <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
             {shortlists.length > 0 ? (
-              shortlists.map((shortlist) => (
-                <ShortlistCard key={shortlist.job_id} shortlist={shortlist} />
+              shortlists.map((shortlist, index) => (
+                <ShortlistCard
+                  // job_id can be null for orphaned entries; fall back to index
+                  key={shortlist.job_id ?? `orphaned-${index}`}
+                  shortlist={shortlist}
+                />
               ))
             ) : (
               <div className='col-span-full py-12 text-center'>
