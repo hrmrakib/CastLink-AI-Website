@@ -15,6 +15,8 @@ import {
   ScanFace,
   MessageCircleMore,
   Loader,
+  ShieldAlert,
+  Star,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -117,9 +119,9 @@ export default function ChatModalDetail({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setCurrentTalentIndex(initialIndex);
-  }, [initialIndex]);
+  // useEffect(() => {
+  //   setCurrentTalentIndex(initialIndex);
+  // }, [initialIndex]);
 
   useEffect(() => {
     setCurrentSessionId(sessionId);
@@ -128,6 +130,12 @@ export default function ChatModalDetail({
   const talentList: TalentProfile[] = useSelector(
     (state: any) => state.aiChat.talentListForModal ?? [],
   );
+
+  useEffect(() => {
+    setCurrentTalentIndex(initialIndex);
+    setCurrentImageIndex(0);
+    setLiked(false);
+  }, [initialIndex, talentList.length]);
 
   const talent: TalentProfile | undefined = talentList[currentTalentIndex];
   const hasTalents = talentList.length > 0;
@@ -376,6 +384,74 @@ export default function ChatModalDetail({
                     alt={talent?.name}
                     className='w-full h-full object-cover'
                   />
+
+                  <div className='absolute top-2  group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3 z-20'>
+                    <div className='flex items-center gap-3 font-semibold text-sm mb-1'>
+                      {talent?.approval_status === "approved" ? (
+                        <div
+                          className='w-6 h-6 text-xl text-blue-400 fill-blue-700'
+                          title='Verified'
+                        >
+                          <Star
+                            size={24}
+                            strokeWidth={1}
+                            className='fill-blue-400'
+                          />
+                        </div>
+                      ) : (
+                        <div className='w-6 h-6 text-xl' title='Not Verified'>
+                          <ShieldAlert
+                            size={24}
+                            strokeWidth={1}
+                            className='opacity-50 fill-blue-400'
+                          />
+                        </div>
+                      )}
+
+                      {/* is available */}
+                      {talent?.is_available &&
+                        !talent?.is_available_on_request && (
+                          <div
+                            className='flex items-center justify-center w-6 h-6'
+                            title={
+                              talent?.is_available
+                                ? "Available "
+                                : "Not Available "
+                            }
+                          >
+                            <span
+                              className={`w-5 h-5 rounded-full ${
+                                talent?.is_available
+                                  ? "bg-green-400"
+                                  : "bg-red-500"
+                              }`}
+                              aria-hidden='true'
+                            />
+                          </div>
+                        )}
+
+                      {/* Available for request */}
+                      {talent?.is_available_on_request && (
+                        <div
+                          className='flex items-center justify-center w-6 h-6'
+                          title={
+                            talent?.is_available_on_request
+                              ? "Available on request"
+                              : "Not Available on request"
+                          }
+                        >
+                          <span
+                            className={`w-5 h-5 rounded-full ${
+                              talent?.is_available_on_request
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
+                            }`}
+                            aria-hidden='true'
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Thumbnail Gallery */}

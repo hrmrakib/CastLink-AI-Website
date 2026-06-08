@@ -91,7 +91,7 @@ interface TalentProfile {
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 // Max talent cards to show before the "+N more" overlay
-const MAX_VISIBLE_TALENTS = 3;
+const MAX_VISIBLE_TALENTS = 4;
 
 export default function AIDynamicPage() {
   const dispatch = useDispatch();
@@ -213,10 +213,18 @@ export default function AIDynamicPage() {
     scrollToBottom();
   }, [messages]);
 
+  const talentListForModal = useSelector(
+    (state: any) => state.aiChat.talentListForModal ?? [],
+  );
+
   const handleOpenModal = (talent: TalentProfile, index: number) => {
     setSelectedTalent(talent);
 
-    setSelectedTalentIndex(index);
+    const globalIndex = talentListForModal.findIndex(
+      (t: TalentProfile) => t.talent_id === talent.talent_id,
+    );
+    setSelectedTalentIndex(globalIndex >= 0 ? globalIndex : 0);
+    // setSelectedTalentIndex(index);
     setIsOpen(true);
   };
 
@@ -570,42 +578,47 @@ export default function AIDynamicPage() {
                                         )}
 
                                         {/* is available */}
-                                        <div
-                                          className='flex items-center justify-center w-6 h-6'
-                                          title={
-                                            profile?.is_available
-                                              ? "Available "
-                                              : "Not Available "
-                                          }
-                                        >
-                                          <span
-                                            className={`w-5 h-5 rounded-full ${
-                                              profile?.is_available
-                                                ? "bg-green-400"
-                                                : "bg-red-500"
-                                            }`}
-                                            aria-hidden='true'
-                                          />
-                                        </div>
+                                        {profile?.is_available &&
+                                          !profile?.is_available_on_request && (
+                                            <div
+                                              className='flex items-center justify-center w-6 h-6'
+                                              title={
+                                                profile?.is_available
+                                                  ? "Available "
+                                                  : "Not Available "
+                                              }
+                                            >
+                                              <span
+                                                className={`w-5 h-5 rounded-full ${
+                                                  profile?.is_available
+                                                    ? "bg-green-400"
+                                                    : "bg-red-500"
+                                                }`}
+                                                aria-hidden='true'
+                                              />
+                                            </div>
+                                          )}
 
                                         {/* Available for request */}
-                                        <div
-                                          className='flex items-center justify-center w-6 h-6'
-                                          title={
-                                            profile?.is_available_on_request
-                                              ? "Available on request"
-                                              : "Not Available on request"
-                                          }
-                                        >
-                                          <span
-                                            className={`w-5 h-5 rounded-full ${
+                                        {profile?.is_available_on_request && (
+                                          <div
+                                            className='flex items-center justify-center w-6 h-6'
+                                            title={
                                               profile?.is_available_on_request
-                                                ? "bg-yellow-400"
-                                                : "bg-slate-200"
-                                            }`}
-                                            aria-hidden='true'
-                                          />
-                                        </div>
+                                                ? "Available on request"
+                                                : "Not Available on request"
+                                            }
+                                          >
+                                            <span
+                                              className={`w-5 h-5 rounded-full ${
+                                                profile?.is_available_on_request
+                                                  ? "bg-yellow-400"
+                                                  : "bg-red-500"
+                                              }`}
+                                              aria-hidden='true'
+                                            />
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
 
@@ -846,7 +859,7 @@ export default function AIDynamicPage() {
               onClick={handleSendMessage}
               disabled={aiChatCreateLoading || !inputValue.trim()}
               className='
-                absolute bottom-2 right-2
+                absolute bottom-3 right-2
                 w-12 h-12
                 bg-[#2563EB] text-white
                 rounded-full
