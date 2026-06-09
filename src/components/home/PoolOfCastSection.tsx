@@ -22,12 +22,12 @@ const PoolOfCastSection = () => {
     <div className='relative w-full overflow-hidden'>
       {/* Background Image */}
       <Image
-        src='/join-pool.png'
+        src='/join-pool2.png'
         alt='hero-bg'
         width={0}
         height={0}
         sizes='100vw'
-        style={{ width: "100%", height: "80vh" }}
+        style={{ width: "100%", height: "90vh" }}
         className='block'
       />
 
