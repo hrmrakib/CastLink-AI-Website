@@ -119,10 +119,6 @@ export default function ChatModalDetail({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   setCurrentTalentIndex(initialIndex);
-  // }, [initialIndex]);
-
   useEffect(() => {
     setCurrentSessionId(sessionId);
   }, [sessionId]);
