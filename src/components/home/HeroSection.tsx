@@ -43,12 +43,12 @@ export default function HeroSection() {
     {
       id: 3,
       alt: "Female talent headshot",
-      src: "/t3.png",
+      src: "/t3.jpg",
     },
     {
       id: 4,
       alt: "Male talent headshot",
-      src: "/man.png",
+      src: "/t4.jpg",
     },
   ];
 
@@ -106,16 +106,15 @@ export default function HeroSection() {
           {talentImages.map((image) => (
             <div
               key={image.id}
-              className='group relative overflow-hidden rounded-2xl bg-gray-200 transition-all duration-300'
+              className='group relative aspect-3/4 overflow-hidden rounded-2xl bg-gray-200 transition-all duration-300'
               onMouseEnter={() => setHoveredImage(image.id)}
               onMouseLeave={() => setHoveredImage(null)}
             >
               <Image
                 src={image.src || "/placeholder.svg"}
                 alt={image.alt}
-                width={500}
-                height={500}
-                className='aspect-square h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
+                fill
+                className='object-cover object-top transition-transform duration-300 group-hover:scale-105'
               />
               {hoveredImage === image.id && (
                 <div className='absolute inset-0 bg-black/20 transition-opacity duration-200' />
