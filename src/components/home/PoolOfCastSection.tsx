@@ -9,6 +9,7 @@ const PoolOfCastSection = () => {
   const router = useRouter();
 
   const handleNavigate = (role: string) => {
+    role = role.toLowerCase();
     if (role === "admin" && !user) {
       router.push("/login");
     } else if (user) {
