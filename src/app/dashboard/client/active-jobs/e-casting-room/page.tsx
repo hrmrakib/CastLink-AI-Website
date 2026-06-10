@@ -1158,8 +1158,6 @@ export default function EcastingRoom() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ECastingRoomContent />
-
-      <div>h2</div>
     </Suspense>
   );
 }

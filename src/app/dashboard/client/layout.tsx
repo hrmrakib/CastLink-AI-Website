@@ -7,7 +7,7 @@ export default function ClientLayout({
 }) {
   return (
     <>
-      <RoleRedirect allowedRole='CLIENT'>{children}</RoleRedirect>;
+      <RoleRedirect allowedRole='CLIENT'>{children}</RoleRedirect>
     </>
   );
 }
