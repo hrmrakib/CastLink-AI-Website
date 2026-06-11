@@ -206,7 +206,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       <div className='mb-3 flex items-start justify-between gap-2'>
         <div className='min-w-0'>
           <h3 className='truncate text-xl font-bold leading-tight text-black'>
-            {shortlist.job_title ?? "Unassigned Shortlist"}
+            {shortlist.job_title ?? "No job title"}
           </h3>
           {isOrphaned && (
             <span className='mt-1 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600'>
