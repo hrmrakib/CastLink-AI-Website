@@ -15,6 +15,7 @@ import {
   X,
   Loader2,
   Euro,
+  Plus,
 } from "lucide-react";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -311,6 +312,9 @@ function AIChatInner() {
   const [generatingCastingLoading, setGeneratingCastingLoading] =
     useState(false);
 
+  const [jobRole, setJobRole] = useState<string[]>([]);
+  const [currentRole, setCurrentRole] = useState("");
+
   const router = useRouter();
   const [aiChatCreateMutation] = useAiChatCreateMutation();
   const [generateJobFromMessageMutation] = useGenerateJobFromMessageMutation();
@@ -458,6 +462,20 @@ function AIChatInner() {
     // Reset skip flag so next attempt shows the modal again if fields are empty
     setIsSkipping(false);
     await runGenerateCasting();
+  };
+
+  const handleAddRole = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.preventDefault();
+    const cleanRole = currentRole.trim();
+    if (cleanRole && !jobRole.includes(cleanRole)) {
+      setJobRole((prev) => [...prev, cleanRole]);
+      setCurrentRole("");
+    }
+  };
+
+  // FIX: Splices specific entry away via dynamic selection filters
+  const handleRemoveRole = (roleToRemove: string) => {
+    setJobRole((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
   return (
@@ -643,20 +661,6 @@ function AIChatInner() {
                     />
                   </div>
                 </div>
-                {/* <div>
-                  <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
-                    <DollarSign className='w-4 h-4' />
-                    Budget Range
-                  </label>
-
-                  <input
-                    type='text'
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                    className='w-full border border-gray-200 rounded-lg px-4 py-3 text-[#000000] bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                    placeholder='min - max (range allowed or just minimum)'
-                  />
-                </div> */}
 
                 {/* Job Type */}
                 <div>
@@ -743,6 +747,59 @@ function AIChatInner() {
                   required
                   className='h-11 border border-gray-300'
                 />
+              </Field>
+
+              {/* FIX: Functional dynamic multi-role addition configuration setup */}
+              <Field>
+                <Label htmlFor='role' className='text-sm font-semibold'>
+                  Add Role(s)
+                </Label>
+                <div className='flex gap-2 w-full items-center'>
+                  <Input
+                    id='role'
+                    name='role'
+                    placeholder='e.g. Fashion Model (Press Enter or click +)'
+                    value={currentRole}
+                    onChange={(e) => setCurrentRole(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddRole();
+                      }
+                    }}
+                    className='h-11 border border-gray-300 flex-1'
+                  />
+                  <Button
+                    type='button'
+                    size='icon'
+                    onClick={handleAddRole}
+                    disabled={!currentRole.trim()}
+                    className='h-11 w-11 bg-[#2563EB] text-white hover:bg-blue-700 transition shrink-0'
+                  >
+                    <Plus className='w-5 h-5' />
+                  </Button>
+                </div>
+
+                {/* Render listed tags gracefully below the element input frame */}
+                {jobRole.length > 0 && (
+                  <div className='flex flex-wrap gap-1.5 mt-3.5'>
+                    {jobRole.map((role) => (
+                      <span
+                        key={role}
+                        className='inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-100 transition-all'
+                      >
+                        {role}
+                        <button
+                          type='button'
+                          onClick={() => handleRemoveRole(role)}
+                          className='text-blue-400 hover:text-blue-900 transition-colors cursor-pointer'
+                        >
+                          <X className='w-3 h-3' />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Field>
 
               <Field>

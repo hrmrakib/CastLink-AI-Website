@@ -16,6 +16,8 @@ import {
   ShieldAlert,
   MessageCircleMore,
   Loader,
+  Plus,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -109,7 +111,6 @@ export default function AIDynamicPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [jobModal, setJobModal] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
-  const [jobRole, setJobRole] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -156,6 +157,8 @@ export default function AIDynamicPage() {
   const [loadingConversationId, setLoadingConversationId] = useState<
     number | null
   >(null);
+  const [jobRole, setJobRole] = useState<string[]>([]);
+  const [currentRole, setCurrentRole] = useState("");
 
   const {
     data,
@@ -164,8 +167,6 @@ export default function AIDynamicPage() {
   } = useGetChatBySessionIdQuery(id);
 
   const isGeneratedJob = data?.data?.generate_job;
-
-  console.log(data?.data?.messages);
 
   // FIX 2: include resData in the dependency array so messages stay in sync
   useEffect(() => {
@@ -363,6 +364,8 @@ export default function AIDynamicPage() {
     }
   };
 
+  console.log({ jobRole });
+
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
@@ -453,6 +456,23 @@ export default function AIDynamicPage() {
     } finally {
       setLoadingConversationId(null);
     }
+  };
+
+  const handleAddRole = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) e.preventDefault();
+    const cleanRole = currentRole.trim();
+    if (jobRole.includes(cleanRole)) {
+      toast.error("Role already exists!");
+    }
+    if (cleanRole && !jobRole.includes(cleanRole)) {
+      setJobRole((prev) => [...prev, cleanRole]);
+      setCurrentRole("");
+    }
+  };
+
+  // FIX: Splices specific entry away via dynamic selection filters
+  const handleRemoveRole = (roleToRemove: string) => {
+    setJobRole((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
   return (
@@ -921,19 +941,57 @@ export default function AIDynamicPage() {
                 />
               </Field>
 
+              {/* FIX: Functional dynamic multi-role addition configuration setup */}
               <Field>
-                <Label htmlFor='title' className='text-sm font-semibold'>
-                  Job Role
+                <Label htmlFor='role' className='text-sm font-semibold'>
+                  Add Role(s)
                 </Label>
-                <Input
-                  id='title'
-                  name='title'
-                  placeholder='e.g. Fashion Model'
-                  value={jobRole}
-                  onChange={(e) => setJobRole(e.target.value)}
-                  required
-                  className='h-11 border border-gray-300'
-                />
+                <div className='flex gap-2 w-full items-center'>
+                  <Input
+                    id='role'
+                    name='role'
+                    placeholder='e.g. Fashion Model (Press Enter or click +)'
+                    value={currentRole}
+                    onChange={(e) => setCurrentRole(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddRole();
+                      }
+                    }}
+                    className='h-11 border border-gray-300 flex-1'
+                  />
+                  <Button
+                    type='button'
+                    size='icon'
+                    onClick={handleAddRole}
+                    disabled={!currentRole.trim()}
+                    className='h-11 w-11 bg-[#2563EB] text-white hover:bg-blue-700 transition shrink-0'
+                  >
+                    <Plus className='w-5 h-5' />
+                  </Button>
+                </div>
+
+                {/* Render listed tags gracefully below the element input frame */}
+                {jobRole.length > 0 && (
+                  <div className='flex flex-wrap gap-1.5 mt-3.5'>
+                    {jobRole.map((role) => (
+                      <span
+                        key={role}
+                        className='inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-100 transition-all'
+                      >
+                        {role}
+                        <button
+                          type='button'
+                          onClick={() => handleRemoveRole(role)}
+                          className='text-blue-400 hover:text-blue-900 transition-colors cursor-pointer'
+                        >
+                          <X className='w-3 h-3' />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Field>
 
               <Field>
