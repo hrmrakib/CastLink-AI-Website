@@ -37,6 +37,21 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
       }),
     }),
 
+    getAvailableRoles: builder.query({
+      query: (jobId) => ({
+        url: `/api/jobs/available-roles?job_id=${jobId}`,
+        method: "GET",
+      }),
+    }),
+
+    assignRole: builder.mutation({
+      query: (body) => ({
+        url: `/api/jobs/assign-role`,
+        method: "POST",
+        body,
+      }),
+    }),
+
     aiChatCreate: builder.mutation({
       query: (body) => ({
         url: "/api/chat",
@@ -166,5 +181,7 @@ export const {
   useSelftapUploadMutation,
   useDeleteActiveJobMutation,
   useDeleteShortlistMutation,
+  useGetAvailableRolesQuery,
+  useAssignRoleMutation,
 } = aiChatAPI;
 export default aiChatAPI;
