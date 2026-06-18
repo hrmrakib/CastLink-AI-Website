@@ -16,7 +16,7 @@ const aiBaseQuery = fetchBaseQuery({
 export const aiBaseAPI = createApi({
   reducerPath: "aiApi",
   baseQuery: aiBaseQuery,
-  tagTypes: ["ActiveJobs"],
+  tagTypes: ["ActiveJobs", "Chat"],
   endpoints: () => ({}),
 });
 
@@ -27,6 +27,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         url: `/api/chat/session-id?session_id=${session_id}`,
         method: "GET",
       }),
+      providesTags: ["Chat"],
     }),
 
     getAIResponse: builder.mutation({
@@ -35,6 +36,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Chat"],
     }),
 
     getAvailableRoles: builder.query({
@@ -42,6 +44,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         url: `/api/jobs/available-roles?job_id=${jobId}`,
         method: "GET",
       }),
+      providesTags: ["Chat"],
     }),
 
     assignRole: builder.mutation({
@@ -50,6 +53,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Chat"],
     }),
 
     aiChatCreate: builder.mutation({
@@ -58,6 +62,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Chat"],
     }),
 
     generateJobFromMessage: builder.mutation({
