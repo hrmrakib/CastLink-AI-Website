@@ -849,7 +849,7 @@ export default function ActiveJobsPage() {
                   {filteredTalents?.length > 0 && (
                     <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
                       <h3 className='text-base font-bold text-foreground mb-4'>
-                        Suggested Talents ({filteredTalents?.length})
+                        Affected Talents ({filteredTalents?.length})
                       </h3>
                       <div className='space-y-1.5'>
                         {filteredTalents?.map((t) => (
