@@ -562,7 +562,7 @@ export default function JobDetailPage() {
   return (
     <div className='min-h-screen bg-[#F3F6F9]'>
       {/* ── Top nav ── */}
-      <div className='bg- border-b border-gray-100 sticky top-0 z-30'>
+      <div className='bg- border-b border-gray-100 top-0 z-30'>
         <div className='max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3'>
           <button
             onClick={() => router.back()}

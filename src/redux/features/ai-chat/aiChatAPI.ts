@@ -71,6 +71,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Chat"],
     }),
 
     getDeaftJobs: builder.query({
