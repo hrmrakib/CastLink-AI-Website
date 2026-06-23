@@ -69,7 +69,7 @@ export default function HeroSection() {
         <div className='mb-6 text-center'>
           <h1 className='text-balance text-4xl font-bold leading-tight text-[#000000] md:text-5xl lg:text-6xl'>
             AI-Powered Casting, <br />
-            <span className='text-[#2563EB]'>and production </span> All in One
+            <span className='text-[#2563EB]'>and Production </span> All in One
             Place
           </h1>
         </div>
