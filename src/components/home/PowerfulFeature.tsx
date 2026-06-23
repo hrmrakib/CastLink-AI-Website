@@ -1,9 +1,9 @@
 import {
-  Briefcase,
   BriefcaseConveyorBelt,
   CalendarClock,
   MessageSquareLock,
   ScanFace,
+  Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -23,13 +23,22 @@ const features = [
   },
   {
     id: 3,
+    title: "AI campaign writer",
+    description:
+      "Describe your idea in a prompt and Al will write your complete campaign — concept, script, storyboard and more.",
+    icon: Sparkles,
+    colorClass: "bg-purple-600",
+    isNew: true,
+  },
+  {
+    id: 4,
     title: "Communication",
     description: "Keep all your communication in one place",
     icon: MessageSquareLock,
     colorClass: "bg-blue-800",
   },
   {
-    id: 4,
+    id: 5,
     title: "Availability tracking",
     description: "Check Availability and Book",
     icon: CalendarClock,
@@ -52,7 +61,7 @@ export default function PowerfulFeature() {
         </div>
 
         {/* Features Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8'>
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -62,13 +71,21 @@ export default function PowerfulFeature() {
               >
                 {/* Icon Container */}
                 <div
-                  className={`${feature.colorClass} rounded-xl p-4 mb-6 transition-transform duration-300 group-hover:scale-110`}
+                  className={`${feature.colorClass} relative rounded-xl p-4 mb-6 transition-transform duration-300 group-hover:scale-110`}
                 >
                   <Icon className='w-8 h-8 text-white' />
+
+                  {feature.isNew && (
+                    <div className='absolute -bottom-5 -right-10 bg-purple-600 text-xs font-semibold text-white rounded-full px-2 py-1 mb-2'>
+                      New
+                    </div>
+                  )}
                 </div>
 
                 {/* Title */}
-                <h3 className='text-lg md:text-xl font-bold text-[#1B1B1D] mb-3'>
+                <h3
+                  className={`text-lg md:text-xl font-bold ${feature.isNew ? "text-purple-600" : "text-[#1B1B1D]"} mb-3`}
+                >
                   {feature.title}
                 </h3>
 
