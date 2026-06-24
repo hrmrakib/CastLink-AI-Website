@@ -9,8 +9,6 @@ import {
   DollarSign,
   Users,
   Sparkles,
-  ChevronLeft,
-  ChevronRight,
   Trash2,
   AlertTriangle,
   Loader,
@@ -20,6 +18,7 @@ import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAP
 import useDebounce from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { useDeleteActiveJobMutation } from "@/redux/features/ai-chat/aiChatAPI";
+import GlobalPagination from "@/components/pagination/GlobalPagination";
 
 interface Job {
   job_id: string;
@@ -39,13 +38,6 @@ interface Job {
   status: string;
   created_at: string;
   updated_at: string;
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  total_pages: number;
 }
 
 function formatBudget(min: string, max: string): string {
@@ -87,22 +79,17 @@ export default function Page() {
 
   const [deleteActiveJobMutation, { isLoading: isDeleting }] =
     useDeleteActiveJobMutation();
-  const { data, isLoading, isFetching } = useGetActiveJobsQuery({
+  const { data, isLoading, isFetching, refetch } = useGetActiveJobsQuery({
     page: currentPage,
-    limit: 10,
+    page_size: 10,
     search: debouncedSearch,
   });
 
   const activeJobs: Job[] = data?.data || [];
-  const pagination: Pagination = data?.pagination || {
-    page: 1,
-    limit: 10,
-    total: 0,
-    total_pages: 1,
-  };
+  const total_pages = data?.meta?.total_pages || 1;
 
   const handlePageChange = (page: number) => {
-    if (page < 1 || page > pagination.total_pages) return;
+    if (page < 1 || page > total_pages) return;
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -117,13 +104,16 @@ export default function Page() {
     if (selectedJobId) {
       try {
         await deleteActiveJobMutation(selectedJobId).unwrap();
+        toast.success("Job deleted successfully");
+        refetch();
       } catch (error: any) {
         toast.error(error?.data?.status_message);
         console.error("Error deleting job:", error);
+      } finally {
+        // refetch();
+        setIsModalOpen(false);
+        setSelectedJobId(null);
       }
-
-      setIsModalOpen(false);
-      setSelectedJobId(null);
     }
   };
 
@@ -135,7 +125,7 @@ export default function Page() {
           <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
             {/* Title Section */}
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>ActiveJob</h1>
+              <h1 className='text-3xl font-bold text-gray-900'>Active Job</h1>
               <p className='text-gray-600 text-sm md:text-base'>
                 Manage your ongoing casting calls
               </p>
@@ -326,82 +316,11 @@ export default function Page() {
             )}
 
             {/* Pagination */}
-            {pagination.total_pages > 1 && (
-              <div className='flex items-center justify-between mt-10'>
-                <p className='text-sm text-gray-500'>
-                  Showing{" "}
-                  <strong>
-                    {(pagination.page - 1) * pagination.limit + 1}–
-                    {Math.min(
-                      pagination.page * pagination.limit,
-                      pagination.total,
-                    )}
-                  </strong>{" "}
-                  of <strong>{pagination.total}</strong> jobs
-                </p>
-
-                <div className='flex items-center gap-1'>
-                  {/* Prev */}
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className='p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition'
-                  >
-                    <ChevronLeft className='w-4 h-4' />
-                  </button>
-
-                  {/* Page Numbers */}
-                  {Array.from(
-                    { length: pagination.total_pages },
-                    (_, i) => i + 1,
-                  )
-                    .filter(
-                      (page) =>
-                        page === 1 ||
-                        page === pagination.total_pages ||
-                        Math.abs(page - currentPage) <= 1,
-                    )
-                    .reduce<(number | "...")[]>((acc, page, idx, arr) => {
-                      if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
-                        acc.push("...");
-                      }
-                      acc.push(page);
-                      return acc;
-                    }, [])
-                    .map((item, idx) =>
-                      item === "..." ? (
-                        <span
-                          key={`ellipsis-${idx}`}
-                          className='px-2 text-gray-400 text-sm'
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <button
-                          key={item}
-                          onClick={() => handlePageChange(item as number)}
-                          className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
-                            currentPage === item
-                              ? "bg-[#2563EB] text-white"
-                              : "border border-gray-200 text-gray-700 hover:bg-gray-50"
-                          }`}
-                        >
-                          {item}
-                        </button>
-                      ),
-                    )}
-
-                  {/* Next */}
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === pagination.total_pages}
-                    className='p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition'
-                  >
-                    <ChevronRight className='w-4 h-4' />
-                  </button>
-                </div>
-              </div>
-            )}
+            <GlobalPagination
+              currentPage={currentPage}
+              totalPages={total_pages}
+              onPageChange={handlePageChange}
+            />
           </>
         )}
       </div>
