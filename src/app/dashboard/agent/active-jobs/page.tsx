@@ -19,6 +19,7 @@ import {
   Check,
   Trash2,
   AlertTriangle,
+  Info,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ import {
   usePolasUploadMutation,
   useSelftapUploadMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
+import GlobalPagination from "@/components/pagination/GlobalPagination";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,6 +81,7 @@ interface Job {
   session_id: string;
   title: string;
   description: string;
+  casting_roles?: string;
   location: string;
   budget_min: string;
   budget_max: string;
@@ -402,11 +405,17 @@ export default function ActiveJobsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const limit = 12;
 
-  const { data, isLoading, isError } = useGetActiveJobsQuery({});
+  const { data, isLoading, isError } = useGetActiveJobsQuery({
+    page,
+    page_size: limit,
+  });
 
   // Safely extract jobs array from API response
   const jobs: Job[] = data?.data ?? [];
+  const totalPages = data?.meta?.total_pages ?? 1;
 
   // Derive unique locations for filter dropdown
   const locations = useMemo(() => {
@@ -500,6 +509,11 @@ export default function ActiveJobsPage() {
     return { ...talent, source_type: "suggestion" };
   });
 
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setPage(page);
+  };
+
   const job_id = selectedJob?.job_id;
 
   return (
@@ -566,6 +580,7 @@ export default function ActiveJobsPage() {
                     {[
                       "Job Name",
                       "Suggested Talent",
+                      "Role",
                       "Location",
                       "Budget",
                       "Status",
@@ -615,6 +630,24 @@ export default function ActiveJobsPage() {
                               —
                             </span>
                           )}
+                        </td>
+                        <td className='px-6 py-4 text-sm text-foreground flex items-center gap-2'>
+                          {/* Tooltip Container */}
+                          <div className='group relative Skinner flex items-center'>
+                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors' />
+                            <span className='whitespace-nowrap ml-2 text-sm'>
+                              {job.casting_roles
+                                ? job.casting_roles
+                                    .split(" ")
+                                    .slice(0, 2)
+                                    .join(" ") + "..."
+                                : ""}
+                            </span>
+                            {/* Tooltip Card */}
+                            <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitelist whitespace-nowrap shadow-md border border-border z-10'>
+                              {job.casting_roles}
+                            </span>
+                          </div>
                         </td>
                         <td className='px-6 py-4 text-sm text-foreground'>
                           {job.location}
@@ -738,6 +771,12 @@ export default function ActiveJobsPage() {
           </>
         )}
       </div>
+
+      <GlobalPagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
 
       {/* ── Detail Modal ───────────────────────────────────────────────── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

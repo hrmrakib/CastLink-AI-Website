@@ -26,6 +26,7 @@ import {
 import { useRouter } from "next/navigation";
 import { TalentPoolSkeleton } from "./TalentPoolSkeleton";
 import { toast } from "sonner";
+import useDebounce from "@/hooks/useDebounce";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "";
 
@@ -88,7 +89,7 @@ function TalentDetailModal({
         </button>
 
         {/* Image */}
-        <div className='w-full sm:w-1/2 h-72 sm:h-auto flex-shrink-0'>
+        <div className='w-full sm:w-1/2 h-72 sm:h-auto shrink-0'>
           <img
             src={talent.image}
             alt={talent.name}
@@ -147,6 +148,8 @@ export default function TalentVault() {
   const [deleteTalentMutation] = useDeleteTalentMutation();
   const [role, setRole] = useState("all");
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
 
   const { data, isFetching } = useGetTalentQuery({
     gender: role !== "all" ? role : undefined,
@@ -157,6 +160,7 @@ export default function TalentVault() {
           ? false
           : undefined,
     is_available_on_request: availability === "on_request" ? true : undefined,
+    search: debouncedSearch,
   });
 
   const myTalents = data?.data ?? [];
@@ -212,13 +216,25 @@ export default function TalentVault() {
       {/* Header Section */}
       <div className='bg-card rounded-xl!'>
         <div className='mx-auto container pt-6'>
-          <div className='mb-8'>
-            <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
-              Talent Pool
-            </h1>
-            <p className='mt-2 text-base text-[#404145]'>
-              Visual overview of agency talent
-            </p>
+          <div className='flex items-center justify-between'>
+            <div className='mb-8'>
+              <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
+                Talent Pool
+              </h1>
+              <p className='mt-2 text-base text-[#404145]'>
+                Visual overview of agency talent
+              </p>
+            </div>
+            <div className='mb-8'>
+              <input
+                type='search'
+                name='search'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder='Search talent (Working on it)'
+                className='border border-[#E7E8EA] rounded-lg px-4 py-2 w-80'
+              />
+            </div>
           </div>
 
           {/* Controls Section */}
