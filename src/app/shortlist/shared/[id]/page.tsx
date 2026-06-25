@@ -102,7 +102,7 @@ export interface ShortlistJobDetail {
 // ── Internal normalised UI shape ─────────────────────────────────────────────
 
 interface Talent {
-  id: string; // shortlisted_id as string (unique per shortlist entry)
+  id: string;
   talent_id: number;
   name: string;
   role: string;
@@ -122,18 +122,9 @@ interface Talent {
   hair_type: string;
   skills: string;
   is_available: boolean;
-  primaryImage: string; // resolved absolute URL
+  primaryImage: string;
   images: TalentImage[];
   created_at: string;
-}
-
-type GroupKey = "lead_male" | "lead_female" | "extra" | "other";
-
-interface GroupedTalents {
-  lead_male: Talent[];
-  lead_female: Talent[];
-  extra: Talent[];
-  other: Talent[]; // fallback for any unknown character value
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -143,7 +134,6 @@ function getPrimaryImage(images: TalentImage[]): string {
   return (images.find((img) => img.is_primary) ?? images[0]).image;
 }
 
-/** Images from the internal API already carry absolute http URLs — pass them through unchanged. */
 function resolveImageUrl(url: string): string {
   if (!url) return "";
   if (/^https?:\/\//i.test(url)) return url;
@@ -179,22 +169,14 @@ function normalise(raw: ShortlistedTalent): Talent {
   };
 }
 
-function groupTalents(talents: ShortlistedTalent[]): GroupedTalents {
-  const groups: GroupedTalents = {
-    lead_male: [],
-    lead_female: [],
-    extra: [],
-    other: [],
-  };
+/** Group talents dynamically by their role field */
+function groupByRole(talents: ShortlistedTalent[]): Record<string, Talent[]> {
+  const groups: Record<string, Talent[]> = {};
   for (const raw of talents) {
     const t = normalise(raw);
-    const char = (raw.talent_info.character ?? "")
-      .toLowerCase()
-      .replace(/\s+/g, "_");
-    if (char === "lead_male") groups.lead_male.push(t);
-    else if (char === "lead_female") groups.lead_female.push(t);
-    else if (char === "extra") groups.extra.push(t);
-    else groups.other.push(t);
+    const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(t);
   }
   return groups;
 }
@@ -252,10 +234,10 @@ interface TalentGroupProps {
   draggedItem: string | null;
   onDragStart: (id: string) => void;
   onDragOver: (e: React.DragEvent) => void;
-  onDrop: (id: string, group: GroupKey) => void;
-  groupKey: GroupKey;
+  onDrop: (id: string, group: string) => void;
+  groupKey: string;
   onView: (talent: Talent) => void;
-  onDelete: (id: string, group: GroupKey) => void;
+  onDelete: (id: string, group: string) => void;
 }
 
 function TalentGroup({
@@ -387,49 +369,32 @@ export default function ShortlistDetailPage() {
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
-  const [grouped, setGrouped] = useState<GroupedTalents>({
-    lead_male: [],
-    lead_female: [],
-    extra: [],
-    other: [],
-  });
+  const [grouped, setGrouped] = useState<Record<string, Talent[]>>({});
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
   const [dummyLoading, setDummyLoading] = useState(false);
 
   const { data, isLoading } = useGetSingleShortlistJobQuery(id);
 
-  // Populate grouped state whenever API data arrives
   useEffect(() => {
     if (!data) return;
-    // Support both { data: job } and job returned directly
     const job: ShortlistJobDetail = data?.data ?? data;
     const talents: ShortlistedTalent[] = job?.shortlisted_talents ?? [];
-    setGrouped(groupTalents(talents));
+    setGrouped(groupByRole(talents));
   }, [data]);
 
-  const totalCount =
-    grouped.lead_male.length +
-    grouped.lead_female.length +
-    grouped.extra.length +
-    grouped.other.length;
-
-  const allTalents = [
-    ...grouped.lead_male,
-    ...grouped.lead_female,
-    ...grouped.extra,
-    ...grouped.other,
-  ];
+  const allTalents = Object.values(grouped).flat();
+  const totalCount = allTalents.length;
 
   // ── Drag-and-drop ─────────────────────────────────────────────────────────
 
   const handleDragStart = (id: string) => setDraggedItem(id);
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
-  const handleDrop = (targetId: string, groupKey: GroupKey) => {
+  const handleDrop = (targetId: string, groupKey: string) => {
     if (draggedItem === null || draggedItem === targetId) return;
     setGrouped((prev) => {
-      const list = [...prev[groupKey]];
+      const list = [...(prev[groupKey] ?? [])];
       const from = list.findIndex((t) => t.id === draggedItem);
       const to = list.findIndex((t) => t.id === targetId);
       if (from === -1 || to === -1) return prev;
@@ -442,7 +407,7 @@ export default function ShortlistDetailPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  const handleDeleteTalent = (id: string, groupKey: GroupKey) => {
+  const handleDeleteTalent = (id: string, groupKey: string) => {
     setGrouped((prev) => ({
       ...prev,
       [groupKey]: prev[groupKey].filter((t) => t.id !== id),
@@ -618,7 +583,7 @@ export default function ShortlistDetailPage() {
           </div>
         </div>
 
-        {/* ── Talent Groups ── */}
+        {/* ── Dynamic Talent Groups ── */}
         {isLoading ? (
           <PageSkeleton />
         ) : totalCount === 0 ? (
@@ -627,50 +592,22 @@ export default function ShortlistDetailPage() {
           </div>
         ) : (
           <>
-            <TalentGroup
-              title='Lead Male'
-              groupKey='lead_male'
-              talents={grouped.lead_male}
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onView={handleViewTalent}
-              onDelete={handleDeleteTalent}
-            />
-            <TalentGroup
-              title='Lead Female'
-              groupKey='lead_female'
-              talents={grouped.lead_female}
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onView={handleViewTalent}
-              onDelete={handleDeleteTalent}
-            />
-            <TalentGroup
-              title='Extra'
-              groupKey='extra'
-              talents={grouped.extra}
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onView={handleViewTalent}
-              onDelete={handleDeleteTalent}
-            />
-            <TalentGroup
-              title='Other'
-              groupKey='other'
-              talents={grouped.other}
-              draggedItem={draggedItem}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onView={handleViewTalent}
-              onDelete={handleDeleteTalent}
-            />
+            {Object.entries(grouped)
+              .filter(([, talents]) => talents.length > 0)
+              .map(([roleKey, talents]) => (
+                <TalentGroup
+                  key={roleKey}
+                  title={roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}
+                  groupKey={roleKey}
+                  talents={talents}
+                  draggedItem={draggedItem}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onView={handleViewTalent}
+                  onDelete={handleDeleteTalent}
+                />
+              ))}
           </>
         )}
       </div>
@@ -769,7 +706,6 @@ export default function ShortlistDetailPage() {
 
                   {/* Right — images */}
                   <div className='flex flex-col gap-4'>
-                    {/* Primary image */}
                     <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
                       {selectedTalent.primaryImage ? (
                         <Image
@@ -786,7 +722,6 @@ export default function ShortlistDetailPage() {
                       )}
                     </div>
 
-                    {/* Additional image thumbnails */}
                     {selectedTalent.images.length > 1 && (
                       <div className='flex gap-2 flex-wrap'>
                         {selectedTalent.images
