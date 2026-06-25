@@ -103,7 +103,6 @@ interface AvailableRole {
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 // Max talent cards to show before the "+N more" overlay
-const MAX_VISIBLE_TALENTS = 4;
 
 export default function AIDynamicPage() {
   const dispatch = useDispatch();
@@ -116,6 +115,8 @@ export default function AIDynamicPage() {
   const [jobSaving, setJobSaving] = useState(false);
   const [selectedTalentIndex, setSelectedTalentIndex] = useState(0);
   const router = useRouter();
+  const [maxVisibleTalent, setMaxVisibleTalent] = useState(4);
+  const [isTalentExpand, setIsTalentExpand] = useState(false);
 
   const [isSkipping, setIsSkipping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -186,8 +187,6 @@ export default function AIDynamicPage() {
   });
   const roles: AvailableRole[] = availableRole ?? [];
 
-  console.log("availableRole", availableRole);
-
   const [assignRoleMutation] = useAssignRoleMutation();
 
   const isGeneratedJob = data?.data?.generate_job;
@@ -240,6 +239,13 @@ export default function AIDynamicPage() {
   );
 
   const handleOpenModal = (talent: TalentProfile, index: number) => {
+    if (index === 3 && isTalentExpand === false) {
+      setMaxVisibleTalent(Infinity);
+      setIsTalentExpand(true);
+      return;
+    }
+
+    console.log({ index });
     setSelectedTalent(talent);
 
     const globalIndex = talentListForModal.findIndex(
@@ -530,6 +536,8 @@ export default function AIDynamicPage() {
     setJobRole((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
+  console.log({ maxVisibleTalent });
+
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Chat Messages Area */}
@@ -583,17 +591,16 @@ export default function AIDynamicPage() {
                       <div className='md:col-span-3'>
                         <div className='grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4'>
                           {message.talents
-                            .slice(0, MAX_VISIBLE_TALENTS)
+                            .slice(0, maxVisibleTalent)
                             .map((profile, idx) => {
                               const imageUrl = profile.images?.[0]
                                 ? `${BASE_URL}${profile.images[0]}`
                                 : "/placeholder.svg";
 
                               const hiddenCount =
-                                message.talents!.length - MAX_VISIBLE_TALENTS;
+                                message.talents!.length - maxVisibleTalent;
                               const isLastVisible =
-                                idx === MAX_VISIBLE_TALENTS - 1 &&
-                                hiddenCount > 0;
+                                idx === maxVisibleTalent - 1 && hiddenCount > 0;
 
                               return (
                                 <div
@@ -696,10 +703,10 @@ export default function AIDynamicPage() {
                                       <p className='font-semibold text-sm mb-1'>
                                         Talent Name: {profile.name}
                                       </p>
-                                      <p>Height: {profile.height}</p>
-                                      <p>Bust: {profile.bust}</p>
-                                      <p>Waist: {profile.waist}</p>
-                                      <p>Hips: {profile.hips}</p>
+                                      <p>Height: {profile.height} cm</p>
+                                      <p>Bust: {profile.bust} cm</p>
+                                      <p>Waist: {profile.waist} cm</p>
+                                      <p>Hips: {profile.hips} cm</p>
                                       <p>Shoe Size: {profile.shoe_size}</p>
                                       <p>Hair: {profile.hair_color}</p>
                                       <p>Eyes: {profile.eye_color}</p>
