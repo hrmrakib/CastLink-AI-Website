@@ -14,6 +14,7 @@ import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobA
 import { useState } from "react";
 import { useDeleteShortlistMutation } from "@/redux/features/ai-chat/aiChatAPI";
 import { getImageUrl } from "@/lib/imagePath";
+import { toast } from "sonner";
 
 // ─── Interfaces matching actual API shape ─────────────────────────────────────
 
@@ -204,6 +205,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
         talent_id: 1,
       }).unwrap();
     } catch (error: any) {
+      toast.error(error?.data?.status_message);
       console.error("Error deleting shortlist:", error);
     } finally {
       setIsDeleteModalOpen(false);

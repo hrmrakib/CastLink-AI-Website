@@ -19,6 +19,8 @@ import useDebounce from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { useDeleteActiveJobMutation } from "@/redux/features/ai-chat/aiChatAPI";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/imagePath";
 
 interface Job {
   job_id: string;
@@ -120,7 +122,7 @@ export default function Page() {
   return (
     <main className='min-h-screen bg-transparent'>
       {/* Header */}
-      <div className='sticky top-0 z-40 bg-transparent'>
+      <div className='bg-transparent'>
         <div className='container mx-auto px-4 py-6'>
           <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
             {/* Title Section */}
@@ -209,13 +211,27 @@ export default function Page() {
                       <Trash2 className='w-5 h-5 text-[#6a6b72]' />
                     </button>
 
-                    {/* Title and Description */}
-                    <h3 className='text-lg font-bold text-[#000000] mb-2'>
-                      {job.title}
-                    </h3>
-                    <p className='text-[#404145] text-sm mb-4 line-clamp-2'>
-                      {job.description}
-                    </p>
+                    {/* Title, Avatar and Description */}
+                    <div className='flex items-start gap-4'>
+                      <div>
+                        <Image
+                          // src={getImageUrl("/t1111.png")}
+                          src={"/nike.png"}
+                          alt={"test"}
+                          width={80}
+                          height={80}
+                          className='w-15 h-15 rounded-full object-cover shrink-0 border-2 border-white shadow-sm'
+                        />
+                      </div>
+                      <div>
+                        <h3 className='text-lg font-bold text-[#000000] mb-2'>
+                          {job.title}
+                        </h3>
+                        <p className='text-[#404145] text-sm mb-4 line-clamp-2'>
+                          {job.description}
+                        </p>
+                      </div>
+                    </div>
 
                     {/* Status Badge */}
                     <div className='mb-4'>
