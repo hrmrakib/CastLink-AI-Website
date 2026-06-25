@@ -27,6 +27,8 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useGetActiveJobDetailsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
 import Link from "next/link";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/imagePath";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -233,13 +235,22 @@ function SuggestionCard({ talent }: { talent: Talent }) {
         <TalentAvatar images={talent.images} name={talent.name} size='lg' />
         <div className='flex-1 min-w-0'>
           <div className='flex items-start justify-between gap-2'>
-            <div>
-              <h3 className='font-semibold text-gray-900 text-sm sm:text-base leading-tight'>
-                {talent.name}
-              </h3>
-              <p className='text-xs text-gray-500 mt-0.5 capitalize'>
-                {talent.role}
-              </p>
+            <div className='flex items-center gap-3'>
+              <Image
+                src={getImageUrl(talent.images[0])}
+                alt={talent.name}
+                width={40}
+                height={40}
+                className='w-10 h-10 rounded-full object-cover shrink-0 border-2 border-white shadow-sm'
+              />
+              <div>
+                <h3 className='font-semibold text-gray-900 text-sm sm:text-base leading-tight'>
+                  {talent.name}
+                </h3>
+                <p className='text-xs text-gray-500 mt-0.5 capitalize'>
+                  {talent.role}
+                </p>
+              </div>
             </div>
             <div className='flex items-center gap-1.5 shrink-0'>
               <span

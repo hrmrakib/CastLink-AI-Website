@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
         port: "8002",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.poolofcast.com",
+      },
     ],
   },
 };
