@@ -412,6 +412,15 @@ export default function ShortlistDetailPage() {
     action: (() => void) | null;
     label: string;
   }>({ open: false, action: null, label: "" });
+  // 1. Add state near your other modal states
+  const [activeImage, setActiveImage] = useState<string>("");
+
+  // 2. Set activeImage when opening the modal
+  const handleViewTalent = (talent: Talent) => {
+    setSelectedTalent(talent);
+    setActiveImage(talent.primaryImage); // ← initialize with primary
+    setIsOpen(true);
+  };
 
   const { data, isLoading } = useGetSingleShortlistJobQuery(id);
 
@@ -459,10 +468,10 @@ export default function ShortlistDetailPage() {
     }));
   };
 
-  const handleViewTalent = (talent: Talent) => {
-    setSelectedTalent(talent);
-    setIsOpen(true);
-  };
+  // const handleViewTalent = (talent: Talent) => {
+  //   setSelectedTalent(talent);
+  //   setIsOpen(true);
+  // };
 
   const handleShareLink = () => {
     const shareUrl = `${window.location.origin}/shortlist/shared/${id}`;
@@ -810,14 +819,15 @@ export default function ShortlistDetailPage() {
 
               {/* Right — images */}
               <div className='flex flex-col gap-4'>
-                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
-                  {selectedTalent.primaryImage ? (
+                <div className='relative w-full aspect- rounded-lg overflow-hidden shadow-md bg-gray-200'>
+                  {activeImage ? (
                     <Image
-                      src={selectedTalent.primaryImage}
+                      src={activeImage}
                       alt={selectedTalent.name}
-                      fill
+                      width={600}
+                      height={800}
                       unoptimized
-                      className='object-cover'
+                      className='object-contain w-full h-auto'
                     />
                   ) : (
                     <div className='flex h-full w-full items-center justify-center text-gray-400'>
@@ -825,24 +835,33 @@ export default function ShortlistDetailPage() {
                     </div>
                   )}
                 </div>
+
                 {selectedTalent.images.length > 1 && (
                   <div className='flex gap-2 flex-wrap'>
-                    {selectedTalent.images
-                      .filter((img) => !img.is_primary)
-                      .map((img) => (
+                    {selectedTalent.images.map((img) => {
+                      const url = resolveImageUrl(img.image);
+                      const isActive = activeImage === url;
+                      return (
                         <div
                           key={img.image_id}
-                          className='relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0'
+                          onClick={() => setActiveImage(url)}
+                          className={`relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0 cursor-pointer transition-all
+                          ${
+                            isActive
+                              ? "ring-2 ring-[#2563EB] ring-offset-1"
+                              : "opacity-70 hover:opacity-100"
+                          }`}
                         >
                           <Image
-                            src={resolveImageUrl(img.image)}
+                            src={url}
                             alt={selectedTalent.name}
                             fill
                             unoptimized
                             className='object-cover'
                           />
                         </div>
-                      ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
