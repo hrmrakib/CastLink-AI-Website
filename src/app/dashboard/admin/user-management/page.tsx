@@ -101,7 +101,6 @@ export default function UserManagement() {
     null,
   );
   const [searchInput, setSearchInput] = useState("");
-  // const [searchQuery, setSearchQuery] = useState("");
   const [deletedIds] = useState<number[]>([]);
 
   const [approveOrRejectAgentMutation, { isLoading: isApproving }] =
@@ -125,6 +124,7 @@ export default function UserManagement() {
     page_size: limit,
     search: searchDebounce,
   });
+  console.log({ activeTab });
 
   const totalPages = data?.meta?.total_pages ?? 1;
 

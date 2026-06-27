@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/purity */
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Eye,
   Video,
@@ -34,6 +34,7 @@ import {
   useSelftapUploadMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -385,8 +386,6 @@ function CardSkeleton() {
   );
 }
 
-// filtering id babed talent
-
 interface AiResult {
   suggested_talents: Talent[];
   requested_selftapes: any[];
@@ -399,9 +398,6 @@ interface AiResult {
 export default function ActiveJobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -416,31 +412,6 @@ export default function ActiveJobsPage() {
   // Safely extract jobs array from API response
   const jobs: Job[] = data?.data ?? [];
   const totalPages = data?.meta?.total_pages ?? 1;
-
-  // Derive unique locations for filter dropdown
-  const locations = useMemo(() => {
-    const set = new Set<string>(jobs.map((j) => j.location));
-    return Array.from(set);
-  }, [jobs]);
-
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const statusMatch = statusFilter === "all" || job.status === statusFilter;
-
-      const locationMatch =
-        locationFilter === "all" || job.location === locationFilter;
-
-      const postedDate = new Date(job.created_at);
-      const now = Date.now();
-      const dateMatch =
-        dateFilter === "all" ||
-        (dateFilter === "30days" &&
-          postedDate > new Date(now - 30 * 86400000)) ||
-        (dateFilter === "60days" && postedDate > new Date(now - 60 * 86400000));
-
-      return statusMatch && locationMatch && dateMatch;
-    });
-  }, [jobs, statusFilter, locationFilter, dateFilter]);
 
   const openJobDetail = (job: Job) => {
     setSelectedJob(job);
@@ -527,32 +498,6 @@ export default function ActiveJobsPage() {
           </p>
         </div>
 
-        {/* Filters */}
-        {/* <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:gap-3'>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className='w-full sm:w-40'>
-              <SelectValue placeholder='Status' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Status</SelectItem>
-              <SelectItem value='active'>Active</SelectItem>
-              <SelectItem value='pending'>Pending</SelectItem>
-              <SelectItem value='completed'>Completed</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className='w-full sm:w-40'>
-              <SelectValue placeholder='Date' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Time</SelectItem>
-              <SelectItem value='30days'>Last 30 Days</SelectItem>
-              <SelectItem value='60days'>Last 60 Days</SelectItem>
-            </SelectContent>
-          </Select>
-        </div> */}
-
         {/* Error state */}
         {isError && (
           <div className='flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 py-12'>
@@ -578,7 +523,7 @@ export default function ActiveJobsPage() {
                 <thead>
                   <tr className='border-b border-border bg-secondary/50'>
                     {[
-                      "Job Name",
+                      "Job Title",
                       "Suggested Talent",
                       "Role",
                       "Location",
@@ -596,15 +541,22 @@ export default function ActiveJobsPage() {
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-border'>
-                  {filteredJobs.map((job) => {
+                  {jobs?.map((job) => {
                     const talent = primaryTalent(job);
                     return (
                       <tr
                         key={job.job_id}
                         className='hover:bg-secondary/30 transition'
                       >
-                        <td className='px-6 py-4 text-sm font-medium text-foreground max-w-50 truncate'>
-                          {job.title}
+                        <td className='px-6 py-4 flex items-center gap-1.5 text-sm font-medium text-foreground max-w-50 truncate'>
+                          <Image
+                            src={"/nike.png"} // TODO: Replace with actual job image
+                            alt={""}
+                            width={36}
+                            height={36}
+                            className='mr-2 rounded-md'
+                          />
+                          <span>{job.title}</span>
                         </td>
                         <td className='px-6 py-4'>
                           {talent ? (
@@ -694,7 +646,7 @@ export default function ActiveJobsPage() {
 
             {/* Mobile Cards */}
             <div className='grid gap-4 md:hidden'>
-              {filteredJobs.map((job) => {
+              {jobs?.map((job) => {
                 const talent = primaryTalent(job);
                 return (
                   <div
@@ -763,7 +715,7 @@ export default function ActiveJobsPage() {
             </div>
 
             {/* Empty state */}
-            {filteredJobs.length === 0 && !isLoading && (
+            {jobs?.length === 0 && !isLoading && (
               <div className='flex flex-col items-center justify-center rounded-lg border border-border bg-card py-12'>
                 <p className='text-muted-foreground'>No jobs found</p>
               </div>
@@ -787,22 +739,36 @@ export default function ActiveJobsPage() {
                 {/* ── Left Panel ── */}
                 <div className='flex-1 bg-white dark:bg-slate-950 p-8 rounded-xl flex flex-col gap-6'>
                   {/* Title & meta */}
-                  <div>
-                    <span className='inline-block text-blue-600 font-semibold text-xs uppercase tracking-wider mb-2'>
-                      AI Matched · {capitalize(selectedJob.job_type)}
-                    </span>
-                    <h2 className='text-2xl font-bold text-foreground leading-tight'>
-                      {selectedJob.title}
-                    </h2>
-                    <div className='mt-3 flex flex-wrap gap-3 text-sm text-muted-foreground'>
-                      <span className='flex items-center gap-1'>
-                        <MapPin className='h-3.5 w-3.5' />{" "}
-                        {selectedJob.location}
+                  <div className='flex items-start gap-4'>
+                    {/* Job Image/Logo */}
+                    <Image
+                      src={"/nike.png"} // Fallback if no photo exists
+                      alt={`${selectedJob.title} logo`}
+                      width={48} // Slightly bumped up from 36 to look balanced with text-2xl h2
+                      height={48}
+                      className='rounded-xl object-cover border bg-muted shrink-0'
+                    />
+
+                    {/* Content Details */}
+                    <div className='flex-1 min-w-0'>
+                      <span className='inline-block text-blue-600 font-semibold text-xs uppercase tracking-wider mb-1'>
+                        AI Matched · {capitalize(selectedJob.job_type)}
                       </span>
-                      <span className='flex items-center gap-1'>
-                        <Calendar className='h-3.5 w-3.5' /> Posted{" "}
-                        {formatDate(selectedJob.created_at)}
-                      </span>
+
+                      <h2 className='text-2xl font-bold text-foreground leading-tight truncate'>
+                        {selectedJob.title}
+                      </h2>
+
+                      <div className='mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground'>
+                        <span className='flex items-center gap-1.5'>
+                          <MapPin className='h-3.5 w-3.5 shrink-0 text-muted-foreground/70' />
+                          {selectedJob.location}
+                        </span>
+                        <span className='flex items-center gap-1.5'>
+                          <Calendar className='h-3.5 w-3.5 shrink-0 text-muted-foreground/70' />
+                          Posted {formatDate(selectedJob.created_at)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
