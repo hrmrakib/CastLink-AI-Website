@@ -172,10 +172,6 @@ function TalentRow({
             {talent_info.location}
           </span>
         )}
-        {/* <span className='flex items-center gap-1 text-xs text-gray-400'>
-          <Calendar className='h-3 w-3' />
-          {summarizeDates(talent_info.available_dates)}
-        </span> */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -268,6 +264,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </button>
         </div>
       </div>
+
       {/* Job meta */}
       <div className='mb-3 flex items-center gap-2 text-xs text-gray-400'>
         <Briefcase className='h-3.5 w-3.5' />
@@ -280,12 +277,14 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </>
         )}
       </div>
+
       {/* Description */}
       {shortlist.description?.trim() && (
         <p className='mb-3 line-clamp-2 text-sm text-[#404145]'>
           {shortlist.description}
         </p>
       )}
+
       {/* Counts row */}
       <div className='mb-3 flex flex-wrap gap-2 text-xs text-gray-500'>
         <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
@@ -307,6 +306,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </span>
         )}
       </div>
+
       {/* Avatar strip */}
       <div className='mb-3 flex items-center gap-2'>
         <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
@@ -331,6 +331,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           <span className='text-xs italic text-gray-400'>No talents yet</span>
         )}
       </div>
+
       {/* Divider + talent list */}
       <div className='border-t border-gray-100 pt-3'>
         <div
@@ -399,7 +400,10 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 
       {availabilityModal && selectedAvailabilityTalent && (
         <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
-          <DialogContent className='sm:max-w-sm lg:max-w-lg max-h-[80vh] flex flex-col'>
+          <DialogContent
+            className='sm:max-w-sm lg:max-w-lg max-h-[80vh] flex flex-col'
+            onClick={(e) => e.stopPropagation()}
+          >
             <DialogHeader className='shrink-0'>
               <DialogTitle>Available Dates</DialogTitle>
               <DialogDescription>

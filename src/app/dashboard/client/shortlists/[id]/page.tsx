@@ -634,6 +634,8 @@ export default function ShortlistDetailPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  console.log("selectedTalent.is_available", selectedTalent?.available_dates);
+
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
@@ -796,9 +798,27 @@ export default function ShortlistDetailPage() {
                     ...(selectedTalent.skills
                       ? [{ label: "Skills", value: selectedTalent.skills }]
                       : []),
+                    // {
+                    //   label: "Available",
+                    //   value: selectedTalent?.available_dates ? "Yes" : "No",
+                    // },
                     {
                       label: "Available",
-                      value: selectedTalent.is_available ? "Yes" : "No",
+                      value: selectedTalent?.available_dates?.length ? (
+                        <button
+                          onClick={() => {
+                            setSelectedAvailabilityTalent(selectedTalent);
+                            setAvailabilityModal(true);
+                          }}
+                          className='flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline transition text-sm font-medium'
+                        >
+                          <Calendar size={14} />
+                          {selectedTalent.available_dates.length} date
+                          {selectedTalent.available_dates.length > 1 ? "s" : ""}
+                        </button>
+                      ) : (
+                        "No dates"
+                      ),
                     },
                     {
                       label: "Added",
