@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { formatAvailabilityDate } from "@/utils/formatAvailabilityDate";
 
 // ─── Interfaces matching actual API shape ─────────────────────────────────────
 
@@ -412,30 +413,62 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
               </DialogDescription>
             </DialogHeader>
             <div className='py-2 space-y-2 overflow-y-auto flex-1 min-h-0'>
-              {selectedAvailabilityTalent.available_dates?.length ? (
-                selectedAvailabilityTalent.available_dates.map((date) => (
-                  <div
-                    key={date}
-                    className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
-                  >
-                    <Calendar size={16} className='text-[#2563EB] shrink-0' />
-                    <span className='text-sm font-medium text-gray-800'>
-                      {new Date(date + "T00:00:00").toLocaleDateString(
-                        "en-US",
-                        {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        },
-                      )}
-                    </span>
-                  </div>
-                ))
+              {selectedAvailabilityTalent?.available_dates &&
+              selectedAvailabilityTalent.available_dates.length > 0 ? (
+                selectedAvailabilityTalent.available_dates.map((dateStr) => {
+                  const { day, date, isPast } = formatAvailabilityDate(dateStr);
+                  return (
+                    <div
+                      key={dateStr}
+                      className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
+                        isPast
+                          ? "border-gray-200 bg-gray-50 opacity-60"
+                          : "border-blue-100 bg-blue-50"
+                      }`}
+                    >
+                      <div className='flex items-center gap-3'>
+                        <Calendar
+                          size={15}
+                          className={`shrink-0 ${isPast ? "text-gray-400" : "text-[#2563EB]"}`}
+                        />
+                        <div className='flex flex-col'>
+                          <span
+                            className={`text-xs font-semibold uppercase tracking-wide ${
+                              isPast ? "text-gray-400" : "text-[#2563EB]"
+                            }`}
+                          >
+                            {day}
+                          </span>
+                          <span
+                            className={`text-sm font-medium ${
+                              isPast
+                                ? "text-gray-400 line-through"
+                                : "text-gray-800"
+                            }`}
+                          >
+                            {date}
+                          </span>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
+                          isPast
+                            ? "text-gray-400 bg-white border-gray-200"
+                            : "text-green-600 bg-white border-green-100"
+                        }`}
+                      >
+                        {isPast ? "Past" : "Available"}
+                      </span>
+                    </div>
+                  );
+                })
               ) : (
-                <p className='text-sm text-gray-500 text-center py-6'>
-                  No available dates listed.
-                </p>
+                <div className='flex flex-col items-center justify-center py-10 text-center gap-2'>
+                  <Calendar size={32} className='text-gray-300' />
+                  <p className='text-sm text-gray-500'>
+                    No available dates listed.
+                  </p>
+                </div>
               )}
             </div>
             <DialogFooter className='shrink-0'>

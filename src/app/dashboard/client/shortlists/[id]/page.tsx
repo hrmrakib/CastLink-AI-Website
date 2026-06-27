@@ -52,6 +52,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { formatAvailabilityDate } from "@/utils/formatAvailabilityDate";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
@@ -206,21 +207,6 @@ function formatDate(iso: string) {
     month: "short",
     year: "numeric",
   });
-}
-
-function formatAvailabilityDate(dateStr: string): {
-  day: string;
-  date: string;
-} {
-  const d = new Date(`${dateStr}T00:00:00`);
-  return {
-    day: d.toLocaleDateString("en-US", { weekday: "long" }),
-    date: d.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
-  };
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -993,25 +979,48 @@ export default function ShortlistDetailPage() {
             {selectedAvailabilityTalent?.available_dates &&
             selectedAvailabilityTalent.available_dates.length > 0 ? (
               selectedAvailabilityTalent.available_dates.map((dateStr) => {
-                const { day, date } = formatAvailabilityDate(dateStr);
+                const { day, date, isPast } = formatAvailabilityDate(dateStr);
                 return (
                   <div
                     key={dateStr}
-                    className='flex items-center justify-between px-4 py-3 rounded-lg border border-blue-100 bg-blue-50'
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
+                      isPast
+                        ? "border-gray-200 bg-gray-50 opacity-60"
+                        : "border-blue-100 bg-blue-50"
+                    }`}
                   >
                     <div className='flex items-center gap-3'>
-                      <Calendar size={15} className='text-[#2563EB] shrink-0' />
+                      <Calendar
+                        size={15}
+                        className={`shrink-0 ${isPast ? "text-gray-400" : "text-[#2563EB]"}`}
+                      />
                       <div className='flex flex-col'>
-                        <span className='text-xs font-semibold text-[#2563EB] uppercase tracking-wide'>
+                        <span
+                          className={`text-xs font-semibold uppercase tracking-wide ${
+                            isPast ? "text-gray-400" : "text-[#2563EB]"
+                          }`}
+                        >
                           {day}
                         </span>
-                        <span className='text-sm font-medium text-gray-800'>
+                        <span
+                          className={`text-sm font-medium ${
+                            isPast
+                              ? "text-gray-400 line-through"
+                              : "text-gray-800"
+                          }`}
+                        >
                           {date}
                         </span>
                       </div>
                     </div>
-                    <span className='text-[10px] uppercase tracking-wider font-bold text-green-600 bg-white px-2 py-1 rounded-full border border-green-100 shadow-sm'>
-                      Available
+                    <span
+                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
+                        isPast
+                          ? "text-gray-400 bg-white border-gray-200"
+                          : "text-green-600 bg-white border-green-100"
+                      }`}
+                    >
+                      {isPast ? "Past" : "Available"}
                     </span>
                   </div>
                 );
