@@ -26,7 +26,7 @@ export default function TermsConditionPage() {
               </Link>
 
               <Link
-                href='/dashboard/client/settings/terms-and-conditions/edit'
+                href='/dashboard/admin/settings/terms-and-conditions/edit'
                 className='inline-flex items-center bg-[#2563EB] text-white rounded-md px-4 py-1.5'
               >
                 <span className='text-base font-medium'>Edit</span>

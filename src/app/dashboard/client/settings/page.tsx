@@ -1,9 +1,4 @@
-import {
-  BookText,
-  ChevronRight,
-  CircleUserRound,
-  LockKeyhole,
-} from "lucide-react";
+import { ChevronRight, CircleUserRound, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 
 const ClientSettingPage = () => {
@@ -28,15 +23,6 @@ const ClientSettingPage = () => {
           >
             <p className='flex items-center gap-2'>
               <LockKeyhole size={20} /> Change password
-            </p>{" "}
-            <ChevronRight />
-          </Link>
-          <Link
-            className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
-            href='/dashboard/client/settings/terms-and-conditions'
-          >
-            <p className='flex items-center gap-2'>
-              <BookText size={20} /> Terms & Conditions
             </p>{" "}
             <ChevronRight />
           </Link>
