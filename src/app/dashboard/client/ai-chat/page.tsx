@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -16,6 +17,7 @@ import {
   Loader2,
   Euro,
   Plus,
+  User,
 } from "lucide-react";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -321,6 +323,26 @@ function AIChatInner() {
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draft_id");
   const [currency, setCurrency] = useState("USD");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const handleCancel = () => {
+    setJobTitle("");
+    setJobDescription("");
+    setIsSkipping(false);
+    setJobModal(false);
+    setJobRole([]);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file)); // Creates a temporary preview URL
+    }
+  };
 
   const currencies = [
     { code: "USD", symbol: "$", label: "Dollar" },
@@ -425,19 +447,56 @@ function AIChatInner() {
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
-      const res = await generateJobFromMessageMutation({
-        session_id: "",
-        message,
-        location,
-        shoot_dates: shootDates,
-        budget_range: budget,
-        job_type: jobType,
-        title: jobTitle,
-        casting_roles: jobRole,
-        description: jobDescription,
-        save_as_draft: false,
-        generate_job: true,
-      }).unwrap();
+      // const res = await generateJobFromMessageMutation({
+      //   session_id: "",
+      //   message,
+      //   location,
+      //   shoot_dates: shootDates,
+      //   budget_range: budget,
+      //   job_type: jobType,
+      //   title: jobTitle,
+      //   casting_roles: jobRole,
+      //   description: jobDescription,
+      //   photo: avatarFile,
+      //   save_as_draft: false,
+      //   generate_job: true,
+      // }).unwrap();
+
+      const formData = new FormData();
+
+      formData.append("session_id", "");
+      formData.append("message", message ?? "");
+      formData.append("location", location ?? "");
+      formData.append("budget_range", budget ?? "");
+      formData.append("job_type", jobType ?? "");
+      formData.append("title", jobTitle ?? "");
+      formData.append("description", jobDescription ?? "");
+
+      formData.append("save_as_draft", String(false));
+      formData.append("generate_job", String(true));
+
+      if (shootDates) {
+        formData.append(
+          "shoot_date",
+          typeof shootDates === "object"
+            ? JSON.stringify(shootDates)
+            : shootDates,
+        );
+      }
+      if (jobRole) {
+        formData.append(
+          "casting_roles",
+          typeof jobRole === "object" ? JSON.stringify(jobRole) : jobRole,
+        );
+      }
+
+      if (avatarFile) {
+        formData.append("photo", avatarFile);
+      }
+
+      console.log(shootDates);
+
+      const res = await generateJobFromMessageMutation(formData).unwrap();
 
       if (res?.status_message) {
         toast.success(res?.status_message || "Job created successfully!");
@@ -733,6 +792,59 @@ function AIChatInner() {
 
           <form className='space-y-4' onSubmit={handleJobSave}>
             <FieldGroup>
+              {/* --- AVATAR UPLOAD SECTION --- */}
+              <Field className='flex flex-col items-center justify-center sm:flex-row sm:justify-start gap-4 pb-2'>
+                <div className='relative w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 group hover:border-blue-500 transition-colors'>
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt='Avatar preview'
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <User className='w-8 h-8 text-gray-400' />
+                  )}
+                  <label
+                    htmlFor='avatar-upload'
+                    className='absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white text-xs font-medium'
+                  >
+                    Change
+                  </label>
+                </div>
+
+                <div className='flex flex-col gap-1 items-center sm:items-start'>
+                  <Label
+                    htmlFor='avatar-upload'
+                    className='text-sm font-semibold cursor-pointer text-blue-600 hover:text-blue-700'
+                  >
+                    Upload Company/Job Image
+                  </Label>
+                  <span className='text-xs text-gray-500'>
+                    PNG, JPG up to 5MB
+                  </span>
+                  <input
+                    id='avatar-upload'
+                    type='file'
+                    accept='image/*'
+                    className='hidden'
+                    onChange={handleAvatarChange}
+                  />
+                  {avatarPreview && (
+                    <button
+                      type='button'
+                      className='text-xs text-red-500 hover:underline mt-1'
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setAvatarPreview(null);
+                      }}
+                    >
+                      Remove image
+                    </button>
+                  )}
+                </div>
+              </Field>
+              {/* --- END OF AVATAR UPLOAD SECTION --- */}
+
               <Field>
                 <Label htmlFor='title' className='text-sm font-semibold'>
                   Job Title
@@ -839,11 +951,12 @@ function AIChatInner() {
                 <Button
                   type='button'
                   variant='outline'
-                  onClick={() => {
-                    setJobTitle("");
-                    setJobDescription("");
-                    setIsSkipping(false);
-                  }}
+                  onClick={() => handleCancel()}
+                  // onClick={() => {
+                  //   setJobTitle("");
+                  //   setJobDescription("");
+                  //   setIsSkipping(false);
+                  // }}
                 >
                   Cancel
                 </Button>

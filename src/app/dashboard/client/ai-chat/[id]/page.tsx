@@ -19,6 +19,7 @@ import {
   Plus,
   X,
   Briefcase,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import ChatModalDetail from "@/components/dashboard/chat/ChatModal";
@@ -174,6 +175,26 @@ export default function AIDynamicPage() {
   >(null);
   const [jobRole, setJobRole] = useState<string[]>([]);
   const [currentRole, setCurrentRole] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file)); // Creates a temporary preview URL
+    }
+  };
+
+  const handleCancel = () => {
+    setJobTitle("");
+    setJobDescription("");
+    setIsSkipping(false);
+    setJobModal(false);
+    setJobRole([]);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
 
   const {
     data,
@@ -406,14 +427,12 @@ export default function AIDynamicPage() {
   const handleAssignRole = async (roleId: number) => {
     if (!assignRoleModal.talent) return;
 
-    console.log({ roleId });
-
     try {
       setAssigningRoleId(roleId);
       const res = await assignRoleMutation({
         job_id: jobId,
         talent_id: assignRoleModal.talent.talent_id,
-        id: roleId | 0,
+        id: roleId,
       }).unwrap();
 
       if (res?.status_message) {
@@ -434,13 +453,22 @@ export default function AIDynamicPage() {
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
-      const res = await generateJobFromMessageMutation({
-        session_id: id,
-        title: jobTitle,
-        casting_roles: jobRole,
-        description: jobDescription,
-        generate_job: true,
-      }).unwrap();
+      const formData = new FormData();
+
+      formData.append("session_id", String(id));
+      formData.append("title", jobTitle);
+      formData.append("description", jobDescription);
+      formData.append("generate_job", String(true));
+
+      formData.append(
+        "casting_roles",
+        typeof jobRole === "object" ? JSON.stringify(jobRole) : jobRole,
+      );
+
+      if (avatarFile) {
+        formData.append("photo", avatarFile);
+      }
+      const res = await generateJobFromMessageMutation(formData).unwrap();
 
       if (res?.status_message) {
         toast.success(res?.status_message || "Job created successfully!");
@@ -976,7 +1004,7 @@ export default function AIDynamicPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Job title & description modal */}
+      {/* Job avatar, title & description modal */}
       <Dialog
         open={jobModal}
         onOpenChange={(open) => {
@@ -994,6 +1022,59 @@ export default function AIDynamicPage() {
 
           <form className='space-y-4' onSubmit={handleJobSave}>
             <FieldGroup>
+              {/* --- AVATAR UPLOAD SECTION --- */}
+              <Field className='flex flex-col items-center justify-center sm:flex-row sm:justify-start gap-4 pb-2'>
+                <div className='relative w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 group hover:border-blue-500 transition-colors'>
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt='Avatar preview'
+                      className='w-full h-full object-cover'
+                    />
+                  ) : (
+                    <User className='w-8 h-8 text-gray-400' />
+                  )}
+                  <label
+                    htmlFor='avatar-upload'
+                    className='absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white text-xs font-medium'
+                  >
+                    Change
+                  </label>
+                </div>
+
+                <div className='flex flex-col gap-1 items-center sm:items-start'>
+                  <Label
+                    htmlFor='avatar-upload'
+                    className='text-sm font-semibold cursor-pointer text-blue-600 hover:text-blue-700'
+                  >
+                    Upload Company/Job Image
+                  </Label>
+                  <span className='text-xs text-gray-500'>
+                    PNG, JPG up to 5MB
+                  </span>
+                  <input
+                    id='avatar-upload'
+                    type='file'
+                    accept='image/*'
+                    className='hidden'
+                    onChange={handleAvatarChange}
+                  />
+                  {avatarPreview && (
+                    <button
+                      type='button'
+                      className='text-xs text-red-500 hover:underline mt-1'
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setAvatarPreview(null);
+                      }}
+                    >
+                      Remove image
+                    </button>
+                  )}
+                </div>
+              </Field>
+              {/* --- END OF AVATAR UPLOAD SECTION --- */}
+
               <Field>
                 <Label htmlFor='title' className='text-sm font-semibold'>
                   Job Title
@@ -1096,11 +1177,16 @@ export default function AIDynamicPage() {
                 <Button
                   type='button'
                   variant='outline'
-                  onClick={() => {
-                    setJobTitle("");
-                    setJobDescription("");
-                    setIsSkipping(false);
-                  }}
+                  onClick={() => handleCancel()}
+                  // onClick={() => {
+                  //   setJobTitle("");
+                  //   setJobDescription("");
+                  //   setIsSkipping(false);
+                  //   setJobModal(false);
+                  //   setJobRole([]);
+                  //   setAvatarFile(null);
+                  //   setAvatarPreview(null);
+                  // }}
                 >
                   Cancel
                 </Button>
