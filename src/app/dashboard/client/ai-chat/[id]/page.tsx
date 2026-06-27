@@ -536,8 +536,6 @@ export default function AIDynamicPage() {
     setJobRole((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
-  console.log({ maxVisibleTalent });
-
   return (
     <main className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Chat Messages Area */}
@@ -1224,11 +1222,6 @@ export default function AIDynamicPage() {
                     <span className='text-sm font-medium text-gray-800'>
                       {role.job_role}
                     </span>
-                    {/* {role.assign_status && (
-                      <span className='text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full'>
-                        Available
-                      </span>
-                    )} */}
                   </div>
                   <Button
                     size='sm'

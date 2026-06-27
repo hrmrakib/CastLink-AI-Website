@@ -15,6 +15,16 @@ import { useState } from "react";
 import { useDeleteShortlistMutation } from "@/redux/features/ai-chat/aiChatAPI";
 import { getImageUrl } from "@/lib/imagePath";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // ─── Interfaces matching actual API shape ─────────────────────────────────────
 
@@ -103,20 +113,6 @@ function uniqueTalents(talents: ShortlistedTalent[]): ShortlistedTalent[] {
   );
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function summarizeDates(dates: string[]): string {
-  if (!dates || dates.length === 0) return "No available dates";
-  if (dates.length === 1) return formatDate(dates[0]);
-  const sorted = [...dates].sort();
-  return `${formatDate(sorted[0])} – ${formatDate(sorted[sorted.length - 1])}`;
-}
-
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
 function ShortlistCardSkeleton() {
   return (
     <div className='rounded-lg border border-gray-200 bg-white p-6 shadow-sm animate-pulse'>
@@ -143,9 +139,13 @@ function ShortlistCardSkeleton() {
   );
 }
 
-// ─── Talent Row ───────────────────────────────────────────────────────────────
-
-function TalentRow({ item }: { item: ShortlistedTalent }) {
+function TalentRow({
+  item,
+  onShowDates,
+}: {
+  item: ShortlistedTalent;
+  onShowDates: (talent: TalentInfo) => void;
+}) {
   const { talent_info } = item;
   const imageUrl = getPrimaryImage(talent_info.images);
 
@@ -172,10 +172,22 @@ function TalentRow({ item }: { item: ShortlistedTalent }) {
             {talent_info.location}
           </span>
         )}
-        <span className='flex items-center gap-1 text-xs text-gray-400'>
+        {/* <span className='flex items-center gap-1 text-xs text-gray-400'>
           <Calendar className='h-3 w-3' />
           {summarizeDates(talent_info.available_dates)}
-        </span>
+        </span> */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onShowDates(talent_info);
+          }}
+          className='flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 hover:underline transition'
+        >
+          <Calendar className='h-3 w-3' />
+          {talent_info.available_dates?.length
+            ? `${talent_info.available_dates.length} date${talent_info.available_dates.length > 1 ? "s" : ""}`
+            : "No dates"}
+        </button>
       </div>
     </div>
   );
@@ -188,6 +200,9 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteShortlistMutation] = useDeleteShortlistMutation();
   const [expanded, setExpanded] = useState(false);
+  const [availabilityModal, setAvailabilityModal] = useState(false);
+  const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
+    useState<TalentInfo | null>(null);
 
   const deduped = uniqueTalents(shortlist.shortlisted_talents ?? []);
   const visibleTalents = expanded ? deduped : deduped.slice(0, 3);
@@ -195,6 +210,11 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   const openDeleteModal = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteModalOpen(true);
+  };
+
+  const handleShowDates = (talent: TalentInfo) => {
+    setSelectedAvailabilityTalent(talent);
+    setAvailabilityModal(true);
   };
 
   const handleConfirmDelete = async (e: React.MouseEvent) => {
@@ -248,7 +268,6 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </button>
         </div>
       </div>
-
       {/* Job meta */}
       <div className='mb-3 flex items-center gap-2 text-xs text-gray-400'>
         <Briefcase className='h-3.5 w-3.5' />
@@ -261,14 +280,12 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </>
         )}
       </div>
-
       {/* Description */}
       {shortlist.description?.trim() && (
         <p className='mb-3 line-clamp-2 text-sm text-[#404145]'>
           {shortlist.description}
         </p>
       )}
-
       {/* Counts row */}
       <div className='mb-3 flex flex-wrap gap-2 text-xs text-gray-500'>
         <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
@@ -290,7 +307,6 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </span>
         )}
       </div>
-
       {/* Avatar strip */}
       <div className='mb-3 flex items-center gap-2'>
         <div className='*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale'>
@@ -315,7 +331,6 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           <span className='text-xs italic text-gray-400'>No talents yet</span>
         )}
       </div>
-
       {/* Divider + talent list */}
       <div className='border-t border-gray-100 pt-3'>
         <div
@@ -323,7 +338,11 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           onClick={(e) => e.stopPropagation()}
         >
           {visibleTalents.map((item) => (
-            <TalentRow key={item.shortlisted_id} item={item} />
+            <TalentRow
+              key={item.shortlisted_id}
+              item={item}
+              onShowDates={handleShowDates}
+            />
           ))}
         </div>
 
@@ -339,7 +358,6 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </button>
         )}
       </div>
-
       {/* Delete Modal */}
       {isDeleteModalOpen && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm'>
@@ -378,11 +396,55 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </div>
         </div>
       )}
+
+      {availabilityModal && selectedAvailabilityTalent && (
+        <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
+          <DialogContent className='sm:max-w-sm lg:max-w-lg max-h-[80vh] flex flex-col'>
+            <DialogHeader className='shrink-0'>
+              <DialogTitle>Available Dates</DialogTitle>
+              <DialogDescription>
+                {selectedAvailabilityTalent.name}&apos;s available dates for
+                booking.
+              </DialogDescription>
+            </DialogHeader>
+            <div className='py-2 space-y-2 overflow-y-auto flex-1 min-h-0'>
+              {selectedAvailabilityTalent.available_dates?.length ? (
+                selectedAvailabilityTalent.available_dates.map((date) => (
+                  <div
+                    key={date}
+                    className='flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
+                  >
+                    <Calendar size={16} className='text-[#2563EB] shrink-0' />
+                    <span className='text-sm font-medium text-gray-800'>
+                      {new Date(date + "T00:00:00").toLocaleDateString(
+                        "en-US",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                      )}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className='text-sm text-gray-500 text-center py-6'>
+                  No available dates listed.
+                </p>
+              )}
+            </div>
+            <DialogFooter className='shrink-0'>
+              <DialogClose asChild>
+                <Button variant='outline'>Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ShortlistsPage() {
   const router = useRouter();
