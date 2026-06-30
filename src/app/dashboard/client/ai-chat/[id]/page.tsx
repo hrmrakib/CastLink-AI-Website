@@ -178,12 +178,25 @@ export default function AIDynamicPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
+  const ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+  ];
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file)); // Creates a temporary preview URL
+    if (!file) return;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Invalid image format. Supported: .jpg, .jpeg, .png, .webp");
+      e.target.value = "";
+      return;
     }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const handleCancel = () => {
@@ -208,6 +221,7 @@ export default function AIDynamicPage() {
     skip: !jobId,
   });
   const roles: AvailableRole[] = availableRole ?? [];
+  // const test: string[] = JSON.parse(roles[0]?.job_role ?? "[]");
 
   const [assignRoleMutation] = useAssignRoleMutation();
 
@@ -429,6 +443,7 @@ export default function AIDynamicPage() {
 
     try {
       setAssigningRoleId(roleId);
+
       const res = await assignRoleMutation({
         job_id: jobId,
         talent_id: assignRoleModal.talent.talent_id,
@@ -450,6 +465,8 @@ export default function AIDynamicPage() {
     }
   };
 
+  console.log({ jobRole });
+
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
@@ -460,10 +477,19 @@ export default function AIDynamicPage() {
       formData.append("description", jobDescription);
       formData.append("generate_job", String(true));
 
-      formData.append(
-        "casting_roles",
-        typeof jobRole === "object" ? JSON.stringify(jobRole) : jobRole,
-      );
+      if (Array.isArray(jobRole)) {
+        jobRole.forEach((role) => {
+          formData.append(
+            "casting_roles",
+            typeof role === "object" ? JSON.stringify(role) : role,
+          );
+        });
+      } else {
+        formData.append(
+          "casting_roles",
+          typeof jobRole === "object" ? JSON.stringify(jobRole) : jobRole,
+        );
+      }
 
       if (avatarFile) {
         formData.append("photo", avatarFile);
@@ -1050,12 +1076,12 @@ export default function AIDynamicPage() {
                     Upload Company/Job Image
                   </Label>
                   <span className='text-xs text-gray-500'>
-                    PNG, JPG up to 5MB
+                    JPG, JPEG, PNG, WEBP up to 5MB
                   </span>
                   <input
                     id='avatar-upload'
                     type='file'
-                    accept='image/*'
+                    accept='.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp'
                     className='hidden'
                     onChange={handleAvatarChange}
                   />
@@ -1178,15 +1204,6 @@ export default function AIDynamicPage() {
                   type='button'
                   variant='outline'
                   onClick={() => handleCancel()}
-                  // onClick={() => {
-                  //   setJobTitle("");
-                  //   setJobDescription("");
-                  //   setIsSkipping(false);
-                  //   setJobModal(false);
-                  //   setJobRole([]);
-                  //   setAvatarFile(null);
-                  //   setAvatarPreview(null);
-                  // }}
                 >
                   Cancel
                 </Button>
@@ -1334,9 +1351,9 @@ export default function AIDynamicPage() {
 
           <div className='py-2 space-y-2'>
             {roles.length > 0 ? (
-              roles.map((role) => (
+              roles.map((role, i) => (
                 <div
-                  key={role.id}
+                  key={i}
                   className='flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
                 >
                   <div className='flex items-center gap-2'>
