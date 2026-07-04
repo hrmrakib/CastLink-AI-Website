@@ -116,7 +116,7 @@ function uniqueTalents(talents: ShortlistedTalent[]): ShortlistedTalent[] {
 
 function ShortlistCardSkeleton() {
   return (
-    <div className='rounded-lg border border-gray-200 bg-white p-6 shadow-sm animate-pulse'>
+    <div className='rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm animate-pulse'>
       <div className='mb-4 flex items-start justify-between'>
         <div className='h-7 w-2/3 rounded-md bg-gray-200' />
         <div className='h-7 w-20 rounded-full bg-gray-200' />
@@ -169,8 +169,10 @@ function TalentRow({
       <div className='flex shrink-0 flex-col items-end gap-0.5'>
         {talent_info.location && (
           <span className='flex items-center gap-1 text-xs text-gray-400'>
-            <MapPin className='h-3 w-3' />
-            {talent_info.location}
+            <MapPin className='h-3 w-3 shrink-0' />
+            <span className='truncate max-w-[80px] sm:max-w-[120px]'>
+              {talent_info.location}
+            </span>
           </span>
         )}
         <button
@@ -180,10 +182,12 @@ function TalentRow({
           }}
           className='flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 hover:underline transition'
         >
-          <Calendar className='h-3 w-3' />
-          {talent_info.available_dates?.length
-            ? `${talent_info.available_dates.length} date${talent_info.available_dates.length > 1 ? "s" : ""}`
-            : "No dates"}
+          <Calendar className='h-3 w-3 shrink-0' />
+          <span className='whitespace-nowrap'>
+            {talent_info.available_dates?.length
+              ? `${talent_info.available_dates.length} date${talent_info.available_dates.length > 1 ? "s" : ""}`
+              : "No dates"}
+          </span>
         </button>
       </div>
     </div>
@@ -241,12 +245,12 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   return (
     <div
       onClick={handleCardClick}
-      className='group rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300'
+      className='group rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
     >
       {/* Header */}
       <div className='mb-3 flex items-start justify-between gap-2'>
         <div className='min-w-0'>
-          <h3 className='truncate text-xl font-bold leading-tight text-black'>
+          <h3 className='truncate text-lg sm:text-xl font-bold leading-tight text-black'>
             {shortlist.title}
           </h3>
           <span className='mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 capitalize'>
@@ -254,12 +258,12 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </span>
         </div>
         <div className='flex shrink-0 flex-col items-end gap-1'>
-          <span className='rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700 whitespace-nowrap'>
+          <span className='rounded-full bg-gray-100 px-3 py-1 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap'>
             {deduped.length} Shortlisted
           </span>
           <button
             onClick={openDeleteModal}
-            className='rounded px-2 py-0.5 text-xs text-red-400 opacity-0 transition hover:text-red-600 group-hover:opacity-100'
+            className='rounded px-2 py-0.5 text-xs text-red-400 sm:opacity-0 transition hover:text-red-600 group-hover:opacity-100'
           >
             Delete
           </button>
@@ -267,14 +271,17 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       </div>
 
       {/* Job meta */}
-      <div className='mb-3 flex items-center gap-2 text-xs text-gray-400'>
-        <Briefcase className='h-3.5 w-3.5' />
-        <span>Job #{shortlist.job_id}</span>
+      <div className='mb-3 flex flex-wrap items-center gap-2 text-xs text-gray-400'>
+        <span className='flex items-center gap-1 whitespace-nowrap'>
+          <Briefcase className='h-3.5 w-3.5' /> Job #{shortlist.job_id}
+        </span>
         {shortlist.location && (
           <>
-            <span>·</span>
-            <MapPin className='h-3.5 w-3.5' />
-            <span>{shortlist.location}</span>
+            <span className='hidden sm:inline'>·</span>
+            <span className='flex items-center gap-1 whitespace-nowrap'>
+              <MapPin className='h-3.5 w-3.5' />
+              {shortlist.location}
+            </span>
           </>
         )}
       </div>
@@ -288,21 +295,21 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 
       {/* Counts row */}
       <div className='mb-3 flex flex-wrap gap-2 text-xs text-gray-500'>
-        <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
+        <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5 whitespace-nowrap'>
           {shortlist.applicants_count} applicants
         </span>
         {shortlist.polas_count > 0 && (
-          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
+          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5 whitespace-nowrap'>
             {shortlist.polas_count} polas
           </span>
         )}
         {shortlist.selftapes_count > 0 && (
-          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
+          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5 whitespace-nowrap'>
             {shortlist.selftapes_count} self-tapes
           </span>
         )}
         {shortlist.ecastings_count > 0 && (
-          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5'>
+          <span className='rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5 whitespace-nowrap'>
             {shortlist.ecastings_count} e-castings
           </span>
         )}
@@ -324,7 +331,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           ))}
         </div>
         {deduped.length > 4 && (
-          <span className='ml-1 text-xs text-gray-500'>
+          <span className='ml-1 text-xs text-gray-500 whitespace-nowrap'>
             +{deduped.length - 4} more
           </span>
         )}
@@ -360,19 +367,21 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
           </button>
         )}
       </div>
+
       {/* Delete Modal */}
       {isDeleteModalOpen && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm'>
-          <div className='bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-100'>
+          <div className='bg-white rounded-xl shadow-xl w-[95vw] sm:max-w-md p-5 sm:p-6 border border-gray-100'>
             <div className='flex items-start gap-4'>
-              <div className='p-3 bg-red-50 rounded-full text-red-600 shrink-0'>
+              <div className='p-3 bg-red-50 rounded-full text-red-600 shrink-0 hidden sm:block'>
                 <AlertTriangle className='w-6 h-6' />
               </div>
               <div>
-                <h3 className='text-lg font-bold text-gray-900 mb-1'>
+                <h3 className='text-lg font-bold text-gray-900 mb-1 flex items-center gap-2'>
+                  <AlertTriangle className='w-5 h-5 text-red-600 sm:hidden shrink-0' />
                   Delete Shortlist
                 </h3>
-                <p className='text-gray-600 text-sm leading-relaxed'>
+                <p className='text-gray-600 text-sm leading-relaxed mt-2 sm:mt-0'>
                   Are you sure you want to permanently delete{" "}
                   <span className='font-semibold text-gray-800'>
                     &ldquo;{shortlist.title}&rdquo;
@@ -381,16 +390,16 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                 </p>
               </div>
             </div>
-            <div className='flex gap-3 justify-end mt-6'>
+            <div className='flex flex-col-reverse sm:flex-row gap-3 justify-end mt-6'>
               <button
                 onClick={handleCloseModal}
-                className='px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer'
+                className='w-full sm:w-auto px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg text-sm transition cursor-pointer'
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className='px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer'
+                className='w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition cursor-pointer'
               >
                 Permanently Delete
               </button>
@@ -402,10 +411,10 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
       {availabilityModal && selectedAvailabilityTalent && (
         <Dialog open={availabilityModal} onOpenChange={setAvailabilityModal}>
           <DialogContent
-            className='sm:max-w-sm lg:max-w-lg max-h-[80vh] flex flex-col'
+            className='w-[95vw] sm:w-full sm:max-w-sm lg:max-w-lg max-h-[85vh] flex flex-col p-4 sm:p-6 rounded-xl'
             onClick={(e) => e.stopPropagation()}
           >
-            <DialogHeader className='shrink-0'>
+            <DialogHeader className='shrink-0 text-left sm:text-center'>
               <DialogTitle>Available Dates</DialogTitle>
               <DialogDescription>
                 {selectedAvailabilityTalent.name}&apos;s available dates for
@@ -420,7 +429,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                   return (
                     <div
                       key={dateStr}
-                      className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
+                      className={`flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 px-3 sm:px-4 py-3 rounded-lg border ${
                         isPast
                           ? "border-gray-200 bg-gray-50 opacity-60"
                           : "border-blue-100 bg-blue-50"
@@ -429,18 +438,18 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                       <div className='flex items-center gap-3'>
                         <Calendar
                           size={15}
-                          className={`shrink-0 ${isPast ? "text-gray-400" : "text-[#2563EB]"}`}
+                          className={`shrink-0 hidden sm:block ${isPast ? "text-gray-400" : "text-[#2563EB]"}`}
                         />
                         <div className='flex flex-col'>
                           <span
-                            className={`text-xs font-semibold uppercase tracking-wide ${
+                            className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wide ${
                               isPast ? "text-gray-400" : "text-[#2563EB]"
                             }`}
                           >
                             {day}
                           </span>
                           <span
-                            className={`text-sm font-medium ${
+                            className={`text-xs sm:text-sm font-medium ${
                               isPast
                                 ? "text-gray-400 line-through"
                                 : "text-gray-800"
@@ -451,7 +460,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                         </div>
                       </div>
                       <span
-                        className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
+                        className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm whitespace-nowrap ${
                           isPast
                             ? "text-gray-400 bg-white border-gray-200"
                             : "text-green-600 bg-white border-green-100"
@@ -471,9 +480,11 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
                 </div>
               )}
             </div>
-            <DialogFooter className='shrink-0'>
+            <DialogFooter className='shrink-0 sm:justify-end'>
               <DialogClose asChild>
-                <Button variant='outline'>Close</Button>
+                <Button variant='outline' className='w-full sm:w-auto'>
+                  Close
+                </Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>
@@ -491,25 +502,32 @@ export default function ShortlistsPage() {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <div className='mx-auto container px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto container px-4 py-6 sm:py-8 sm:px-6 lg:px-8'>
         {/* Header */}
-        <div className='mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
+        <div className='mb-6 sm:mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
           <div>
-            <h1 className='text-3xl font-bold text-black'>Shortlists</h1>
-            <p className='mt-1 text-gray-600'>Your curated talent selections</p>
+            <h1 className='text-2xl sm:text-3xl font-bold text-black'>
+              Shortlists
+            </h1>
+            <p className='mt-1 text-sm sm:text-base text-gray-600'>
+              Your curated talent selections
+            </p>
           </div>
           <button
             onClick={() => router.push("/dashboard/client/ai-chat")}
-            className='bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
+            className='w-full sm:w-auto bg-[#2563EB] hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition whitespace-nowrap cursor-pointer'
           >
-            <Sparkles className='w-6 h-6 text-white' strokeWidth={1.2} />
+            <Sparkles
+              className='w-5 h-5 sm:w-6 sm:h-6 text-white'
+              strokeWidth={1.2}
+            />
             Create New Job
           </button>
         </div>
 
         {/* Loading */}
         {isLoading && (
-          <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
+          <div className='grid gap-4 sm:gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
             {[1, 2, 3, 4].map((i) => (
               <ShortlistCardSkeleton key={i} />
             ))}
@@ -518,13 +536,13 @@ export default function ShortlistsPage() {
 
         {/* Grid */}
         {!isLoading && (
-          <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
+          <div className='grid gap-4 sm:gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
             {shortlists.length > 0 ? (
               shortlists.map((shortlist) => (
                 <ShortlistCard key={shortlist.job_id} shortlist={shortlist} />
               ))
             ) : (
-              <div className='col-span-full py-12 text-center'>
+              <div className='col-span-full py-12 text-center px-4'>
                 <p className='text-gray-500'>
                   No shortlists yet. Create one to get started!
                 </p>

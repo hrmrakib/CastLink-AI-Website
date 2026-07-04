@@ -4,7 +4,7 @@
 "use client";
 
 import type React from "react";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Sparkles,
@@ -447,20 +447,6 @@ function AIChatInner() {
   const runGenerateCasting = async () => {
     try {
       setGeneratingCastingLoading(true);
-      // const res = await generateJobFromMessageMutation({
-      //   session_id: "",
-      //   message,
-      //   location,
-      //   shoot_dates: shootDates,
-      //   budget_range: budget,
-      //   job_type: jobType,
-      //   title: jobTitle,
-      //   casting_roles: jobRole,
-      //   description: jobDescription,
-      //   photo: avatarFile,
-      //   save_as_draft: false,
-      //   generate_job: true,
-      // }).unwrap();
 
       const formData = new FormData();
 
@@ -538,6 +524,20 @@ function AIChatInner() {
     setJobRole((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+
+    // Auto-grow logic
+    if (textareaRef.current) {
+      // Reset height to auto to allow shrinking when text is deleted
+      textareaRef.current.style.height = "auto";
+      // Set height to the new scrollHeight
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
   return (
     <main className='min-h-screen bg-gray-50'>
       {/* Header */}
@@ -582,25 +582,33 @@ function AIChatInner() {
           {/* Form */}
           <form className='space-y-8'>
             {/* Main Input */}
-            <div className='relative bg-white rounded-xl border border-gray-200 p-4 md:p-6 flex gap-3 items-stretch'>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleChatSubmit(e as any);
-                  }
-                }}
-                placeholder="I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
-                className='flex-1 bg-transparent text-[#000000] placeholder-[#404145] resize-none focus:outline-none text-base leading-relaxed'
-                rows={3}
-              />
+            <div className='relative bg-white rounded-xl border border-gray-200 p-4 flex gap-3 items-stretch'>
+              <div className='w-full pb-6'>
+                <textarea
+                  ref={textareaRef}
+                  value={message}
+                  // onChange={(e) => setMessage(e.target.value)}
+                  onChange={handleInput}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+
+                      if (textareaRef.current) {
+                        textareaRef.current.style.height = "auto";
+                      }
+                      handleChatSubmit(e as any);
+                    }
+                  }}
+                  placeholder="I'm looking for 3 African male models with dreadlocks for a fashion shoot in Berlin..."
+                  className='flex-1 w-full bg-transparent text-[#000000] placeholder-[#404145] resize-none focus:outline-none text-base leading-relaxed max-h-60 overflow-y-auto'
+                  rows={2}
+                />
+              </div>
               <button
                 type='submit'
                 onClick={handleChatSubmit}
                 disabled={!message.trim() || chatLoading}
-                className='absolute bottom-3 right-3 lg:h-11 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-lg p-2 lg:p-3 flex items-center justify-center transition shrink-0'
+                className='absolute bottom-3 right-2.5 lg:h-11 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed text-white rounded-full p-2 lg:p-3 flex items-center justify-center transition shrink-0'
               >
                 {chatLoading ? (
                   <Loader2 className='w-5 h-5 animate-spin' />
@@ -952,11 +960,6 @@ function AIChatInner() {
                   type='button'
                   variant='outline'
                   onClick={() => handleCancel()}
-                  // onClick={() => {
-                  //   setJobTitle("");
-                  //   setJobDescription("");
-                  //   setIsSkipping(false);
-                  // }}
                 >
                   Cancel
                 </Button>

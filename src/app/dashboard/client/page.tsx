@@ -143,11 +143,9 @@ export default function Page() {
   const recentJobs = data?.recent_jobs ?? [];
   const recentActivity = data?.recent_activity ?? [];
 
-  console.log({ recentActivity });
-
   return (
     <main className='min-h-screen bg-transparent'>
-      <div className='container mx-auto px-4 py-8'>
+      <div className='container mx-auto py-8'>
         {/* Stats Section */}
         <div className='flex flex-wrap items-center gap-6 mb-8'>
           {isLoading ? (
@@ -158,40 +156,43 @@ export default function Page() {
               <StatCardSkeleton />
             </>
           ) : (
-            <>
-              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full'>
+              <div className='w-full bg-card border border-border rounded-lg p-5 sm:p-6'>
+                <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 sm:mb-2'>
                   Active Jobs
                 </p>
-                <p className='text-4xl font-bold text-[#000000]'>
+                <p className='text-3xl sm:text-4xl font-bold text-[#000000] dark:text-white'>
                   {stats?.active_jobs ?? 0}
                 </p>
               </div>
-              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+
+              <div className='w-full bg-card border border-border rounded-lg p-5 sm:p-6'>
+                <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 sm:mb-2'>
                   Total Talent
                 </p>
-                <p className='text-4xl font-bold text-[#000000]'>
+                <p className='text-3xl sm:text-4xl font-bold text-[#000000] dark:text-white'>
                   {stats?.total_talent ?? 0}
                 </p>
               </div>
-              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+
+              <div className='w-full bg-card border border-border rounded-lg p-5 sm:p-6'>
+                <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 sm:mb-2'>
                   Booked
                 </p>
-                <p className='text-4xl font-bold text-[#000000]'>
+                <p className='text-3xl sm:text-4xl font-bold text-[#000000] dark:text-white'>
                   {stats?.booked ?? 0}
                 </p>
               </div>
-              <div className='min-w-65 bg-card border border-border rounded-lg p-6'>
-                <p className='text-muted-[#000000] text-sm font-medium mb-2'>
+
+              <div className='w-full bg-card border border-border rounded-lg p-5 sm:p-6'>
+                <p className='text-gray-600 dark:text-gray-400 text-sm font-medium mb-1 sm:mb-2'>
                   Pending
                 </p>
-                <p className='text-4xl font-bold text-[#000000]'>
+                <p className='text-3xl sm:text-4xl font-bold text-[#000000] dark:text-white'>
                   {stats?.pending ?? 0}
                 </p>
               </div>
-            </>
+            </div>
           )}
         </div>
 
@@ -252,14 +253,14 @@ export default function Page() {
                         </span>
                       </div>
                     </div>
-                    <div className='flex flex-col sm:flex-row gap-3 mt-4'>
+                    <div className='flex gap-3 mt-4 w-full'>
                       <button
                         onClick={() =>
                           router.push(
                             `/dashboard/client/active-jobs/${job.job_id}`,
                           )
                         }
-                        className='bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'
+                        className='w-1/2 sm:w-auto bg-[#F6F7F9] border border-border rounded-lg px-4 py-2 text-sm font-normal! text-[#000000] hover:bg-muted transition cursor-pointer'
                       >
                         View Details
                       </button>
@@ -269,7 +270,7 @@ export default function Page() {
                             `/dashboard/client/ai-chat/${job.session_id}`,
                           )
                         }
-                        className='w-32! h-11! button text-sm! font-normal!'
+                        className='w-1/2! sm:w-32! h-11! button text-sm! font-normal!'
                       >
                         AI Results
                       </button>
