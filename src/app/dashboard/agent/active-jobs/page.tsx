@@ -143,21 +143,14 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
 
   const meet_url = process.env.NEXT_PUBLIC_MEET_APP_URL;
 
-  /**
-   * Helper to construct FormData based on your API requirements:
-   * job_id, talent_id, and files
-   */
-
   const prepareFormData = (file: File) => {
     const formData = new FormData();
-    // Ensure these keys match your backend exactly
     formData.append("job_id", String(job_id));
     formData.append("talent_id", String(talent?.talent_id));
     formData.append("files", file);
     return formData;
   };
 
-  // Automatic Pola Upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -175,7 +168,6 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
     }
   };
 
-  // Automatic Self-tape Upload
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -195,7 +187,6 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   };
 
   const handleCopyLink = () => {
-    // const link = `${window.location.origin}/casting/${talent.talent_id}`;
     const link = `${meet_url}/channel/${job_id}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
@@ -204,7 +195,7 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   };
 
   return (
-    <div className='flex items-center gap-3 p-3 rounded-lg transition hover:bg-gray-50 dark:hover:bg-slate-900'>
+    <div className='flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-lg transition hover:bg-gray-50 dark:hover:bg-slate-900'>
       <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
         <AvatarImage src={resolveMedia(talent.images?.[0])} />
         <AvatarFallback>
@@ -216,7 +207,7 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
         </AvatarFallback>
       </Avatar>
 
-      <div className='min-w-0 flex-1'>
+      <div className='min-w-0 flex-1 w-full sm:w-auto'>
         <p className='font-semibold text-sm text-foreground truncate'>
           {talent.name}
         </p>
@@ -225,8 +216,7 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
         </p>
       </div>
 
-      <div className='text-right shrink-0'>
-        {/* Hidden inputs for file selection */}
+      <div className='w-full sm:w-auto mt-2 sm:mt-0 text-left sm:text-right shrink-0 flex items-center sm:justify-end'>
         <input
           type='file'
           ref={imageInputRef}
@@ -243,7 +233,7 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
         />
 
         <div
-          className={`px-2.5 py-2 rounded-full text-xs font-semibold ${
+          className={`px-2.5 py-2 rounded-full text-xs font-semibold w-fit ${
             talent.source_type === "ecasting"
               ? "bg-[#F4E8FF] text-[#7408D3]"
               : talent.source_type === "pola" ||
@@ -297,9 +287,9 @@ function StatBadge({
   return (
     <div className='flex items-center gap-2 bg-gray-50 dark:bg-slate-800 rounded-lg px-3 py-2'>
       <Icon className='h-4 w-4 text-blue-500 shrink-0' />
-      <div>
-        <p className='text-xs text-muted-foreground'>{label}</p>
-        <p className='text-sm font-bold text-foreground'>{count}</p>
+      <div className='min-w-0'>
+        <p className='text-xs text-muted-foreground truncate'>{label}</p>
+        <p className='text-sm font-bold text-foreground truncate'>{count}</p>
       </div>
     </div>
   );
@@ -409,7 +399,6 @@ export default function ActiveJobsPage() {
     page_size: limit,
   });
 
-  // Safely extract jobs array from API response
   const jobs: Job[] = data?.data ?? [];
   const totalPages = data?.meta?.total_pages ?? 1;
 
@@ -418,7 +407,6 @@ export default function ActiveJobsPage() {
     setIsModalOpen(true);
   };
 
-  // Primary talent displayed in the table row
   function primaryTalent(job: Job) {
     return (
       job.ai_result.suggested_talents?.[0] ??
@@ -432,13 +420,10 @@ export default function ActiveJobsPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // Confirm permanent delete handler
   const handleConfirmDelete = () => {
     if (selectedJobId) {
       console.log(`Permanently deleting job with ID: ${selectedJobId}`);
-      // TODO: Place your RTK Query delete mutation trigger here:
       // await deleteJob(selectedJobId).unwrap();
-
       setIsDeleteModalOpen(false);
       setSelectedJobId(null);
     }
@@ -449,34 +434,21 @@ export default function ActiveJobsPage() {
   const filteredTalents = aiResult?.suggested_talents?.map((talent: Talent) => {
     const tId = talent.talent_id;
 
-    // 1. Check Polas (Highest Priority)
     const polaMatch = aiResult.requested_polas.find(
       (p: Talent) => p.talent_id === tId,
     );
+    if (polaMatch) return { ...polaMatch, source_type: "pola" };
 
-    if (polaMatch) {
-      return { ...polaMatch, source_type: "pola" };
-    }
-
-    // 2. Check E-Castings (Medium Priority)
     const ecastingMatch = aiResult.requested_ecastings.find(
       (e: Talent) => e.talent_id === tId,
     );
+    if (ecastingMatch) return { ...ecastingMatch, source_type: "ecasting" };
 
-    if (ecastingMatch) {
-      return { ...ecastingMatch, source_type: "ecasting" };
-    }
-
-    // 3. Check Selftapes (Lowest Priority)
     const selftapeMatch = aiResult.requested_selftapes.find(
       (s: Talent) => s.talent_id === tId,
     );
+    if (selftapeMatch) return { ...selftapeMatch, source_type: "selftape" };
 
-    if (selftapeMatch) {
-      return { ...selftapeMatch, source_type: "selftape" };
-    }
-
-    // 4. Default: If no request exists, keep the original suggested talent info
     return { ...talent, source_type: "suggestion" };
   });
 
@@ -489,19 +461,21 @@ export default function ActiveJobsPage() {
 
   return (
     <div className='min-h-screen bg-white rounded-xl'>
-      <div className='mx-auto container px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 w-full overflow-x-hidden'>
         {/* Header */}
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-foreground'>Active Jobs</h1>
-          <p className='mt-1 text-muted-foreground'>
+        <div className='mb-6 sm:mb-8'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-foreground'>
+            Active Jobs
+          </h1>
+          <p className='mt-1 text-sm sm:text-base text-muted-foreground'>
             Manage all active job postings and talent assignments
           </p>
         </div>
 
         {/* Error state */}
         {isError && (
-          <div className='flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 py-12'>
-            <p className='text-red-600 font-medium'>
+          <div className='flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 py-12 px-4'>
+            <p className='text-red-600 font-medium text-center'>
               Failed to load jobs. Please try again.
             </p>
           </div>
@@ -533,7 +507,7 @@ export default function ActiveJobsPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className='px-6 py-4 text-left font-bold text-sm text-foreground'
+                        className='px-6 py-4 text-left font-bold text-sm text-foreground whitespace-nowrap'
                       >
                         {h}
                       </th>
@@ -550,18 +524,18 @@ export default function ActiveJobsPage() {
                       >
                         <td className='px-6 py-4 flex items-center gap-1.5 text-sm font-medium text-foreground max-w-50 truncate'>
                           <Image
-                            src={"/nike.png"} // TODO: Replace with actual job image
+                            src={"/nike.png"}
                             alt={""}
                             width={36}
                             height={36}
-                            className='mr-2 rounded-md'
+                            className='mr-2 rounded-md shrink-0'
                           />
-                          <span>{job.title}</span>
+                          <span className='truncate'>{job.title}</span>
                         </td>
                         <td className='px-6 py-4'>
                           {talent ? (
                             <div className='flex items-center gap-3'>
-                              <Avatar className='h-8 w-8'>
+                              <Avatar className='h-8 w-8 shrink-0'>
                                 <AvatarImage
                                   src={resolveMedia(talent.images?.[0])}
                                 />
@@ -573,7 +547,7 @@ export default function ActiveJobsPage() {
                                     .slice(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className='text-sm text-foreground'>
+                              <span className='text-sm text-foreground truncate'>
                                 {talent.name}
                               </span>
                             </div>
@@ -583,11 +557,10 @@ export default function ActiveJobsPage() {
                             </span>
                           )}
                         </td>
-                        <td className='px-6 py-4 text-sm text-foreground flex items-center gap-2'>
-                          {/* Tooltip Container */}
+                        <td className='px-6 py-4 text-sm text-foreground'>
                           <div className='group relative Skinner flex items-center'>
-                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors' />
-                            <span className='whitespace-nowrap ml-2 text-sm'>
+                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0' />
+                            <span className='whitespace-nowrap ml-2 text-sm truncate max-w-25'>
                               {job.casting_roles
                                 ? job.casting_roles
                                     .split(" ")
@@ -595,16 +568,15 @@ export default function ActiveJobsPage() {
                                     .join(" ") + "..."
                                 : ""}
                             </span>
-                            {/* Tooltip Card */}
-                            <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitelist whitespace-nowrap shadow-md border border-border z-10'>
+                            <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitespace-nowrap shadow-md border border-border z-10'>
                               {job.casting_roles}
                             </span>
                           </div>
                         </td>
-                        <td className='px-6 py-4 text-sm text-foreground'>
+                        <td className='px-6 py-4 text-sm text-foreground whitespace-nowrap'>
                           {job.location}
                         </td>
-                        <td className='px-6 py-4 text-sm text-foreground'>
+                        <td className='px-6 py-4 text-sm text-foreground whitespace-nowrap'>
                           {formatBudget(job.budget_min, job.budget_max)}
                         </td>
                         <td className='px-6 py-4'>
@@ -620,7 +592,7 @@ export default function ActiveJobsPage() {
                             {capitalize(job.status)}
                           </Badge>
                         </td>
-                        <td className='px-6 py-4 space-x-1.5'>
+                        <td className='px-6 py-4 space-x-1.5 whitespace-nowrap'>
                           <Button
                             size='sm'
                             onClick={() => openJobDetail(job)}
@@ -632,7 +604,6 @@ export default function ActiveJobsPage() {
                             size='sm'
                             onClick={() => openDeleteModal(job.job_id)}
                             className='bg-transparent hover:bg-transparent border border-[#2563EB] text-[#2563EB] hover:border-[#CD0000] hover:text-[#CD0000] transition-colors'
-                            // className='bg-[#CD0000] hover:bg-[#e20303]'
                           >
                             <Trash2 className='h-4 w-4' />
                           </Button>
@@ -651,10 +622,10 @@ export default function ActiveJobsPage() {
                 return (
                   <div
                     key={job.job_id}
-                    className='rounded-lg border border-border bg-card p-4'
+                    className='rounded-lg border border-border bg-card p-4 flex flex-col'
                   >
                     <div className='mb-3 flex items-start justify-between'>
-                      <h3 className='font-semibold text-foreground text-sm flex-1 mr-2'>
+                      <h3 className='font-semibold text-foreground text-sm flex-1 mr-2 leading-snug'>
                         {job.title}
                       </h3>
                       <Badge
@@ -670,7 +641,7 @@ export default function ActiveJobsPage() {
 
                     {talent && (
                       <div className='mb-2 flex items-center gap-2'>
-                        <Avatar className='h-6 w-6'>
+                        <Avatar className='h-6 w-6 shrink-0'>
                           <AvatarImage src={resolveMedia(talent.images?.[0])} />
                           <AvatarFallback>
                             {talent.name
@@ -680,35 +651,37 @@ export default function ActiveJobsPage() {
                               .slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
-                        <span className='text-sm text-foreground'>
+                        <span className='text-sm text-foreground line-clamp-1'>
                           {talent.name}
                         </span>
                       </div>
                     )}
 
-                    <div className='mb-3 flex items-center gap-4 text-sm text-muted-foreground'>
-                      <span className='flex items-center gap-1'>
-                        <MapPin className='h-3 w-3' /> {job.location}
+                    <div className='mb-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
+                      <span className='flex items-center gap-1 whitespace-nowrap'>
+                        <MapPin className='h-3 w-3 shrink-0' /> {job.location}
                       </span>
-                      <span className='flex items-center gap-1'>
-                        <DollarSign className='h-3 w-3' />
+                      <span className='flex items-center gap-1 whitespace-nowrap'>
+                        <DollarSign className='h-3 w-3 shrink-0' />
                         {formatBudget(job.budget_min, job.budget_max)}
                       </span>
                     </div>
 
-                    <Button
-                      onClick={() => openJobDetail(job)}
-                      className='w-full bg-[#2563EB] hover:bg-blue-700'
-                    >
-                      <Eye className='mr-2 h-4 w-4' />
-                      View Details
-                    </Button>
-                    <Button
-                      onClick={() => openDeleteModal(job.job_id)}
-                      className='w-full bg-[#2563EB] hover:bg-blue-700'
-                    >
-                      <Trash2 className='mr-2 h-4 w-4' />
-                    </Button>
+                    <div className='mt-auto flex items-center gap-2'>
+                      <Button
+                        onClick={() => openJobDetail(job)}
+                        className='flex-1 bg-[#2563EB] hover:bg-blue-700 h-9 text-xs sm:text-sm'
+                      >
+                        <Eye className='mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4' />
+                        View Details
+                      </Button>
+                      <Button
+                        onClick={() => openDeleteModal(job.job_id)}
+                        className='bg-transparent hover:bg-red-50 border border-[#2563EB] text-[#2563EB] hover:border-[#CD0000] hover:text-[#CD0000] shrink-0 px-3 h-9 transition-colors'
+                      >
+                        <Trash2 className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
@@ -716,55 +689,56 @@ export default function ActiveJobsPage() {
 
             {/* Empty state */}
             {jobs?.length === 0 && !isLoading && (
-              <div className='flex flex-col items-center justify-center rounded-lg border border-border bg-card py-12'>
-                <p className='text-muted-foreground'>No jobs found</p>
+              <div className='flex flex-col items-center justify-center rounded-lg border border-border bg-card py-12 px-4'>
+                <p className='text-muted-foreground text-center'>
+                  No jobs found
+                </p>
               </div>
             )}
           </>
         )}
       </div>
 
-      <GlobalPagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      <div className='px-4 sm:px-6 lg:px-8 pb-8'>
+        <GlobalPagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
 
       {/* ── Detail Modal ───────────────────────────────────────────────── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className='h-[90vh] lg:max-h-[85vh] max-w-6xl lg:min-w-5xl border-0 bg-[#f0f2f5] dark:bg-slate-900 p-6 overflow-y-auto'>
+        <DialogContent className='h-dvh md:h-[90vh] lg:max-h-[85vh] w-[95vw] md:w-full max-w-6xl border-0 bg-[#f0f2f5] dark:bg-slate-900 p-0 md:p-6 overflow-y-auto sm:rounded-xl'>
           {selectedJob && (
-            <>
-              <div className='flex flex-col lg:flex-row gap-5 items-stretch'>
+            <div className='p-4 sm:p-0'>
+              <div className='flex flex-col lg:flex-row gap-4 sm:gap-5 items-stretch'>
                 {/* ── Left Panel ── */}
-                <div className='flex-1 bg-white dark:bg-slate-950 p-8 rounded-xl flex flex-col gap-6'>
+                <div className='flex-1 bg-white dark:bg-slate-950 p-4 sm:p-6 lg:p-8 rounded-xl flex flex-col gap-5 sm:gap-6'>
                   {/* Title & meta */}
-                  <div className='flex items-start gap-4'>
-                    {/* Job Image/Logo */}
+                  <div className='flex items-start gap-3 sm:gap-4'>
                     <Image
-                      src={"/nike.png"} // Fallback if no photo exists
+                      src={"/nike.png"}
                       alt={`${selectedJob.title} logo`}
-                      width={48} // Slightly bumped up from 36 to look balanced with text-2xl h2
+                      width={48}
                       height={48}
-                      className='rounded-xl object-cover border bg-muted shrink-0'
+                      className='rounded-xl object-cover border bg-muted shrink-0 w-10 h-10 sm:w-12 sm:h-12'
                     />
-
-                    {/* Content Details */}
                     <div className='flex-1 min-w-0'>
-                      <span className='inline-block text-blue-600 font-semibold text-xs uppercase tracking-wider mb-1'>
+                      <span className='inline-block text-blue-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider mb-0.5 sm:mb-1'>
                         AI Matched · {capitalize(selectedJob.job_type)}
                       </span>
-
-                      <h2 className='text-2xl font-bold text-foreground leading-tight truncate'>
+                      <h2 className='text-lg sm:text-xl lg:text-2xl font-bold text-foreground leading-tight line-clamp-2'>
                         {selectedJob.title}
                       </h2>
-
-                      <div className='mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground'>
+                      <div className='mt-2 flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1.5 text-xs sm:text-sm text-muted-foreground'>
                         <span className='flex items-center gap-1.5'>
                           <MapPin className='h-3.5 w-3.5 shrink-0 text-muted-foreground/70' />
-                          {selectedJob.location}
+                          <span className='truncate max-w-30 sm:max-w-none'>
+                            {selectedJob.location}
+                          </span>
                         </span>
-                        <span className='flex items-center gap-1.5'>
+                        <span className='flex items-center gap-1.5 whitespace-nowrap'>
                           <Calendar className='h-3.5 w-3.5 shrink-0 text-muted-foreground/70' />
                           Posted {formatDate(selectedJob.created_at)}
                         </span>
@@ -774,20 +748,20 @@ export default function ActiveJobsPage() {
 
                   {/* Description */}
                   <div>
-                    <h3 className='text-base font-bold text-foreground mb-1'>
+                    <h3 className='text-sm sm:text-base font-bold text-foreground mb-1'>
                       Description
                     </h3>
-                    <p className='text-sm text-muted-foreground leading-relaxed'>
+                    <p className='text-xs sm:text-sm text-muted-foreground leading-relaxed'>
                       {selectedJob.description}
                     </p>
                   </div>
 
                   {/* Budget */}
                   <div>
-                    <h3 className='text-base font-bold text-foreground mb-1'>
+                    <h3 className='text-sm sm:text-base font-bold text-foreground mb-1'>
                       Budget
                     </h3>
-                    <p className='text-lg font-semibold text-blue-600'>
+                    <p className='text-base sm:text-lg font-semibold text-blue-600'>
                       {formatBudget(
                         selectedJob.budget_min,
                         selectedJob.budget_max,
@@ -797,28 +771,30 @@ export default function ActiveJobsPage() {
 
                   {/* Shoot dates */}
                   <div>
-                    <h3 className='text-base font-bold text-foreground mb-1'>
+                    <h3 className='text-sm sm:text-base font-bold text-foreground mb-1'>
                       Shoot Date(s)
                     </h3>
                     {selectedJob?.ai_result.shoot_date?.length > 0 ? (
                       <div className='flex flex-wrap gap-2'>
                         {selectedJob?.ai_result?.shoot_date?.map((d, i) => (
-                          <Badge key={i} variant='outline'>
+                          <Badge key={i} variant='outline' className='text-xs'>
                             {d}
                           </Badge>
                         ))}
                       </div>
                     ) : (
-                      <p className='text-sm text-muted-foreground'>TBD</p>
+                      <p className='text-xs sm:text-sm text-muted-foreground'>
+                        TBD
+                      </p>
                     )}
                   </div>
 
                   {/* Stats grid */}
                   <div>
-                    <h3 className='text-base font-bold text-foreground mb-3'>
+                    <h3 className='text-sm sm:text-base font-bold text-foreground mb-3'>
                       Activity
                     </h3>
-                    <div className='grid grid-cols-2 gap-3'>
+                    <div className='grid grid-cols-2 gap-2 sm:gap-3'>
                       <StatBadge
                         icon={Users}
                         label='Applicants'
@@ -849,11 +825,11 @@ export default function ActiveJobsPage() {
                 </div>
 
                 {/* ── Right Panel ── */}
-                <div className='flex-1 flex flex-col gap-5'>
+                <div className='flex-1 flex flex-col gap-4 sm:gap-5'>
                   {/* Suggested Talents */}
                   {filteredTalents?.length > 0 && (
-                    <div className='bg-white dark:bg-slate-950 p-6 rounded-xl'>
-                      <h3 className='text-base font-bold text-foreground mb-4'>
+                    <div className='bg-white dark:bg-slate-950 p-4 sm:p-6 rounded-xl'>
+                      <h3 className='text-sm sm:text-base font-bold text-foreground mb-3 sm:mb-4'>
                         Affected Talents ({filteredTalents?.length})
                       </h3>
                       <div className='space-y-1.5'>
@@ -870,68 +846,70 @@ export default function ActiveJobsPage() {
 
                   {/* Agent info */}
                   {selectedJob.ai_result.suggested_talents?.[0] && (
-                    <div className='bg-white dark:bg-slate-950 p-6 rounded-xl border-t-4 border-t-amber-400'>
-                      <h3 className='text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider'>
+                    <div className='bg-white dark:bg-slate-950 p-4 sm:p-6 rounded-xl border-t-4 border-t-amber-400'>
+                      <h3 className='text-xs sm:text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider'>
                         Managing Agent
                       </h3>
-                      <div className='flex items-center gap-4'>
-                        <div className='w-11 h-11 bg-[#2563EB] rounded-lg flex items-center justify-center shrink-0'>
-                          <span className='text-white font-bold text-lg'>
+                      <div className='flex items-center gap-3 sm:gap-4'>
+                        <div className='w-10 h-10 sm:w-11 sm:h-11 bg-[#2563EB] rounded-lg flex items-center justify-center shrink-0'>
+                          <span className='text-white font-bold text-base sm:text-lg'>
                             {selectedJob.ai_result.suggested_talents[0].agent_name.charAt(
                               0,
                             )}
                           </span>
                         </div>
-                        <div>
-                          <p className='font-bold text-foreground'>
+                        <div className='min-w-0'>
+                          <p className='font-bold text-sm sm:text-base text-foreground truncate'>
                             {
                               selectedJob.ai_result.suggested_talents[0]
                                 .agent_name
                             }
                           </p>
-                          <p className='text-sm text-muted-foreground'>Agent</p>
+                          <p className='text-xs sm:text-sm text-muted-foreground'>
+                            Agent
+                          </p>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
 
       {/* ── FIXED: Added Delete Confirmation Modal Layout ─────────────────── */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className='max-w-md border-0 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-lg'>
+        <DialogContent className='w-[90vw] max-w-md border-0 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-lg'>
           <DialogTitle className='sr-only'>Confirm Job Deletion</DialogTitle>
           <div className='flex flex-col items-center text-center gap-4 mt-2'>
             <div className='p-3 bg-red-50 dark:bg-red-950/30 rounded-full text-red-600 shrink-0'>
-              <AlertTriangle className='h-8 w-8' />
+              <AlertTriangle className='h-6 w-6 sm:h-8 sm:w-8' />
             </div>
             <div>
-              <h2 className='text-xl font-bold text-foreground leading-tight'>
+              <h2 className='text-lg sm:text-xl font-bold text-foreground leading-tight'>
                 Delete Job Posting?
               </h2>
-              <p className='text-sm text-muted-foreground leading-relaxed mt-2'>
+              <p className='text-xs sm:text-sm text-muted-foreground leading-relaxed mt-2'>
                 Are you sure you want to permanently delete this job assignment?
-                This action cannot be undone and will historical data associated
-                with it.
+                This action cannot be undone and will erase historical data
+                associated with it.
               </p>
             </div>
           </div>
 
-          <div className='flex items-center gap-3 mt-6 justify-end w-full'>
+          <div className='flex flex-col sm:flex-row items-center gap-3 mt-6 justify-end w-full'>
             <Button
               variant='outline'
               onClick={() => setIsDeleteModalOpen(false)}
-              className='flex-1 sm:flex-initial'
+              className='w-full sm:flex-initial'
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmDelete}
-              className='bg-[#CD0000] hover:bg-red-700 text-white flex-1 sm:flex-initial'
+              className='bg-[#CD0000] hover:bg-red-700 text-white w-full sm:flex-initial'
             >
               Delete Posting
             </Button>
@@ -946,7 +924,6 @@ export default function ActiveJobsPage() {
         jobTitle={selectedJob?.title}
         onUploadComplete={(files) => {
           console.log("Uploaded files:", files);
-          // TODO: call your API with the uploaded file references here
           setIsUploadOpen(false);
         }}
       />

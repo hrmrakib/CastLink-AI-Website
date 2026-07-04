@@ -14,8 +14,6 @@ import { NavItem } from "./CommonItem";
 const AdminSidebar = () => {
   const pathname = usePathname();
 
-  console.log(pathname);
-
   return (
     <>
       <SidebarMenu className='px-4 space-y-2'>

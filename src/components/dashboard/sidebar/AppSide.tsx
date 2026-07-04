@@ -63,7 +63,7 @@ export default function DashboardSidebar() {
   return (
     <>
       <div className='bg-sidebar-bg! md:bg-sidebar-bg!'>
-        <Sidebar className='border-none  border-transparent shadow-2xl fixed left-0 h-full z-30 bg-sidebarBg! md:bg-sidebarBg!'>
+        <Sidebar className='border-none border-transparent shadow-2xl fixed left-0 h-full z-30 bg-sidebarBg! md:bg-sidebarBg!'>
           <SidebarContent>
             <div className='flex items-center justify-center py-8'>
               <Link href='/' className='text-2xl font-bold text-[#000000]'>
@@ -127,6 +127,7 @@ export default function DashboardSidebar() {
           </SidebarFooter>
         </Sidebar>
 
+        {/* Logout Confirm Modal */}
         <AlertDialog
           open={isLogoutModalOpen}
           onOpenChange={setIsLogoutModalOpen}

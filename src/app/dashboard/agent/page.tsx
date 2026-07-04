@@ -3,6 +3,7 @@
 "use client";
 
 import { useGetAgentOverviewQuery } from "@/redux/features/agent/overviewAPI";
+
 function Skeleton() {
   return (
     <main className='min-h-screen bg-transparent'>
@@ -58,8 +59,6 @@ export default function Home() {
   };
   const recentActivity = data?.data?.recent_activity || [];
 
-  console.log({ recentActivity });
-
   const base_url = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
   if (isLoading) return <Skeleton />;
@@ -69,40 +68,56 @@ export default function Home() {
       {/* Main Content */}
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10'>
         {/* Stats Grid */}
-        <div className='flex gap-4 md:gap-6 mb-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 w-full'>
           {/* Active Jobs Card */}
-          <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+          <div className='flex items-center justify-between w-full bg-card rounded-lg border border-border px-5 py-6 md:px-6 md:py-8 hover:shadow-sm transition-shadow'>
             <div>
-              <p className='text-sm text-muted-foreground mb-2'>Active Jobs</p>
-              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+              <p className='text-sm text-muted-foreground mb-1 md:mb-2'>
+                Active Jobs
+              </p>
+              <p className='text-3xl md:text-4xl lg:text-5xl font-bold text-foreground'>
                 {stats.active_jobs}
               </p>
             </div>
-            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
+            <img
+              src='/user-icon.png'
+              alt='Active Jobs'
+              className='w-12 h-12 md:w-14 lg:w-16 md:h-14 lg:h-16 shrink-0'
+            />
           </div>
 
           {/* Total Talents Card */}
-          <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+          <div className='flex items-center justify-between w-full bg-card rounded-lg border border-border px-5 py-6 md:px-6 md:py-8 hover:shadow-sm transition-shadow'>
             <div>
-              <p className='text-sm text-muted-foreground mb-2'>
+              <p className='text-sm text-muted-foreground mb-1 md:mb-2'>
                 Total Talents
               </p>
-              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+              <p className='text-3xl md:text-4xl lg:text-5xl font-bold text-foreground'>
                 {stats.total_talents}
               </p>
             </div>
-            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
+            <img
+              src='/user-icon.png'
+              alt='Total Talents'
+              className='w-12 h-12 md:w-14 lg:w-16 md:h-14 lg:h-16 shrink-0'
+            />
           </div>
 
-          {/* Message Count */}
-          <div className='flex items-center justify-between min-w-sm bg-card rounded-lg border border-border px-6 py-8 hover:shadow-sm transition-shadow'>
+          {/* Message Count Card */}
+          <div className='flex items-center justify-between w-full bg-card rounded-lg border border-border px-5 py-6 md:px-6 md:py-8 hover:shadow-sm transition-shadow sm:col-span-2 lg:col-span-1'>
             <div>
-              <p className='text-sm text-muted-foreground mb-2'>New Messeges</p>
-              <p className='text-4xl md:text-5xl font-bold text-foreground'>
+              <p className='text-sm text-muted-foreground mb-1 md:mb-2'>
+                New Messages
+              </p>
+              <p className='text-3xl md:text-4xl lg:text-5xl font-bold text-foreground'>
                 {stats.new_messages}
               </p>
             </div>
-            <img src='/user-icon.png' alt='Calendar' className='w-16 h-16' />
+            <img
+              src='/user-icon.png'
+              alt='Messages'
+              className='w-12 h-12 md:w-14 lg:w-16 md:h-14 lg:h-16 shrink-0'
+            />
           </div>
         </div>
 

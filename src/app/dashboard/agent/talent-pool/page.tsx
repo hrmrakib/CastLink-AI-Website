@@ -215,38 +215,40 @@ export default function TalentVault() {
 
       {/* Header Section */}
       <div className='bg-card rounded-xl!'>
-        <div className='mx-auto container pt-6'>
-          <div className='flex items-center justify-between'>
-            <div className='mb-8'>
+        <div className='mx-auto container pt-6 px-4 sm:px-6 lg:px-8'>
+          {/* Header & Search */}
+          <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8'>
+            <div>
               <h1 className='text-xl font-bold tracking-tight text-[#000000] sm:text-3xl'>
                 Talent Pool
               </h1>
-              <p className='mt-2 text-base text-[#404145]'>
+              <p className='mt-2 text-sm sm:text-base text-[#404145]'>
                 Visual overview of agency talent
               </p>
             </div>
-            <div className='mb-8'>
+            <div className='w-full sm:w-auto'>
               <input
                 type='search'
                 name='search'
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder='Search talent (Working on it)'
-                className='border border-[#E7E8EA] rounded-lg px-4 py-2 w-80'
+                className='border border-[#E7E8EA] rounded-lg px-4 py-2 w-full sm:w-80 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500'
               />
             </div>
           </div>
 
           {/* Controls Section */}
-          <div className='flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center'>
-            <div className='flex gap-3'>
+          <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between'>
+            {/* Select Filters */}
+            <div className='grid grid-cols-1 min-[480px]:grid-cols-2 sm:flex gap-3 w-full sm:w-auto'>
               <Select
                 value={availability}
                 onValueChange={(value: AvailabilityFilter) =>
                   setAvailability(value)
                 }
               >
-                <SelectTrigger className='w-45'>
+                <SelectTrigger className='w-full sm:w-45'>
                   <SelectValue placeholder='Availability' />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,7 +262,7 @@ export default function TalentVault() {
               </Select>
 
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className='w-45'>
+                <SelectTrigger className='w-full sm:w-45'>
                   <SelectValue placeholder='All' />
                 </SelectTrigger>
                 <SelectContent>
@@ -274,12 +276,14 @@ export default function TalentVault() {
               </Select>
             </div>
 
-            <div className='flex items-center gap-4'>
+            {/* View Toggles & Range Slider */}
+            <div className='flex flex-col min-[480px]:flex-row min-[480px]:items-center justify-between w-full sm:w-auto gap-4'>
+              {/* Grid Icons (Hidden on Mobile) */}
               <div className='hidden gap-2 sm:flex'>
                 <button
                   onClick={() => setGridColumns(1)}
                   className='rounded-md border border-border bg-background p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
-                  aria-label='3 column grid'
+                  aria-label='1 column grid'
                 >
                   <Grid3x3 className='h-5 w-5' />
                 </button>
@@ -292,7 +296,11 @@ export default function TalentVault() {
                 </button>
               </div>
 
-              <div className='flex items-center gap-3'>
+              {/* Range Slider */}
+              <div className='flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg border sm:border-0 border-border'>
+                <span className='text-sm font-medium text-muted-foreground sm:hidden'>
+                  Grid Layout
+                </span>
                 <input
                   type='range'
                   min={1}
@@ -304,18 +312,18 @@ export default function TalentVault() {
                       ((gridColumns - 1) / 3) * 100
                     }%, #e5e7eb ${((gridColumns - 1) / 3) * 100}%)`,
                   }}
-                  className='h-2 w-32 cursor-pointer appearance-none rounded-lg
-                    [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:h-5
-                    [&::-webkit-slider-thumb]:w-5
-                    [&::-webkit-slider-thumb]:rounded-full
-                    [&::-webkit-slider-thumb]:bg-blue-600
-                    [&::-webkit-slider-thumb]:border-2
-                    [&::-webkit-slider-thumb]:border-white
-                    [&::-moz-range-thumb]:h-5
-                    [&::-moz-range-thumb]:w-5
-                    [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:bg-blue-600'
+                  className='h-2 w-full max-w-37.5 sm:w-32 cursor-pointer appearance-none rounded-lg
+              [&::-webkit-slider-thumb]:appearance-none
+              [&::-webkit-slider-thumb]:h-5
+              [&::-webkit-slider-thumb]:w-5
+              [&::-webkit-slider-thumb]:rounded-full
+              [&::-webkit-slider-thumb]:bg-blue-600
+              [&::-webkit-slider-thumb]:border-2
+              [&::-webkit-slider-thumb]:border-white
+              [&::-moz-range-thumb]:h-5
+              [&::-moz-range-thumb]:w-5
+              [&::-moz-range-thumb]:rounded-full
+              [&::-moz-range-thumb]:bg-blue-600'
                 />
               </div>
             </div>
