@@ -195,28 +195,30 @@ function TalentRow({ talent, job_id }: { talent: Talent; job_id: string }) {
   };
 
   return (
-    <div className='flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-lg transition hover:bg-gray-50 dark:hover:bg-slate-900'>
-      <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
-        <AvatarImage src={resolveMedia(talent.images?.[0])} />
-        <AvatarFallback>
-          {talent?.name
-            ?.split(" ")
-            .map((n) => n[0])
-            .join("")
-            .slice(0, 2)}
-        </AvatarFallback>
-      </Avatar>
+    <div className='flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:p-3 rounded-lg transition hover:bg-gray-50 dark:hover:bg-slate-900'>
+      <div className='flex items-center gap-2.5'>
+        <Avatar className='h-10 w-10 shrink-0 border border-gray-200'>
+          <AvatarImage src={resolveMedia(talent.images?.[0])} />
+          <AvatarFallback>
+            {talent?.name
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
 
-      <div className='min-w-0 flex-1 w-full sm:w-auto'>
-        <p className='font-semibold text-sm text-foreground truncate'>
-          {talent.name}
-        </p>
-        <p className='text-xs text-muted-foreground capitalize'>
-          {talent.role} · {talent.location}
-        </p>
+        <div className='min-w-0 flex-1 max-w-max sm:w-auto'>
+          <p className='font-semibold text-sm text-foreground truncate'>
+            {talent.name}
+          </p>
+          <p className='text-xs text-muted-foreground capitalize'>
+            {talent.role} · {talent.location}
+          </p>
+        </div>
       </div>
 
-      <div className='w-full sm:w-auto mt-2 sm:mt-0 text-left sm:text-right shrink-0 flex items-center sm:justify-end'>
+      <div className='max-w-max sm:w-auto mt-2 sm:mt-0 text-left sm:text-right shrink-0 flex items-center sm:justify-end'>
         <input
           type='file'
           ref={imageInputRef}
@@ -709,7 +711,7 @@ export default function ActiveJobsPage() {
 
       {/* ── Detail Modal ───────────────────────────────────────────────── */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className='h-dvh md:h-[90vh] lg:max-h-[85vh] w-[95vw] md:w-full max-w-6xl border-0 bg-[#f0f2f5] dark:bg-slate-900 p-0 md:p-6 overflow-y-auto sm:rounded-xl'>
+        <DialogContent className='h-dvh md:h-[90vh] lg:max-h-[85vh] w-full max-w-[95vw] md:max-w-[50vw] lg:max-w-[60vw] border-0 bg-[#f0f2f5] dark:bg-slate-900 p-0 md:p-6 overflow-y-auto overflow-x-hidden sm:rounded-xl'>
           {selectedJob && (
             <div className='p-4 sm:p-0'>
               <div className='flex flex-col lg:flex-row gap-4 sm:gap-5 items-stretch'>
