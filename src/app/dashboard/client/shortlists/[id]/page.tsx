@@ -38,6 +38,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
   useBookTalentMutation,
+  useDeleteSingleTalentFromShortlistMutation,
   useECastingRequestMutation,
   usePolasRequestMutation,
   useSelfTapRequestMutation,
@@ -257,7 +258,7 @@ interface TalentGroupProps {
   onDrop: (id: string, group: string) => void;
   groupKey: string;
   onView: (talent: Talent) => void;
-  onDelete: (id: string, group: string) => void;
+  onDelete: (talentId: string) => void;
 }
 
 function TalentGroup({
@@ -365,7 +366,8 @@ function TalentGroup({
               </button>
               <button
                 title='Delete Talent'
-                onClick={() => onDelete(talent.id, groupKey)}
+                disabled
+                onClick={() => onDelete(String(talent.talent_id))}
                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
               >
                 <Trash2 size={20} />
@@ -401,6 +403,9 @@ export default function ShortlistDetailPage() {
   // 1. Add state near your other modal states
   const [activeImage, setActiveImage] = useState<string>("");
 
+  const [deleteSingleTalentFromShortlistMutation] =
+    useDeleteSingleTalentFromShortlistMutation();
+
   // 2. Set activeImage when opening the modal
   const handleViewTalent = (talent: Talent) => {
     setSelectedTalent(talent);
@@ -408,9 +413,10 @@ export default function ShortlistDetailPage() {
     setIsOpen(true);
   };
 
-  const { data, isLoading } = useGetSingleShortlistJobQuery(id);
+  const { data, isLoading, refetch } = useGetSingleShortlistJobQuery(id);
 
   const session_id = data?.shortlisted_talents?.[0]?.session_id;
+  const jobId = data?.job_id;
 
   useEffect(() => {
     if (!data) return;
@@ -447,11 +453,21 @@ export default function ShortlistDetailPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  const handleDeleteTalent = (id: string, groupKey: string) => {
-    setGrouped((prev) => ({
-      ...prev,
-      [groupKey]: prev[groupKey].filter((t) => t.id !== id),
-    }));
+  const handleDeleteTalent = async (talentId: string) => {
+    console.log({ jobId, talentId });
+
+    try {
+      const res = await deleteSingleTalentFromShortlistMutation({
+        job_id: jobId,
+        talent_id: talentId,
+      }).unwrap();
+      refetch();
+      toast.success("Deleted the talent successfully!");
+
+      console.log(res);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // const handleViewTalent = (talent: Talent) => {
@@ -618,10 +634,6 @@ export default function ShortlistDetailPage() {
   const jobTitle = job?.title ?? "Shortlist";
   const jobDescription = job?.description?.trim() ?? "";
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
-  console.log("selectedTalent.is_available", selectedTalent?.available_dates);
-
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
@@ -706,8 +718,8 @@ export default function ShortlistDetailPage() {
         ) : (
           <>
             {Object.entries(grouped)
-              .filter(([, talents]) => talents.length > 0)
-              .map(([roleKey, talents]) => (
+              ?.filter(([, talents]) => talents?.length > 0)
+              ?.map(([roleKey, talents]) => (
                 <TalentGroup
                   key={roleKey}
                   title={roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}
@@ -784,10 +796,6 @@ export default function ShortlistDetailPage() {
                     ...(selectedTalent.skills
                       ? [{ label: "Skills", value: selectedTalent.skills }]
                       : []),
-                    // {
-                    //   label: "Available",
-                    //   value: selectedTalent?.available_dates ? "Yes" : "No",
-                    // },
                     {
                       label: "Available",
                       value: selectedTalent?.available_dates?.length ? (

@@ -16,7 +16,7 @@ const aiBaseQuery = fetchBaseQuery({
 export const aiBaseAPI = createApi({
   reducerPath: "aiApi",
   baseQuery: aiBaseQuery,
-  tagTypes: ["ActiveJobs", "Chat"],
+  tagTypes: ["ActiveJobs", "Chat", "Shortlist"],
   endpoints: () => ({}),
 });
 
@@ -167,6 +167,13 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "DELETE",
       }),
     }),
+
+    deleteSingleTalentFromShortlist: builder.mutation({
+      query: (params) => ({
+        url: `/api/talents/delete-shortlist?job_id=${params.job_id}&talent_id=${params.talent_id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -189,5 +196,6 @@ export const {
   useDeleteShortlistMutation,
   useGetAvailableRolesQuery,
   useAssignRoleMutation,
+  useDeleteSingleTalentFromShortlistMutation,
 } = aiChatAPI;
 export default aiChatAPI;

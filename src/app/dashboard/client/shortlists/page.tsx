@@ -8,6 +8,7 @@ import {
   MapPin,
   Calendar,
   Briefcase,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -245,7 +246,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
   return (
     <div
       onClick={handleCardClick}
-      className='group rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
+      className='rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
     >
       {/* Header */}
       <div className='mb-3 flex items-start justify-between gap-2'>
@@ -257,15 +258,15 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
             {shortlist.job_type}
           </span>
         </div>
-        <div className='flex shrink-0 flex-col items-end gap-1'>
+        <div className='w-36 flex shrink flex-row items-center justify-between gap-1'>
           <span className='rounded-full bg-gray-100 px-3 py-1 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap'>
             {deduped.length} Shortlisted
           </span>
           <button
             onClick={openDeleteModal}
-            className='rounded px-2 py-0.5 text-xs text-red-400 sm:opacity-0 transition hover:text-red-600 group-hover:opacity-100'
+            className='rounded px-2 py-0.5 text-xs text-red-400  transition hover:text-red-600'
           >
-            Delete
+            <Trash size={20} />
           </button>
         </div>
       </div>
