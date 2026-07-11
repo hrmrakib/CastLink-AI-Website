@@ -162,8 +162,8 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
 
     // delete shortlist
     deleteShortlist: builder.mutation({
-      query: ({ job_id, talent_id }) => ({
-        url: `/api/talents/delete-shortlist?job_id=${job_id}`,
+      query: (job_id) => ({
+        url: `/api/jobs/delete-all-shortlists?job_id=${job_id}`,
         method: "DELETE",
       }),
     }),
