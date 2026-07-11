@@ -470,11 +470,6 @@ export default function ShortlistDetailPage() {
     }
   };
 
-  // const handleViewTalent = (talent: Talent) => {
-  //   setSelectedTalent(talent);
-  //   setIsOpen(true);
-  // };
-
   const handleShareLink = () => {
     const shareUrl = `${window.location.origin}/shortlist/shared/${id}`;
     navigator.clipboard?.writeText(shareUrl);

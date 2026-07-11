@@ -40,6 +40,7 @@ interface Job {
   status: string;
   created_at: string;
   updated_at: string;
+  job_photo?: string;
 }
 
 function formatBudget(min: string, max: string): string {
@@ -89,6 +90,8 @@ export default function Page() {
 
   const activeJobs: Job[] = data?.data || [];
   const total_pages = data?.meta?.total_pages || 1;
+
+  console.log({ activeJobs });
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > total_pages) return;
@@ -199,6 +202,8 @@ export default function Page() {
                 const budget = formatBudget(job.budget_min, job.budget_max);
                 const date = formatDate(job.created_at);
 
+                console.log({ job });
+
                 return (
                   <div
                     key={job.job_id}
@@ -215,8 +220,8 @@ export default function Page() {
                     <div className='flex items-start gap-4'>
                       <div>
                         <Image
-                          // src={getImageUrl("/t1111.png")}
-                          src={"/nike.png"}
+                          src={getImageUrl(job?.job_photo ?? "/nike.png")}
+                          // src={"/nike.png"}
                           alt={"test"}
                           width={80}
                           height={80}
