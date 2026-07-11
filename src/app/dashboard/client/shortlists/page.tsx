@@ -197,7 +197,13 @@ function TalentRow({
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
-function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
+function ShortlistCard({
+  shortlist,
+  refetch,
+}: {
+  shortlist: ShortlistJob;
+  refetch: () => void;
+}) {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteShortlistMutation] = useDeleteShortlistMutation();
@@ -221,11 +227,14 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 
   const handleConfirmDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
     try {
       await deleteShortlistMutation({
         job_id: shortlist.job_id,
-        talent_id: 1,
       }).unwrap();
+
+      toast.success("Deleted shortlist successfully!");
+      refetch();
     } catch (error: any) {
       toast.error(error?.data?.status_message);
       console.error("Error deleting shortlist:", error);
@@ -497,7 +506,7 @@ function ShortlistCard({ shortlist }: { shortlist: ShortlistJob }) {
 
 export default function ShortlistsPage() {
   const router = useRouter();
-  const { data, isLoading } = useGetShortlistsJobQuery({});
+  const { data, isLoading, refetch } = useGetShortlistsJobQuery({});
 
   const shortlists: ShortlistJob[] = data ?? [];
 
@@ -540,7 +549,11 @@ export default function ShortlistsPage() {
           <div className='grid gap-4 sm:gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2'>
             {shortlists.length > 0 ? (
               shortlists.map((shortlist) => (
-                <ShortlistCard key={shortlist.job_id} shortlist={shortlist} />
+                <ShortlistCard
+                  key={shortlist.job_id}
+                  shortlist={shortlist}
+                  refetch={refetch}
+                />
               ))
             ) : (
               <div className='col-span-full py-12 text-center px-4'>
