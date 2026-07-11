@@ -126,15 +126,6 @@ function JobCard({
   return (
     <div className='rounded-lg border border-[#E7E8EA] bg-white py-8 px-5 shadow-sm transition-all hover:shadow-md'>
       <div className='mb-6 flex flex-col items-start justify-between'>
-        <div className='rounded-lg mb-5'>
-          <Image
-            src='/assets/draft.svg'
-            width={100}
-            height={100}
-            alt={title}
-            className='w-full h-10 object-cover'
-          />
-        </div>
         <div className='flex items-start justify-between gap-3 w-full'>
           <div className='flex-1'>
             <h3 className='font-bold text-xl text-[#000000] mb-2 capitalize'>
