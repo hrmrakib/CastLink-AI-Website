@@ -138,7 +138,7 @@ export default function Home() {
                     {/* Avatar */}
                     <div className='shrink-0'>
                       <img
-                        src={base_url + activity.sender?.profile_pic}
+                        src={activity.sender?.profile_pic}
                         alt={activity.sender?.full_name}
                         width={40}
                         height={40}
