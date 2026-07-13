@@ -220,7 +220,7 @@ export default function Page() {
                     <div className='flex items-start gap-4'>
                       <div>
                         <Image
-                          src={getImageUrl(job?.job_photo ?? "/nike.png")}
+                          src={getImageUrl(job?.job_photo) ?? "/job.jpg"}
                           alt={"test"}
                           width={80}
                           height={80}
