@@ -22,6 +22,7 @@ import {
   setConversation,
 } from "@/redux/features/messages/conversationSlice";
 import { RootState } from "@/redux/store";
+import { getImageUrl } from "@/lib/imagePath";
 
 type TConversation = {
   conversation_id: number;
@@ -373,13 +374,6 @@ function MessagingComponent() {
 
   const removeFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const getImageUrl = (path: string | null | undefined) => {
-    if (!path) return "/placeholder.svg";
-    const base = (process.env.NEXT_PUBLIC_IMAGE_URL || "").replace(/\/$/, "");
-    const filePath = path.startsWith("/") ? path : `/${path}`;
-    return `${base}${filePath}`;
   };
 
   // ── Shared: Message Input ────────────────────────────────────────────────────
