@@ -151,6 +151,7 @@ export default function PersonalInformationPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
+
       const fd = new FormData();
       fd.append("full_name", formData.full_name);
       fd.append("bio", formData.bio);
@@ -208,6 +209,8 @@ export default function PersonalInformationPage() {
     : avatarPreview
       ? `${BASE_URL}${avatarPreview}`
       : null;
+
+  console.log({ avatarSrc });
 
   return (
     <div className='min-h-screen bg-gray-50'>

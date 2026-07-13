@@ -35,6 +35,7 @@ import {
 } from "@/redux/features/ai-chat/aiChatAPI";
 import GlobalPagination from "@/components/pagination/GlobalPagination";
 import Image from "next/image";
+import { getImageUrl } from "@/lib/imagePath";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@ interface Job {
   ecastings_count: number;
   polas_count: number;
   ai_result: AIResult;
+  job_photo?: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -404,6 +406,8 @@ export default function ActiveJobsPage() {
   const jobs: Job[] = data?.data ?? [];
   const totalPages = data?.meta?.total_pages ?? 1;
 
+  console.log({ jobs });
+
   const openJobDetail = (job: Job) => {
     setSelectedJob(job);
     setIsModalOpen(true);
@@ -526,13 +530,15 @@ export default function ActiveJobsPage() {
                       >
                         <td className='px-6 py-4 flex items-center gap-1.5 text-sm font-medium text-foreground max-w-50 truncate'>
                           <Image
-                            src={"/nike.png"}
+                            src={getImageUrl(job?.job_photo)}
                             alt={""}
                             width={36}
                             height={36}
                             className='mr-2 rounded-md shrink-0'
                           />
-                          <span className='truncate'>{job.title}</span>
+                          <span className='truncate' title={job.title}>
+                            {job.title}
+                          </span>
                         </td>
                         <td className='px-6 py-4'>
                           {talent ? (
@@ -720,7 +726,7 @@ export default function ActiveJobsPage() {
                   {/* Title & meta */}
                   <div className='flex items-start gap-3 sm:gap-4'>
                     <Image
-                      src={"/nike.png"}
+                      src={getImageUrl(selectedJob?.job_photo)}
                       alt={`${selectedJob.title} logo`}
                       width={48}
                       height={48}

@@ -221,7 +221,6 @@ export default function Page() {
                       <div>
                         <Image
                           src={getImageUrl(job?.job_photo ?? "/nike.png")}
-                          // src={"/nike.png"}
                           alt={"test"}
                           width={80}
                           height={80}

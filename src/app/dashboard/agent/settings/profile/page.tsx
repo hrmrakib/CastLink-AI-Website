@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useUpdateProfileMutation } from "@/redux/features/user/userAPI";
+import { getImageUrl } from "@/lib/imagePath";
 
 interface UserProfile {
   user_id: number;
@@ -234,7 +235,7 @@ export default function PersonalInformationPage() {
                   <div className='w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg'>
                     {avatarSrc ? (
                       <Image
-                        src={avatarSrc}
+                        src={getImageUrl(avatarSrc)}
                         alt='Profile'
                         width={400}
                         height={400}

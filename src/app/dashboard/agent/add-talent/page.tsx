@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { getImageUrl } from "@/lib/imagePath";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -1111,7 +1112,7 @@ export default function AddTalentPage() {
                         className='group relative aspect-square rounded-lg overflow-hidden bg-muted'
                       >
                         <Image
-                          src={image.url || "/placeholder.svg"}
+                          src={getImageUrl(image.url) || "/placeholder.svg"}
                           alt={image.name}
                           width={100}
                           height={100}
