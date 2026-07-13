@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { TalentPoolSkeleton } from "./TalentPoolSkeleton";
 import { toast } from "sonner";
 import useDebounce from "@/hooks/useDebounce";
+import { getImageUrl } from "@/lib/imagePath";
 
 const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "";
 
@@ -174,7 +175,8 @@ export default function TalentVault() {
     return {
       id: talent.talent_id,
       name: talent.name,
-      image: primaryImage ? `${BASE_URL}${primaryImage}` : "/placeholder.svg",
+      image: primaryImage,
+      // ? `${BASE_URL}${primaryImage}` : "/placeholder.svg",
       height: talent.height ? `${talent.height} ft` : "—",
       bust: talent.bust ? `${talent.bust} cm` : "—",
       waist: talent.waist ? `${talent.waist} cm` : "—",
@@ -352,7 +354,7 @@ export default function TalentVault() {
             >
               {/* Image */}
               <img
-                src={talent.image}
+                src={getImageUrl(talent.image)}
                 alt={talent.name}
                 className='h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0'
               />
