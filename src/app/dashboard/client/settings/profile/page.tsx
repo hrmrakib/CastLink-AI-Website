@@ -201,12 +201,10 @@ export default function PersonalInformationPage() {
     );
   }
 
-  const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
-
   const avatarSrc = avatarPreview?.startsWith("data:")
     ? avatarPreview
     : avatarPreview
-      ? `${BASE_URL}${avatarPreview}`
+      ? `${avatarPreview}`
       : null;
 
   return (
