@@ -153,7 +153,7 @@ export default function DashboardSidebar() {
                 Logout From Account
               </AlertDialogTitle>
               <AlertDialogDescription className='text-[#9C9CA4] text-base font-medium text-center mb-4'>
-                Are you sure want logout from Octavials Account?
+                Are you sure want logout from Poolofcast Account?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className='flex flex-col-reverse sm:flex-row gap-6'>
