@@ -769,7 +769,7 @@ export default function AIDynamicPage() {
 
                                   {/* Action Buttons */}
                                   <div
-                                    className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                                    className='flex flex-wrap justify-evenly gap-2 sm:gap-3 mt-4'
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <button
@@ -803,7 +803,7 @@ export default function AIDynamicPage() {
                                       <Calendar size={20} />
                                     </button>
 
-                                    <button
+                                    {/* <button
                                       onClick={() =>
                                         withConfirm(
                                           () =>
@@ -819,9 +819,9 @@ export default function AIDynamicPage() {
                                       title='Selftapes Request'
                                     >
                                       <Camera size={20} />
-                                    </button>
+                                    </button> */}
 
-                                    <button
+                                    {/* <button
                                       onClick={() =>
                                         withConfirm(
                                           () =>
@@ -837,7 +837,7 @@ export default function AIDynamicPage() {
                                       title='E-Casting Request'
                                     >
                                       <Phone size={20} />
-                                    </button>
+                                    </button> */}
 
                                     <button
                                       onClick={() =>
@@ -857,7 +857,7 @@ export default function AIDynamicPage() {
                                       <Check size={20} />
                                     </button>
 
-                                    <button
+                                    {/* <button
                                       onClick={() =>
                                         withConfirm(
                                           () =>
@@ -873,7 +873,7 @@ export default function AIDynamicPage() {
                                       title='Polas Request'
                                     >
                                       <ScanFace size={20} />
-                                    </button>
+                                    </button> */}
 
                                     {/* Message agent button */}
                                     <button
