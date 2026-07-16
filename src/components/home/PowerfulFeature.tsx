@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   PlayCircle,
   ArrowRight,
+  PencilLine,
 } from "lucide-react";
 
 // --- Types ---
@@ -25,7 +26,7 @@ const stepsData: StepData[] = [
     id: 1,
     title: "Create Brief",
     description: "Describe the talent you need\nin plain English.",
-    icon: (props) => <Pencil {...props} fill='currentColor' />, // Filled
+    icon: (props) => <PencilLine {...props} fill='currentColor' />, // Filled
     footer: (
       <div className='bg-blue-50/50 rounded-lg p-4 text-sm text-slate-700 font-medium text-center shadow-sm border border-blue-50'>
         "Female, 20–30, Germany,
@@ -116,7 +117,7 @@ const DottedConnector = () => (
 export default function FlowSection() {
   return (
     <section className='w-full py-16 px-4 bg-[#FDFDFD]'>
-      <div className='max-w-7xl mx-auto'>
+      <div className='container mx-auto'>
         {/* Heading */}
         <h2 className='text-4xl font-extrabold text-center text-slate-900 mb-16 tracking-tight'>
           The Flow
