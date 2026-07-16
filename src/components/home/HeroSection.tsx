@@ -68,18 +68,16 @@ export default function HeroSection() {
         {/* Headline */}
         <div className='mb-6 text-center'>
           <h1 className='text-balance text-4xl font-bold leading-tight text-[#000000] md:text-5xl lg:text-6xl'>
-            AI-Powered Casting, <br />
-            <span className='text-[#2563EB]'>and Production </span> All in One
-            Place
+            From Brief to Presentation <br /> in
+            <span className='text-[#2563EB]'> Minutes </span>
           </h1>
         </div>
 
         {/* Subheading */}
         <div className='mb-10 text-center'>
           <p className='mx-auto max-w-2xl text-lg leading-relaxed text-[#404145] md:text-xl'>
-            From prompt to booking, Pool Of Cast simplifies casting by
-            connecting you with the right actors and models worldwide in real
-            time.
+            Al-powered casting workflow that helps you search across agencies,
+            build shortlists and share stunning presentations with clients.
           </p>
         </div>
 

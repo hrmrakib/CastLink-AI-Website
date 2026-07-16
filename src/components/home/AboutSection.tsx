@@ -59,7 +59,7 @@ export default function AboutSection() {
         {/* Header */}
         <div className='text-center mb-14 md:mb-20'>
           <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-[#1B1B1D] mb-4'>
-            Meet the Team Behind Poolio
+            The Team
           </h2>
           <p className='text-[#404145] text-lg max-w-xl mx-auto leading-relaxed'>
             Passionate people building the future of casting — united by a
@@ -97,12 +97,12 @@ export default function AboutSection() {
 
                 <div className='w-10 h-px bg-[#E7E8EA] mb-3' />
 
-                <p className='text-sm text-[#404145] leading-relaxed mb-5'>
+                {/* <p className='text-sm text-[#404145] leading-relaxed mb-5'>
                   {member.bio}
-                </p>
+                </p> */}
 
                 {/* Social Links */}
-                <div className='flex items-center gap-3'>
+                <div className='hidden flex items-center gap-3'>
                   {member.linkedin && (
                     <a
                       href={member.linkedin}
