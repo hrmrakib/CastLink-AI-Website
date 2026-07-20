@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Pencil,
   Search,
   Heart,
   Send,
