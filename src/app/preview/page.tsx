@@ -1,5 +1,7 @@
 "use client";
 
+import { Dot, Star } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 
 // --- Types ---
@@ -50,14 +52,10 @@ const ROLE_2_MODELS = Array(4)
 // --- Components ---
 
 const Header = () => (
-  <header className='flex flex-col md:flex-row justify-between items-center py-6 px-4 md:px-8 border-b border-gray-100 bg-white'>
+  <header className='flex flex-col md:flex-row justify-between items-center py-6 px-4 md:px-8 bg-transparent'>
     {/* Left Logo Placeholder */}
     <div className='flex flex-col items-center mb-4 md:mb-0'>
-      <div className='w-10 h-10 bg-black rounded-sm flex justify-center items-center'>
-        <div className='w-4 h-4 bg-white rounded-full mb-1' />
-        <div className='w-1 h-3 bg-white' />
-      </div>
-      <span className='font-bold text-lg tracking-tight mt-1'>Joe Public</span>
+      <Image src='/shortlist-logo.png' alt='Logo' width={64} height={64} />
     </div>
 
     {/* Center Titles */}
@@ -72,14 +70,14 @@ const Header = () => (
     </div>
 
     {/* Right Logo Placeholder */}
-    <div className='w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white font-serif italic font-bold text-xl mt-4 md:mt-0'>
-      Coca-Cola
+    <div className='flex flex-col items-center mb-4 md:mb-0'>
+      <Image src='/cocacola.jpg' alt='Logo' width={64} height={64} />
     </div>
   </header>
 );
 
 const CampaignStats = () => (
-  <div className='flex flex-wrap justify-around items-center py-6 px-4 md:px-8 border-b border-gray-100 bg-white text-sm'>
+  <div className='flex flex-wrap justify-around items-center py-6 px-4 md:px-8 border-b-2 border-t-2 border-gray-100 bg-transparent text-sm'>
     <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
       <svg
         className='w-5 h-5 text-gray-400'
@@ -167,7 +165,7 @@ const ModelCard = ({ model }: { model: Model }) => {
   return (
     <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]'>
       {/* Image & Stats Overlay */}
-      <div className='relative aspect-[4/3] w-full overflow-hidden'>
+      <div className='relative aspect-4/3 w-full overflow-hidden'>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={model.imageUrl}
@@ -176,13 +174,13 @@ const ModelCard = ({ model }: { model: Model }) => {
         />
 
         {/* Top left status indicators */}
-        <div className='absolute top-3 left-3 flex gap-1.5'>
-          <div className='w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm' />
+        <div className='absolute top-3 left-3 flex items-center gap-1.5'>
+          <Star fill='blue' color='blue' size={16} />
           <div className='w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-sm' />
         </div>
 
         {/* Bottom Stats Gradient Overlay */}
-        <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4'>
+        <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4'>
           <h3 className='text-white font-semibold text-lg mb-2'>
             {model.name}
           </h3>
@@ -332,11 +330,11 @@ export default function CampaignPage() {
             <h2 className='text-xl md:text-2xl font-bold text-gray-900'>
               Role 1 &ndash; Lead Model
             </h2>
-            <span className='text-sm font-medium text-gray-500'>
+            <span className='text-sm font-semibold text-gray-500'>
               {ROLE_1_MODELS.length} models
             </span>
           </div>
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
             {ROLE_1_MODELS.map((model) => (
               <ModelCard key={model.id} model={model} />
             ))}
@@ -349,9 +347,11 @@ export default function CampaignPage() {
             <h2 className='text-xl md:text-2xl font-bold text-gray-900'>
               Role 2 &ndash; Supporting Model
             </h2>
-            <span className='text-sm font-medium text-gray-500'>7 models</span>
+            <span className='text-sm font-semibold text-gray-500'>
+              7 models
+            </span>
           </div>
-          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
             {ROLE_2_MODELS.map((model) => (
               <ModelCard key={model.id} model={model} />
             ))}
