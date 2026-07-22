@@ -180,7 +180,7 @@ const ModelCard = ({ model }: { model: Model }) => {
   return (
     <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]'>
       {/* Image & Stats Overlay */}
-      <div className='relative aspect-4/3 w-full overflow-hidden'>
+      <div className='relative aspect-4/3 w-full h-72 overflow-hidden'>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={model.imageUrl}
