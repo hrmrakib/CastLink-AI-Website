@@ -19,7 +19,6 @@ interface StepData {
   footer: React.ReactNode;
 }
 
-// --- Data ---
 const stepsData: StepData[] = [
   {
     id: 1,
@@ -88,10 +87,6 @@ const stepsData: StepData[] = [
   },
 ];
 
-// --- Components ---
-
-// Updated Dotted Connector matching "POC flow.png"
-// Uses strokeDasharray="0 10" with round linecaps to create perfect circular dots
 const DottedConnector = () => (
   <div className='hidden lg:flex absolute top-[45%] lg:-right-10 xl:-right-12 lg:w-10 xl:w-12 -translate-y-1/2 items-center justify-center text-blue-600 z-0 pointer-events-none'>
     <svg
