@@ -68,15 +68,6 @@ const AgentSidebar = () => {
             pathname.startsWith("/dashboard/agent/message/")
           }
         />
-        <NavItem
-          href='/dashboard/agent/chat'
-          icon={MessageCircleMore}
-          label='Quick Chat'
-          active={
-            pathname === "/dashboard/agent/chat" ||
-            pathname.startsWith("/dashboard/agent/chat/")
-          }
-        />
 
         <NavItem
           href='/dashboard/agent/settings'
