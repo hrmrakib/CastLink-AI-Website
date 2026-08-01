@@ -22,7 +22,6 @@ import {
   Check,
   ScanFace,
   ArrowLeft,
-  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -213,289 +212,175 @@ function formatDate(iso: string) {
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
+function SkeletonCard() {
+  return (
+    <div className='w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:gap-4 sm:p-6 animate-pulse'>
+      <div className='h-6 w-6 rounded-full bg-gray-200 shrink-0' />
+      <div className='h-12 w-12 rounded-lg bg-gray-200 shrink-0' />
+      <div className='flex-1 space-y-2 min-w-0'>
+        <div className='h-4 w-1/3 rounded bg-gray-200' />
+        <div className='h-3 w-1/2 rounded bg-gray-200' />
+        <div className='flex gap-2'>
+          <div className='h-3 w-16 rounded bg-gray-200' />
+          <div className='h-3 w-16 rounded bg-gray-200' />
+          <div className='h-3 w-16 rounded bg-gray-200' />
+        </div>
+      </div>
+      <div className='flex gap-2 shrink-0'>
+        <div className='h-8 w-8 rounded-lg bg-gray-200' />
+        <div className='h-8 w-8 rounded-lg bg-gray-200' />
+        <div className='h-8 w-8 rounded-lg bg-gray-200' />
+      </div>
+    </div>
+  );
+}
+
 function PageSkeleton() {
   return (
-    <div className='min-h-screen bg-gray-50/50 pb-24'>
-      <div className='container mx-auto px-4 md:px-8 py-8 space-y-12 animate-pulse'>
-        <div className='h-32 bg-gray-200 rounded-lg w-full mb-8'></div>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
-          {Array.from({ length: 4 }).map((_, i) => (
-             <div key={i} className='aspect-4/3 bg-gray-200 rounded-lg'></div>
-          ))}
-        </div>
+    <div className='min-h-screen bg-gray-50'>
+      <div className='space-y-3 sm:space-y-4'>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
       </div>
     </div>
   );
 }
 
-// ── Chat Widget ──────────────────────────────────────────────────────────────
+// ── Talent Group ──────────────────────────────────────────────────────────────
 
-const ChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  
-  return (
-    <div className='fixed bottom-6 right-6 z-50'>
-      {isOpen && (
-        <div className='absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col mb-4 origin-bottom-right transition-all'>
-          {/* Header */}
-          <div className='bg-blue-600 text-white p-4 flex justify-between items-center'>
-            <div className='flex items-center gap-3'>
-               <div className='relative'>
-                 <div className='w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold'>B</div>
-                 <div className='absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full'></div>
-               </div>
-               <div>
-                 <h3 className='font-semibold'>Blessing</h3>
-                 <p className='text-xs text-blue-100'>Agent</p>
-               </div>
-            </div>
-            <button onClick={() => setIsOpen(false)} className='text-blue-100 hover:text-white transition-colors'>
-              <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12'></path></svg>
-            </button>
-          </div>
-          
-          {/* Chat Messages */}
-          <div className='h-80 bg-gray-50 p-4 overflow-y-auto flex flex-col gap-4'>
-            <div className='flex items-start gap-2'>
-              <div className='w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0'>B</div>
-              <div className='bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800 border border-gray-100'>
-                Hi! Let me know if you'd like to see more like this.
-              </div>
-            </div>
-          </div>
-          
-          {/* Input */}
-          <div className='p-3 bg-white border-t border-gray-100 flex items-center gap-2'>
-            <input 
-              type='text' 
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder='Reply...' 
-              className='flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50' 
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && message.trim()) {
-                   setMessage("");
-                }
-              }}
-            />
-            <button 
-              disabled={!message.trim()}
-              className='w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0'
-              onClick={() => setMessage("")}
-            >
-              <svg className='w-4 h-4 ml-0.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8'></path></svg>
-            </button>
-          </div>
-        </div>
-      )}
-
-      <button onClick={() => setIsOpen(!isOpen)} className='w-14 h-14 bg-blue-600 hover:bg-blue-700 transition-transform hover:scale-105 active:scale-95 rounded-full shadow-lg flex justify-center items-center text-white relative'>
-        <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-          {isOpen ? (
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12'></path>
-          ) : (
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'></path>
-          )}
-        </svg>
-        {!isOpen && (
-           <span className='absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full'></span>
-        )}
-      </button>
-    </div>
-  );
-};
-
-
-// ── Grid Model Card ─────────────────────────────────────────────────────────
-
-function ModelCard({
-  talent,
-  onView,
-  onDelete,
-}: {
-  talent: Talent;
+interface TalentGroupProps {
+  title: string;
+  talents: Talent[];
+  draggedItem: string | null;
+  onDragStart: (id: string) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (id: string, group: string) => void;
+  groupKey: string;
   onView: (talent: Talent) => void;
   onDelete: (talentId: string) => void;
-}) {
-  const [showChat, setShowChat] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [savedComments, setSavedComments] = useState<string[]>([]);
-  const [starred, setStarred] = useState(false);
-  const [liked, setLiked] = useState(false);
+}
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (commentText.trim()) {
-      setSavedComments([...savedComments, commentText.trim()]);
-      setCommentText("");
-    }
-  };
+function TalentGroup({
+  title,
+  talents,
+  draggedItem,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  groupKey,
+  onView,
+  onDelete,
+}: TalentGroupProps) {
+  if (talents.length === 0) return null;
 
   return (
-    <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]'>
-      {/* Image & Stats Overlay */}
-      <div className='relative aspect-4/3 w-full h-72 overflow-hidden group'>
-        <Image
-          src={talent.primaryImage || "/preview/1.jpg"}
-          alt={talent.name}
-          fill
-          unoptimized
-          className='object-contain w-full h-full bg-gray-100'
-        />
-
-        {/* Top left status indicators */}
-        <div className='absolute top-3 left-3 flex items-center gap-1.5'>
-          <button onClick={() => setStarred(!starred)}>
-             <Star className={`w-5 h-5 drop-shadow-sm transition-colors ${starred ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
-          </button>
-        </div>
-
-        {/* Bottom Stats Gradient Overlay */}
-        <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none'>
-          <h3 className='text-white font-semibold text-lg mb-2 pointer-events-auto truncate'>
-            {talent.name}
-          </h3>
-          <div className='grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] text-gray-200 pointer-events-auto'>
-            <p>Height <span className='text-white font-medium'>{talent.height || "—"}</span></p>
-            <p>Shoe <span className='text-white font-medium'>{talent.shoe_size || "—"}</span></p>
-            <p>Bust <span className='text-white font-medium'>{talent.bust || "—"}</span></p>
-            <p>Hair <span className='text-white font-medium'>{talent.hair_colour || "—"}</span></p>
-            <p>Waist <span className='text-white font-medium'>{talent.waist || "—"}</span></p>
-            <p>Eyes <span className='text-white font-medium'>{talent.eye_colour || "—"}</span></p>
-            <p>Hips <span className='text-white font-medium'>{talent.hips || "—"}</span></p>
-            <p>Role <span className='text-white font-medium capitalize truncate'>{talent.role || "—"}</span></p>
-          </div>
-        </div>
+    <div className='mb-8'>
+      <div className='flex items-center gap-3 mb-4'>
+        <h2 className='text-lg font-bold text-[#000000] sm:text-xl'>{title}</h2>
+        <span className='inline-flex items-center justify-center rounded-full bg-[#E9EFFD] px-2.5 py-0.5 text-xs font-semibold text-[#2563EB]'>
+          {talents.length}
+        </span>
+        <div className='flex-1 border-t border-gray-200' />
       </div>
 
-      {/* Action Bar */}
-      <div className='flex justify-between items-center p-3 px-4 bg-white border-t border-gray-100'>
-        <button onClick={() => setLiked(!liked)} className='transition-colors' title='Like'>
-          <Heart className={`w-5 h-5 ${liked ? "text-blue-500 fill-blue-500" : "text-gray-400 hover:text-blue-500"}`} />
-        </button>
-        
-        <button 
-          onClick={() => setShowChat(!showChat)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${
-            showChat || savedComments.length > 0
-              ? 'bg-blue-50 text-blue-600 border-blue-100' 
-              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'></path></svg>
-          {savedComments.length > 0 ? `${savedComments.length} messages` : 'Chat'}
-        </button>
-
-        <button onClick={() => onView(talent)} className='text-gray-400 transition-colors hover:text-gray-600' title='View Details'>
-          <Eye className='w-5 h-5' />
-        </button>
-        
-        <button onClick={() => onDelete(String(talent.talent_id))} className='text-gray-400 transition-colors hover:text-red-500' title='Delete'>
-          <Trash2 className='w-5 h-5' />
-        </button>
-      </div>
-      
-      {/* Inline Thread Bubble */}
-      {showChat && (
-        <div className='bg-gray-50/80 p-3 border-t border-gray-100 flex flex-col gap-3'>
-          {savedComments.length > 0 && (
-            <div className='flex flex-col gap-2 max-h-40 overflow-y-auto pr-1'>
-              {savedComments.map((comment, idx) => (
-                <div key={idx} className='bg-white p-2.5 rounded-xl rounded-tr-none shadow-sm text-xs text-gray-700 border border-gray-100 self-end max-w-[90%]'>
-                  {comment}
-                </div>
-              ))}
+      <div className='space-y-3 sm:space-y-4'>
+        {talents.map((talent, index) => (
+          <div
+            key={talent.id}
+            draggable
+            onDragStart={() => onDragStart(talent.id)}
+            onDragOver={onDragOver}
+            onDrop={() => onDrop(talent.id, groupKey)}
+            className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
+              draggedItem === talent.id ? "opacity-50" : ""
+            } hover:shadow-md cursor-move active:cursor-grabbing`}
+          >
+            {/* Number Badge */}
+            <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
+              {index + 1}
             </div>
-          )}
-          
-          <form onSubmit={handleCommentSubmit} className='flex items-end gap-2'>
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Type a message..."
-              className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none shadow-inner bg-white min-h-[40px]'
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleCommentSubmit(e as any);
-                }
-              }}
-            />
-            <button 
-              type="submit" 
-              disabled={!commentText.trim()}
-              className='bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shrink-0'
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-              </svg>
-            </button>
-          </form>
-        </div>
-      )}
+
+            {/* Avatar */}
+            <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
+              {talent.primaryImage ? (
+                <Image
+                  src={talent.primaryImage}
+                  alt={talent.name}
+                  fill
+                  unoptimized
+                  className='object-cover'
+                />
+              ) : (
+                <div className='flex h-full w-full items-center justify-center text-white'>
+                  <UserRoundPlus />
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className='flex-1 min-w-0'>
+              <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
+                {talent.name}
+              </h3>
+              <div className='flex items-center gap-5 flex-wrap'>
+                <p className='text-[#2563EB] text-sm'>
+                  Added: {formatDate(talent.created_at)}
+                </p>
+                {talent.is_available && (
+                  <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
+                    Available
+                  </span>
+                )}
+              </div>
+              <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
+                <span className='flex items-center gap-1'>
+                  <MapPin size={14} />
+                  {talent.location}, {talent.country}
+                </span>
+                <span className='flex items-center gap-1 capitalize'>
+                  <Briefcase size={14} />
+                  {talent.role}
+                </span>
+                <span className='flex items-center gap-1 capitalize'>
+                  <UserRound size={14} />
+                  {talent.character}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className='flex gap-2 shrink-0'>
+              <div
+                title='Verified'
+                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
+              >
+                <img src='/badge.png' alt='Verified' />
+              </div>
+              <button
+                title='View Talent'
+                onClick={() => onView(talent)}
+                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
+              >
+                <Eye size={20} />
+              </button>
+              <button
+                title='Delete Talent'
+                disabled
+                onClick={() => onDelete(String(talent.talent_id))}
+                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-
-// ── Page Header Component ───────────────────────────────────────────────────
-const Header = ({ jobTitle, totalCount }: { jobTitle: string; totalCount: number }) => (
-  <header className='flex flex-col md:flex-row justify-between items-center py-6 px-4 md:px-8 bg-transparent'>
-    <div className='flex flex-col items-center mb-4 md:mb-0'>
-      <Image src='/shortlist-logo.png' alt='Logo' width={64} height={64} />
-    </div>
-
-    <div className='text-center'>
-      <h1 className='text-2xl md:text-3xl font-bold text-gray-900'>
-        {jobTitle}
-      </h1>
-      <p className='text-sm text-gray-500 mt-1'>
-        {totalCount} talent{totalCount !== 1 ? "s" : ""} selected
-      </p>
-    </div>
-
-    <div className='flex flex-col items-center mb-4 md:mb-0'>
-      {/* Optional right-side image block */}
-    </div>
-  </header>
-);
-
-const CampaignStats = ({ roleCount, modelCount }: { roleCount: number; modelCount: number }) => (
-  <div className='flex flex-wrap justify-around items-center py-6 px-4 md:px-8 border-b-2 border-t-2 border-gray-100 bg-transparent text-sm'>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
-      <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'></path></svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Date</p>
-        <p className='font-semibold text-gray-900'>{new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
-      </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
-      <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'></path></svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Roles</p>
-        <p className='font-semibold text-gray-900'>{roleCount}</p>
-      </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
-      <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'></path></svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Models</p>
-        <p className='font-semibold text-gray-900'>{modelCount}</p>
-      </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
-      <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'></path></svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Reference</p>
-        <p className='font-semibold text-gray-900'>Live Job</p>
-      </div>
-    </div>
-  </div>
-);
-
-// ── Main Page ──────────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ShortlistDetailPage() {
   const router = useRouter();
@@ -508,16 +393,23 @@ export default function ShortlistDetailPage() {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
   const [availabilityModal, setAvailabilityModal] = useState(false);
-  const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] = useState<Talent | null>(null);
-  
-  const [confirmModal, setConfirmModal] = useState<{ open: boolean; action: (() => void) | null; label: string }>({ open: false, action: null, label: "" });
+  const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
+    useState<Talent | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    action: (() => void) | null;
+    label: string;
+  }>({ open: false, action: null, label: "" });
+  // 1. Add state near your other modal states
   const [activeImage, setActiveImage] = useState<string>("");
 
-  const [deleteSingleTalentFromShortlistMutation] = useDeleteSingleTalentFromShortlistMutation();
+  const [deleteSingleTalentFromShortlistMutation] =
+    useDeleteSingleTalentFromShortlistMutation();
 
+  // 2. Set activeImage when opening the modal
   const handleViewTalent = (talent: Talent) => {
     setSelectedTalent(talent);
-    setActiveImage(talent.primaryImage);
+    setActiveImage(talent.primaryImage); // ← initialize with primary
     setIsOpen(true);
   };
 
@@ -535,15 +427,35 @@ export default function ShortlistDetailPage() {
 
   const allTalents = Object.values(grouped).flat();
   const totalCount = allTalents.length;
-  const roleCount = Object.keys(grouped).length;
 
   const withConfirm = (action: () => void, label: string) => {
     setConfirmModal({ open: true, action, label });
   };
 
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────
+
+  const handleDragStart = (id: string) => setDraggedItem(id);
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+
+  const handleDrop = (targetId: string, groupKey: string) => {
+    if (draggedItem === null || draggedItem === targetId) return;
+    setGrouped((prev) => {
+      const list = [...(prev[groupKey] ?? [])];
+      const from = list.findIndex((t) => t.id === draggedItem);
+      const to = list.findIndex((t) => t.id === targetId);
+      if (from === -1 || to === -1) return prev;
+      const [moved] = list.splice(from, 1);
+      list.splice(to, 0, moved);
+      return { ...prev, [groupKey]: list };
+    });
+    setDraggedItem(null);
+  };
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   const handleDeleteTalent = async (talentId: string) => {
+    console.log({ jobId, talentId });
+
     try {
       const res = await deleteSingleTalentFromShortlistMutation({
         job_id: jobId,
@@ -551,6 +463,8 @@ export default function ShortlistDetailPage() {
       }).unwrap();
       refetch();
       toast.success("Deleted the talent successfully!");
+
+      console.log(res);
     } catch (error) {
       console.error(error);
     }
@@ -638,15 +552,23 @@ export default function ShortlistDetailPage() {
 
   // ── Mutations ────────────────────────────────────────────────────────────
 
-  const [polasRequestMutation, { isLoading: polasLoading }] = usePolasRequestMutation();
-  const [selfTapRequestMutation, { isLoading: selfTapLoading }] = useSelfTapRequestMutation();
-  const [eCastingRequestMutation, { isLoading: eCastingLoading }] = useECastingRequestMutation();
-  const [shortlistTalentMutation, { isLoading: shortlistLoading }] = useShortlistTalentMutation();
-  const [bookTalentMutation, { isLoading: bookLoading }] = useBookTalentMutation();
+  const [polasRequestMutation, { isLoading: polasLoading }] =
+    usePolasRequestMutation();
+  const [selfTapRequestMutation, { isLoading: selfTapLoading }] =
+    useSelfTapRequestMutation();
+  const [eCastingRequestMutation, { isLoading: eCastingLoading }] =
+    useECastingRequestMutation();
+  const [shortlistTalentMutation, { isLoading: shortlistLoading }] =
+    useShortlistTalentMutation();
+  const [bookTalentMutation, { isLoading: bookLoading }] =
+    useBookTalentMutation();
 
   const handlePolasRequest = async (talentId: number) => {
     try {
-      const res = await polasRequestMutation({ session_id, talent_id: talentId }).unwrap();
+      const res = await polasRequestMutation({
+        session_id,
+        talent_id: talentId,
+      }).unwrap();
       if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
       toast.error(error?.data?.status_message);
@@ -655,7 +577,10 @@ export default function ShortlistDetailPage() {
 
   const handleTalentBooking = async (talentId: number) => {
     try {
-      const res = await bookTalentMutation({ session_id, talent_id: talentId }).unwrap();
+      const res = await bookTalentMutation({
+        session_id,
+        talent_id: talentId,
+      }).unwrap();
       if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
       toast.error(error?.data?.status_message);
@@ -664,7 +589,10 @@ export default function ShortlistDetailPage() {
 
   const handleECastingRequest = async (talentId: number) => {
     try {
-      const res = await eCastingRequestMutation({ session_id, talent_id: talentId }).unwrap();
+      const res = await eCastingRequestMutation({
+        session_id,
+        talent_id: talentId,
+      }).unwrap();
       if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
       toast.error(error?.data?.status_message);
@@ -673,7 +601,10 @@ export default function ShortlistDetailPage() {
 
   const handleSelftapRequest = async (talentId: number) => {
     try {
-      const res = await selfTapRequestMutation({ session_id, talent_id: talentId }).unwrap();
+      const res = await selfTapRequestMutation({
+        session_id,
+        talent_id: talentId,
+      }).unwrap();
       if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
       toast.error(error?.data?.status_message);
@@ -682,7 +613,10 @@ export default function ShortlistDetailPage() {
 
   const handleShortListTalent = async (talentId: number) => {
     try {
-      const res = await shortlistTalentMutation({ session_id, talent_id: talentId }).unwrap();
+      const res = await shortlistTalentMutation({
+        session_id,
+        talent_id: talentId,
+      }).unwrap();
       if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
       toast.error(error?.data?.status_message);
@@ -696,60 +630,80 @@ export default function ShortlistDetailPage() {
   const jobDescription = job?.description?.trim() ?? "";
 
   return (
-    <div className='min-h-screen bg-gray-50/50 pb-24 relative'>
-      <main className='container mx-auto px-4 md:px-8 py-8 space-y-12'>
-        <Header jobTitle={jobTitle} totalCount={totalCount} />
-        
-        {/* Render utility buttons above the grid */}
-        <div className='flex flex-wrap items-end justify-between mt-6 max-w-7xl mx-auto'>
-          <button
-            onClick={() => router.back()}
-            className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-          >
-            <ArrowLeft size={18} />
-            Go Back
-          </button>
+    <div className='min-h-screen bg-gray-50'>
+      <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
+        {/* Page Header */}
+        <div className='mb-8'>
+          <h1 className='text-2xl font-bold text-[#000000] sm:text-3xl'>
+            Shortlist: {jobTitle}
+          </h1>
+          <p className='mt-2 text-sm text-[#404145] sm:text-base'>
+            {jobDescription ||
+              `Drag to reorder • ${totalCount} talent${totalCount !== 1 ? "s" : ""} selected`}
+          </p>
+          {jobDescription && (
+            <p className='mt-1 text-xs text-[#404145]'>
+              Drag to reorder • {totalCount} talent{totalCount !== 1 ? "s" : ""}{" "}
+              selected
+            </p>
+          )}
 
-          <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='outline'
-                  className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-                >
-                  <Filter size={18} />
-                  {filter === "" ? "Filter" : filter}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-36' align='start'>
-                <DropdownMenuItem onSelect={() => setFilter("")}>All</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("1st Option")}>1st Option</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>2nd Option</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("Not available")}>Not available</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <div className='flex flex-wrap items-end justify-between mt-6'>
             <button
-              onClick={handleShareLink}
+              onClick={() => router.back()}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
-              <Share2 size={18} />
-              Share Link
+              <ArrowLeft size={18} />
+              Go Back
             </button>
 
-            <button
-              onClick={handleDownloadPDF}
-              className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
-            >
-              <Download size={18} />
-              Download PDF
-            </button>
+            <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant='outline'
+                    className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+                  >
+                    <Filter size={18} />
+                    {filter === "" ? "Filter" : filter}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='w-36' align='start'>
+                  <DropdownMenuItem onSelect={() => setFilter("")}>
+                    All
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
+                    1st Option
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
+                    2nd Option
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setFilter("Not available")}>
+                    Not available
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <button
+                onClick={handleShareLink}
+                className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              >
+                <Share2 size={18} />
+                Share Link
+              </button>
+
+              <button
+                onClick={handleDownloadPDF}
+                className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
+              >
+                <Download size={18} />
+                Download PDF
+              </button>
+            </div>
           </div>
         </div>
 
-        <CampaignStats roleCount={roleCount} modelCount={totalCount} />
-
-        {/* Dynamic Talent Grids */}
+        {/* Dynamic Talent Groups */}
         {isLoading ? (
           <PageSkeleton />
         ) : totalCount === 0 ? (
@@ -761,38 +715,22 @@ export default function ShortlistDetailPage() {
             {Object.entries(grouped)
               ?.filter(([, talents]) => talents?.length > 0)
               ?.map(([roleKey, talents]) => (
-                <section key={roleKey}>
-                  <div className='flex justify-between items-end mb-6'>
-                    <h2 className='text-xl md:text-2xl font-bold text-gray-900 capitalize'>
-                      {roleKey}
-                    </h2>
-                    <span className='text-sm font-semibold text-gray-500'>
-                      {talents.length} models
-                    </span>
-                  </div>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
-                    {talents.map((talent) => (
-                      <ModelCard 
-                        key={talent.id} 
-                        talent={talent} 
-                        onView={handleViewTalent} 
-                        onDelete={handleDeleteTalent} 
-                      />
-                    ))}
-                  </div>
-                </section>
+                <TalentGroup
+                  key={roleKey}
+                  title={roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}
+                  groupKey={roleKey}
+                  talents={talents}
+                  draggedItem={draggedItem}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onView={handleViewTalent}
+                  onDelete={handleDeleteTalent}
+                />
               ))}
           </>
         )}
-      </main>
-
-      {/* Footer Branding */}
-      <footer className='text-center py-12'>
-        <h2 className='text-2xl font-bold text-gray-900'>
-          <span className='text-blue-600'>Pool</span> Of Cast.
-        </h2>
-        <p className='text-xs text-gray-500 mt-1'>Cast. Book. Manage.</p>
-      </footer>
+      </div>
 
       {/* ── View Talent Modal ── */}
       {isOpen && selectedTalent && (
@@ -829,13 +767,21 @@ export default function ShortlistDetailPage() {
                     },
                     {
                       label: "Height",
-                      value: selectedTalent.height ? `${selectedTalent.height} cm` : "—",
+                      value: selectedTalent.height
+                        ? `${selectedTalent.height} cm`
+                        : "—",
                     },
                     { label: "Waist", value: selectedTalent.waist || "—" },
                     { label: "Bust", value: selectedTalent.bust || "—" },
                     { label: "Hips", value: selectedTalent.hips || "—" },
-                    { label: "Dress size", value: selectedTalent.dress_size || "—" },
-                    { label: "Shoe size", value: selectedTalent.shoe_size || "—" },
+                    {
+                      label: "Dress size",
+                      value: selectedTalent.dress_size || "—",
+                    },
+                    {
+                      label: "Shoe size",
+                      value: selectedTalent.shoe_size || "—",
+                    },
                     {
                       label: "Hair",
                       value: `${selectedTalent.hair_colour} / ${selectedTalent.hair_type}`,
@@ -1128,8 +1074,6 @@ export default function ShortlistDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <ChatWidget />
     </div>
   );
 }
