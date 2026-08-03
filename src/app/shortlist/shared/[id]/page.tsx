@@ -308,9 +308,25 @@ function IdentifyModal({
             className='mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
           >
             {isLoading && (
-              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className='animate-spin h-4 w-4 text-white'
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+              >
+                <circle
+                  className='opacity-25'
+                  cx='12'
+                  cy='12'
+                  r='10'
+                  stroke='currentColor'
+                  strokeWidth='4'
+                ></circle>
+                <path
+                  className='opacity-75'
+                  fill='currentColor'
+                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                ></path>
               </svg>
             )}
             {isLoading ? "Verifying..." : "Continue"}
@@ -524,8 +540,10 @@ function ModelCard({
     { jobId, token: guestToken },
     { skip: !guestToken },
   );
-  const [addFavorite, { isLoading: isAddingFavorite }] = useAddFavoriteMutation();
-  const [removeFavorite, { isLoading: isRemovingFavorite }] = useRemoveFavoriteMutation();
+  const [addFavorite, { isLoading: isAddingFavorite }] =
+    useAddFavoriteMutation();
+  const [removeFavorite, { isLoading: isRemovingFavorite }] =
+    useRemoveFavoriteMutation();
 
   const favList = favs?.data ?? favs ?? [];
   const serverFavorited = Array.isArray(favList)
@@ -586,10 +604,11 @@ function ModelCard({
     }
   };
 
-  const { data: commentsData, isLoading: isCommentsLoading } = useGetCommentsQuery(
-    { jobId, token: guestToken, talent_id: talent.talent_id },
-    { skip: !guestToken || !showChat },
-  );
+  const { data: commentsData, isLoading: isCommentsLoading } =
+    useGetCommentsQuery(
+      { jobId, token: guestToken, talent_id: talent.talent_id },
+      { skip: !guestToken || !showChat },
+    );
   const [addComment, { isLoading: isCommenting }] = useAddCommentMutation();
 
   const comments = commentsData?.data ?? commentsData ?? [];
@@ -626,8 +645,6 @@ function ModelCard({
           unoptimized
           className='object-contain w-full h-full bg-gray-100'
         />
-
-
 
         {/* Bottom Stats Gradient Overlay */}
         <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none'>
@@ -774,9 +791,25 @@ function ModelCard({
               className='bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shrink-0 flex items-center justify-center min-w-[32px]'
             >
               {isCommenting ? (
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className='animate-spin h-4 w-4'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  ></circle>
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                  ></path>
                 </svg>
               ) : (
                 <svg
@@ -1188,13 +1221,31 @@ export default function ShortlistDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
-        <div className="flex flex-col items-center gap-4">
-          <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      <div className='min-h-screen flex items-center justify-center bg-gray-50/50'>
+        <div className='flex flex-col items-center gap-4'>
+          <svg
+            className='animate-spin h-10 w-10 text-blue-600'
+            xmlns='http://www.w3.org/2000/svg'
+            fill='none'
+            viewBox='0 0 24 24'
+          >
+            <circle
+              className='opacity-25'
+              cx='12'
+              cy='12'
+              r='10'
+              stroke='currentColor'
+              strokeWidth='4'
+            ></circle>
+            <path
+              className='opacity-75'
+              fill='currentColor'
+              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+            ></path>
           </svg>
-          <span className="text-gray-500 font-medium text-lg animate-pulse">Loading shortlist...</span>
+          <span className='text-gray-500 font-medium text-lg animate-pulse'>
+            Loading shortlist...
+          </span>
         </div>
       </div>
     );
