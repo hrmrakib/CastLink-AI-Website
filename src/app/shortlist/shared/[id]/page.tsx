@@ -4,7 +4,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Eye,
   Filter,
@@ -39,7 +39,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useClientChat } from "@/provider/ClientChatProvider";
+import { useClientChat, ClientChatProvider } from "@/provider/ClientChatProvider";
 import {
   useBookTalentMutation,
   useDeleteSingleTalentFromShortlistMutation,
@@ -350,23 +350,60 @@ const ChatWidget = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const { connect, sendMessage, isAuthenticated } = useClientChat();
+  const {
+    connect,
+    sendMessage,
+    isAuthenticated,
+    messages,
+    unreadCount,
+    markSeen,
+    socket,
+  } = useClientChat();
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: chatData } = useGetChatHistoryQuery(
     { jobId, token: guestToken },
-    { skip: !guestToken || !isOpen },
+    { skip: !guestToken || !isOpen || isAuthenticated }, // skip if authenticated via ws
   );
-  const messages = chatData?.data ?? chatData ?? [];
+
+  const rawData = chatData?.data ?? chatData;
+  const fallbackHistory = Array.isArray(rawData)
+    ? rawData
+    : (Array.isArray(rawData?.results) ? rawData.results : (Array.isArray(rawData?.data) ? rawData.data : []));
+
+  // Use WS messages if we have hydrated history, otherwise combine REST history with optimistic messages
+  // We can assume we have hydrated history if isAuthenticated is true or if we received a fetch_chat event (which populates non-optimistic messages).
+  const hasServerMessages = messages.some(m => !m.isOptimistic);
+
+  const displayMessages = hasServerMessages || isAuthenticated
+    ? messages
+    : [...fallbackHistory, ...messages];
 
   useEffect(() => {
-    if (isOpen && guestToken && guestThread) {
+    if (guestToken && guestThread) {
+      // Connect as soon as we have tokens, don't wait for isOpen
       connect(guestThread, guestToken, true);
     }
-  }, [isOpen, guestToken, guestThread, connect]);
+  }, [guestToken, guestThread, connect]);
+
+  useEffect(() => {
+    if (isOpen) {
+      markSeen();
+      // Auto-scroll on open or new message (wait for DOM update)
+      if (chatContainerRef.current) {
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop =
+              chatContainerRef.current.scrollHeight;
+          }
+        }, 50);
+      }
+    }
+  }, [isOpen, markSeen, displayMessages.length]);
 
   const handleSend = () => {
-    if (message.trim() && isAuthenticated) {
-      sendMessage({ action: "send_message", message: message.trim() });
+    if (message.trim()) {
+      sendMessage({ action: "send_message", text: message.trim() });
       setMessage("");
     }
   };
@@ -410,9 +447,12 @@ const ChatWidget = ({
           </div>
 
           {/* Chat Messages */}
-          <div className='h-80 bg-gray-50 p-4 overflow-y-auto flex flex-col gap-4'>
-            {messages.length > 0 ? (
-              messages.map((msg: any, i: number) => (
+          <div
+            ref={chatContainerRef}
+            className='h-80 bg-gray-50 p-4 overflow-y-auto flex flex-col gap-4'
+          >
+            {displayMessages.length > 0 ? (
+              displayMessages.map((msg: any, i: number) => (
                 <div
                   key={i}
                   className={`flex items-start gap-2 ${msg.sender === "client" ? "flex-row-reverse" : ""}`}
@@ -423,11 +463,10 @@ const ChatWidget = ({
                     {msg.sender === "client" ? "Me" : "A"}
                   </div>
                   <div
-                    className={`p-3 rounded-2xl shadow-sm text-sm border ${
-                      msg.sender === "client"
-                        ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
-                        : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
-                    }`}
+                    className={`p-3 rounded-2xl shadow-sm text-sm border ${msg.sender === "client"
+                      ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
+                      : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
+                      }`}
                   >
                     {msg.text || msg.content}
                   </div>
@@ -462,7 +501,7 @@ const ChatWidget = ({
               }}
             />
             <button
-              disabled={!message.trim() || !isAuthenticated}
+              disabled={!message.trim()}
               className='w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0'
               onClick={handleSend}
             >
@@ -510,8 +549,10 @@ const ChatWidget = ({
             ></path>
           )}
         </svg>
-        {!isOpen && (
-          <span className='absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full'></span>
+        {!isOpen && unreadCount > 0 && (
+          <span className='absolute top-0 right-0 w-5 h-5 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] font-bold text-white leading-none pb-[1px] pr-[1px]'>
+            {unreadCount}
+          </span>
         )}
       </button>
     </div>
@@ -719,11 +760,10 @@ function ModelCard({
 
         <button
           onClick={() => setShowChat(!showChat)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${
-            showChat || comments.length > 0
-              ? "bg-blue-50 text-blue-600 border-blue-100"
-              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${showChat || comments.length > 0
+            ? "bg-blue-50 text-blue-600 border-blue-100"
+            : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+            }`}
         >
           <svg
             className='w-4 h-4'
@@ -1278,7 +1318,7 @@ export default function ShortlistDetailPage() {
           </button>
 
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant='outline'
@@ -1302,7 +1342,7 @@ export default function ShortlistDetailPage() {
                   Not available
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
 
             <button
               onClick={handleShareLink}
@@ -1494,11 +1534,10 @@ export default function ShortlistDetailPage() {
                           key={img.image_id}
                           onClick={() => setActiveImage(url)}
                           className={`relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0 cursor-pointer transition-all
-                          ${
-                            isActive
+                          ${isActive
                               ? "ring-2 ring-[#2563EB] ring-offset-1"
                               : "opacity-70 hover:opacity-100"
-                          }`}
+                            }`}
                         >
                           <Image
                             src={url}
@@ -1619,17 +1658,16 @@ export default function ShortlistDetailPage() {
 
           <div className='py-3 space-y-2 overflow-y-auto flex-1 min-h-0 pr-1'>
             {selectedAvailabilityTalent?.available_dates &&
-            selectedAvailabilityTalent.available_dates.length > 0 ? (
+              selectedAvailabilityTalent.available_dates.length > 0 ? (
               selectedAvailabilityTalent.available_dates.map((dateStr) => {
                 const { day, date, isPast } = formatAvailabilityDate(dateStr);
                 return (
                   <div
                     key={dateStr}
-                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
-                      isPast
-                        ? "border-gray-200 bg-gray-50 opacity-60"
-                        : "border-blue-100 bg-blue-50"
-                    }`}
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${isPast
+                      ? "border-gray-200 bg-gray-50 opacity-60"
+                      : "border-blue-100 bg-blue-50"
+                      }`}
                   >
                     <div className='flex items-center gap-3'>
                       <Calendar
@@ -1638,29 +1676,26 @@ export default function ShortlistDetailPage() {
                       />
                       <div className='flex flex-col'>
                         <span
-                          className={`text-xs font-semibold uppercase tracking-wide ${
-                            isPast ? "text-gray-400" : "text-[#2563EB]"
-                          }`}
+                          className={`text-xs font-semibold uppercase tracking-wide ${isPast ? "text-gray-400" : "text-[#2563EB]"
+                            }`}
                         >
                           {day}
                         </span>
                         <span
-                          className={`text-sm font-medium ${
-                            isPast
-                              ? "text-gray-400 line-through"
-                              : "text-gray-800"
-                          }`}
+                          className={`text-sm font-medium ${isPast
+                            ? "text-gray-400 line-through"
+                            : "text-gray-800"
+                            }`}
                         >
                           {date}
                         </span>
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
-                        isPast
-                          ? "text-gray-400 bg-white border-gray-200"
-                          : "text-green-600 bg-white border-green-100"
-                      }`}
+                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${isPast
+                        ? "text-gray-400 bg-white border-gray-200"
+                        : "text-green-600 bg-white border-green-100"
+                        }`}
                     >
                       {isPast ? "Past" : "Available"}
                     </span>
@@ -1715,11 +1750,13 @@ export default function ShortlistDetailPage() {
       </Dialog>
 
       {guestToken && (
-        <ChatWidget
-          jobId={id}
-          guestToken={guestToken}
-          guestThread={guestThread}
-        />
+        <ClientChatProvider>
+          <ChatWidget
+            jobId={id}
+            guestToken={guestToken}
+            guestThread={guestThread}
+          />
+        </ClientChatProvider>
       )}
     </div>
   );
