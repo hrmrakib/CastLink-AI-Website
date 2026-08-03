@@ -64,11 +64,11 @@ const guestChatAPI = baseAPI.injectEndpoints({
     }),
 
     addComment: build.mutation({
-      query: ({ jobId, token, talent_id, text }) => ({
+      query: ({ jobId, token, talent_id, comment }) => ({
         url: `client/talents/shortlisted/${jobId}/talents/${talent_id}/comments/`,
         method: "POST",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
-        body: { text },
+        body: { comment },
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Talents", id: `Comments-${arg.talent_id}` },

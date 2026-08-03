@@ -7,20 +7,12 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import {
   Eye,
-  Trash2,
   Filter,
   Share2,
   Download,
   UserRoundPlus,
-  MapPin,
-  Briefcase,
-  UserRound,
   Heart,
   Calendar,
-  Camera,
-  Phone,
-  Check,
-  ScanFace,
   ArrowLeft,
   Star,
 } from "lucide-react";
@@ -262,8 +254,12 @@ function IdentifyModal({
       if (token) {
         localStorage.setItem(`guest_token_${jobId}`, token);
         if (threadId) localStorage.setItem(`guest_thread_${jobId}`, threadId);
-        if (guestClient) localStorage.setItem(`guest_client_${jobId}`, JSON.stringify(guestClient));
-        
+        if (guestClient)
+          localStorage.setItem(
+            `guest_client_${jobId}`,
+            JSON.stringify(guestClient),
+          );
+
         onSuccess(token, threadId || "");
         toast.success("Welcome!");
       } else {
@@ -277,7 +273,7 @@ function IdentifyModal({
   };
 
   return (
-    <div className='fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
+    <div className='fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
       <div className='bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl'>
         <h2 className='text-2xl font-bold mb-2'>Welcome!</h2>
         <p className='text-gray-500 mb-6'>
@@ -309,8 +305,14 @@ function IdentifyModal({
           <button
             disabled={isLoading}
             type='submit'
-            className='mt-2 w-full bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
+            className='mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
           >
+            {isLoading && (
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
             {isLoading ? "Verifying..." : "Continue"}
           </button>
         </form>
@@ -522,37 +524,69 @@ function ModelCard({
     { jobId, token: guestToken },
     { skip: !guestToken },
   );
-  const [addFavorite] = useAddFavoriteMutation();
-  const [removeFavorite] = useRemoveFavoriteMutation();
+  const [addFavorite, { isLoading: isAddingFavorite }] = useAddFavoriteMutation();
+  const [removeFavorite, { isLoading: isRemovingFavorite }] = useRemoveFavoriteMutation();
 
   const favList = favs?.data ?? favs ?? [];
-  const isFavorited = Array.isArray(favList)
+  const serverFavorited = Array.isArray(favList)
     ? favList.some((f: any) => String(f.talent_id) === String(talent.talent_id))
     : false;
+
+  const [localFav, setLocalFav] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem(`favs_${jobId}`) || "[]");
+    if (stored.includes(talent.talent_id)) {
+      setLocalFav(true);
+    }
+  }, [jobId, talent.talent_id]);
+
+  const isFavorited = localFav !== null ? localFav : serverFavorited;
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!guestToken) return;
+
+    const stored = JSON.parse(localStorage.getItem(`favs_${jobId}`) || "[]");
+
     try {
       if (isFavorited) {
+        setLocalFav(false);
+        const updated = stored.filter((id: number) => id !== talent.talent_id);
+        localStorage.setItem(`favs_${jobId}`, JSON.stringify(updated));
+
         await removeFavorite({
           jobId,
           token: guestToken,
           talent_id: talent.talent_id,
-        });
+        }).unwrap();
+        toast.success("Removed from favorites");
       } else {
+        setLocalFav(true);
+        if (!stored.includes(talent.talent_id)) stored.push(talent.talent_id);
+        localStorage.setItem(`favs_${jobId}`, JSON.stringify(stored));
+
         await addFavorite({
           jobId,
           token: guestToken,
           talent_id: talent.talent_id,
-        });
+        }).unwrap();
+        toast.success("Added to favorites");
       }
     } catch (err) {
+      setLocalFav(isFavorited); // Revert
+      if (isFavorited) {
+        if (!stored.includes(talent.talent_id)) stored.push(talent.talent_id);
+        localStorage.setItem(`favs_${jobId}`, JSON.stringify(stored));
+      } else {
+        const updated = stored.filter((id: number) => id !== talent.talent_id);
+        localStorage.setItem(`favs_${jobId}`, JSON.stringify(updated));
+      }
       toast.error("Failed to update favorite");
     }
   };
 
-  const { data: commentsData } = useGetCommentsQuery(
+  const { data: commentsData, isLoading: isCommentsLoading } = useGetCommentsQuery(
     { jobId, token: guestToken, talent_id: talent.talent_id },
     { skip: !guestToken || !showChat },
   );
@@ -568,11 +602,12 @@ function ModelCard({
           jobId,
           token: guestToken,
           talent_id: talent.talent_id,
-          text: commentText.trim(),
-        });
+          comment: commentText.trim(),
+        }).unwrap();
         setCommentText("");
+        toast.success("Note added successfully");
       } catch (err) {
-        toast.error("Failed to send comment");
+        toast.error("Failed to send note");
       }
     }
   };
@@ -592,17 +627,7 @@ function ModelCard({
           className='object-contain w-full h-full bg-gray-100'
         />
 
-        {/* Top left status indicators */}
-        <div className='absolute top-3 left-3 flex items-center gap-1.5'>
-          <button
-            onClick={toggleFavorite}
-            className='hover:scale-110 transition-transform'
-          >
-            <Star
-              className={`w-5 h-5 drop-shadow-sm transition-colors ${isFavorited ? "text-yellow-400 fill-yellow-400" : "text-white"}`}
-            />
-          </button>
-        </div>
+
 
         {/* Bottom Stats Gradient Overlay */}
         <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none'>
@@ -666,7 +691,8 @@ function ModelCard({
       <div className='flex justify-between items-center p-3 px-4 bg-white border-t border-gray-100'>
         <button
           onClick={toggleFavorite}
-          className='transition-colors'
+          disabled={isAddingFavorite || isRemovingFavorite}
+          className='transition-colors disabled:opacity-50'
           title={isFavorited ? "Unfavorite" : "Favorite"}
         >
           <Heart
@@ -695,7 +721,7 @@ function ModelCard({
               d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
             ></path>
           </svg>
-          {comments.length > 0 ? `${comments.length} notes` : "Chat"}
+          {comments.length > 0 ? `${comments.length} comments` : "Comment"}
         </button>
 
         <button
@@ -719,7 +745,10 @@ function ModelCard({
                   key={idx}
                   className='bg-white p-2.5 rounded-xl rounded-tr-none shadow-sm text-xs text-gray-700 border border-gray-100 self-end max-w-[90%]'
                 >
-                  {comment.text || comment.content || comment}
+                  {comment.comment ||
+                    comment.text ||
+                    comment.content ||
+                    (typeof comment === "string" ? comment : "Empty note")}
                 </div>
               ))}
             </div>
@@ -742,21 +771,28 @@ function ModelCard({
             <button
               type='submit'
               disabled={!commentText.trim() || isCommenting}
-              className='bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shrink-0'
+              className='bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shrink-0 flex items-center justify-center min-w-[32px]'
             >
-              <svg
-                className='w-4 h-4'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth='2'
-                  d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8'
-                ></path>
-              </svg>
+              {isCommenting ? (
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8'
+                  ></path>
+                </svg>
+              )}
             </button>
           </form>
         </div>
@@ -901,7 +937,7 @@ export default function ShortlistDetailPage() {
     const token = localStorage.getItem(`guest_token_${id}`);
     const thread = localStorage.getItem(`guest_thread_${id}`);
     const client = localStorage.getItem(`guest_client_${id}`);
-    
+
     if (token && client) {
       setGuestToken(token);
       if (thread) setGuestThread(thread);
@@ -910,14 +946,19 @@ export default function ShortlistDetailPage() {
     }
   }, [id]);
 
-  const { isError: isSessionError, error: sessionError } = useCheckGuestSessionQuery(
-    { jobId: id, token: guestToken },
-    { skip: !guestToken },
-  );
+  const { isError: isSessionError, error: sessionError } =
+    useCheckGuestSessionQuery(
+      { jobId: id, token: guestToken },
+      { skip: !guestToken },
+    );
 
   useEffect(() => {
     // Only wipe session and show modal if the server explicitly rejects the token (401)
-    if (isSessionError && sessionError && (sessionError as any).status === 401) {
+    if (
+      isSessionError &&
+      sessionError &&
+      (sessionError as any).status === 401
+    ) {
       localStorage.removeItem(`guest_token_${id}`);
       localStorage.removeItem(`guest_thread_${id}`);
       localStorage.removeItem(`guest_client_${id}`);
@@ -1145,6 +1186,20 @@ export default function ShortlistDetailPage() {
   const jobTitle = job?.title ?? "Shortlist";
   const jobDescription = job?.description?.trim() ?? "";
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="text-gray-500 font-medium text-lg animate-pulse">Loading shortlist...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen bg-gray-50/50 pb-24 relative'>
       {showIdentify && (
@@ -1239,8 +1294,8 @@ export default function ShortlistDetailPage() {
                       {talents.length} models
                     </span>
                   </div>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
-                    {talents.map((talent) => (
+                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10 items-start'>
+                    {talents?.map((talent) => (
                       <ModelCard
                         key={talent.id}
                         talent={talent}
@@ -1415,7 +1470,7 @@ export default function ShortlistDetailPage() {
                 className='flex flex-wrap gap-2 sm:gap-3'
                 onClick={(e) => e.stopPropagation()}
               >
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleShortListTalent(selectedTalent.talent_id),
@@ -1427,7 +1482,7 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Heart size={20} fill='currentColor' />
-                </button>
+                </button> */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1439,7 +1494,7 @@ export default function ShortlistDetailPage() {
                 >
                   <Calendar size={20} />
                 </button>
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleSelftapRequest(selectedTalent.talent_id),
@@ -1451,8 +1506,8 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Camera size={20} />
-                </button>
-                <button
+                </button> */}
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleECastingRequest(selectedTalent.talent_id),
@@ -1464,8 +1519,8 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Phone size={20} />
-                </button>
-                <button
+                </button> */}
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleTalentBooking(selectedTalent.talent_id),
@@ -1477,8 +1532,8 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Check size={20} />
-                </button>
-                <button
+                </button> */}
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handlePolasRequest(selectedTalent.talent_id),
@@ -1490,7 +1545,7 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <ScanFace size={20} />
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
