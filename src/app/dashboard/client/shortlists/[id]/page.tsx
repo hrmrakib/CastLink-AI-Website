@@ -292,9 +292,8 @@ function TalentGroup({
             onDragStart={() => onDragStart(talent.id)}
             onDragOver={onDragOver}
             onDrop={() => onDrop(talent.id, groupKey)}
-            className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
-              draggedItem === talent.id ? "opacity-50" : ""
-            } hover:shadow-md cursor-move active:cursor-grabbing`}
+            className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${draggedItem === talent.id ? "opacity-50" : ""
+              } hover:shadow-md cursor-move active:cursor-grabbing`}
           >
             {/* Number Badge */}
             <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
@@ -855,11 +854,10 @@ export default function ShortlistDetailPage() {
                           key={img.image_id}
                           onClick={() => setActiveImage(url)}
                           className={`relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0 cursor-pointer transition-all
-                          ${
-                            isActive
+                          ${isActive
                               ? "ring-2 ring-[#2563EB] ring-offset-1"
                               : "opacity-70 hover:opacity-100"
-                          }`}
+                            }`}
                         >
                           <Image
                             src={url}
@@ -980,17 +978,16 @@ export default function ShortlistDetailPage() {
 
           <div className='py-3 space-y-2 overflow-y-auto flex-1 min-h-0 pr-1'>
             {selectedAvailabilityTalent?.available_dates &&
-            selectedAvailabilityTalent.available_dates.length > 0 ? (
+              selectedAvailabilityTalent.available_dates.length > 0 ? (
               selectedAvailabilityTalent.available_dates.map((dateStr) => {
                 const { day, date, isPast } = formatAvailabilityDate(dateStr);
                 return (
                   <div
                     key={dateStr}
-                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
-                      isPast
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${isPast
                         ? "border-gray-200 bg-gray-50 opacity-60"
                         : "border-blue-100 bg-blue-50"
-                    }`}
+                      }`}
                   >
                     <div className='flex items-center gap-3'>
                       <Calendar
@@ -999,29 +996,26 @@ export default function ShortlistDetailPage() {
                       />
                       <div className='flex flex-col'>
                         <span
-                          className={`text-xs font-semibold uppercase tracking-wide ${
-                            isPast ? "text-gray-400" : "text-[#2563EB]"
-                          }`}
+                          className={`text-xs font-semibold uppercase tracking-wide ${isPast ? "text-gray-400" : "text-[#2563EB]"
+                            }`}
                         >
                           {day}
                         </span>
                         <span
-                          className={`text-sm font-medium ${
-                            isPast
+                          className={`text-sm font-medium ${isPast
                               ? "text-gray-400 line-through"
                               : "text-gray-800"
-                          }`}
+                            }`}
                         >
                           {date}
                         </span>
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
-                        isPast
+                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${isPast
                           ? "text-gray-400 bg-white border-gray-200"
                           : "text-green-600 bg-white border-green-100"
-                      }`}
+                        }`}
                     >
                       {isPast ? "Past" : "Available"}
                     </span>

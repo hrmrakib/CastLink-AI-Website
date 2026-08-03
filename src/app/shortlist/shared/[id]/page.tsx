@@ -22,6 +22,7 @@ import {
   Check,
   ScanFace,
   ArrowLeft,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,11 +32,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
+import {
+  useIdentifyGuestMutation,
+  useCheckGuestSessionQuery,
+  useGetFavoritesQuery,
+  useAddFavoriteMutation,
+  useRemoveFavoriteMutation,
+  useGetCommentsQuery,
+  useAddCommentMutation,
+  useGetChatHistoryQuery,
+} from "@/redux/features/client/guestChatAPI";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useClientChat } from "@/provider/ClientChatProvider";
 import {
   useBookTalentMutation,
   useDeleteSingleTalentFromShortlistMutation,
@@ -190,7 +202,6 @@ function normalise(raw: ShortlistedTalent): Talent {
   };
 }
 
-/** Group talents dynamically by their role field */
 function groupByRole(talents: ShortlistedTalent[]): Record<string, Talent[]> {
   const groups: Record<string, Talent[]> = {};
   for (const raw of talents) {
@@ -212,204 +223,731 @@ function formatDate(iso: string) {
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
-function SkeletonCard() {
-  return (
-    <div className='w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:gap-4 sm:p-6 animate-pulse'>
-      <div className='h-6 w-6 rounded-full bg-gray-200 shrink-0' />
-      <div className='h-12 w-12 rounded-lg bg-gray-200 shrink-0' />
-      <div className='flex-1 space-y-2 min-w-0'>
-        <div className='h-4 w-1/3 rounded bg-gray-200' />
-        <div className='h-3 w-1/2 rounded bg-gray-200' />
-        <div className='flex gap-2'>
-          <div className='h-3 w-16 rounded bg-gray-200' />
-          <div className='h-3 w-16 rounded bg-gray-200' />
-          <div className='h-3 w-16 rounded bg-gray-200' />
-        </div>
-      </div>
-      <div className='flex gap-2 shrink-0'>
-        <div className='h-8 w-8 rounded-lg bg-gray-200' />
-        <div className='h-8 w-8 rounded-lg bg-gray-200' />
-        <div className='h-8 w-8 rounded-lg bg-gray-200' />
-      </div>
-    </div>
-  );
-}
-
 function PageSkeleton() {
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <div className='space-y-3 sm:space-y-4'>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonCard key={i} />
-        ))}
+    <div className='min-h-screen bg-gray-50/50 pb-24'>
+      <div className='container mx-auto px-4 md:px-8 py-8 space-y-12 animate-pulse'>
+        <div className='h-32 bg-gray-200 rounded-lg w-full mb-8'></div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className='aspect-4/3 bg-gray-200 rounded-lg'></div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Talent Group ──────────────────────────────────────────────────────────────
+// ── Identify Modal ────────────────────────────────────────────────────────────
 
-interface TalentGroupProps {
-  title: string;
-  talents: Talent[];
-  draggedItem: string | null;
-  onDragStart: (id: string) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: (id: string, group: string) => void;
-  groupKey: string;
-  onView: (talent: Talent) => void;
-  onDelete: (talentId: string) => void;
-}
+function IdentifyModal({
+  jobId,
+  onSuccess,
+}: {
+  jobId: string;
+  onSuccess: (token: string, threadId: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [identifyGuest, { isLoading }] = useIdentifyGuestMutation();
 
-function TalentGroup({
-  title,
-  talents,
-  draggedItem,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  groupKey,
-  onView,
-  onDelete,
-}: TalentGroupProps) {
-  if (talents.length === 0) return null;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await identifyGuest({ jobId, name, email }).unwrap();
+      const token = res?.guest_token || res?.data?.guest_token;
+      const threadId = res?.thread_id || res?.data?.thread_id;
+      const guestClient = res?.guest_client || res?.data?.guest_client;
+
+      if (token) {
+        localStorage.setItem(`guest_token_${jobId}`, token);
+        if (threadId) localStorage.setItem(`guest_thread_${jobId}`, threadId);
+        if (guestClient) localStorage.setItem(`guest_client_${jobId}`, JSON.stringify(guestClient));
+        
+        onSuccess(token, threadId || "");
+        toast.success("Welcome!");
+      } else {
+        toast.error("Failed to receive session token.");
+      }
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to identify. Please try again.",
+      );
+    }
+  };
 
   return (
-    <div className='mb-8'>
-      <div className='flex items-center gap-3 mb-4'>
-        <h2 className='text-lg font-bold text-[#000000] sm:text-xl'>{title}</h2>
-        <span className='inline-flex items-center justify-center rounded-full bg-[#E9EFFD] px-2.5 py-0.5 text-xs font-semibold text-[#2563EB]'>
-          {talents.length}
-        </span>
-        <div className='flex-1 border-t border-gray-200' />
-      </div>
-
-      <div className='space-y-3 sm:space-y-4'>
-        {talents.map((talent, index) => (
-          <div
-            key={talent.id}
-            draggable
-            onDragStart={() => onDragStart(talent.id)}
-            onDragOver={onDragOver}
-            onDrop={() => onDrop(talent.id, groupKey)}
-            className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
-              draggedItem === talent.id ? "opacity-50" : ""
-            } hover:shadow-md cursor-move active:cursor-grabbing`}
-          >
-            {/* Number Badge */}
-            <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
-              {index + 1}
-            </div>
-
-            {/* Avatar */}
-            <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
-              {talent.primaryImage ? (
-                <Image
-                  src={talent.primaryImage}
-                  alt={talent.name}
-                  fill
-                  unoptimized
-                  className='object-cover'
-                />
-              ) : (
-                <div className='flex h-full w-full items-center justify-center text-white'>
-                  <UserRoundPlus />
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className='flex-1 min-w-0'>
-              <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
-                {talent.name}
-              </h3>
-              <div className='flex items-center gap-5 flex-wrap'>
-                <p className='text-[#2563EB] text-sm'>
-                  Added: {formatDate(talent.created_at)}
-                </p>
-                {talent.is_available && (
-                  <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
-                    Available
-                  </span>
-                )}
-              </div>
-              <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
-                <span className='flex items-center gap-1'>
-                  <MapPin size={14} />
-                  {talent.location}, {talent.country}
-                </span>
-                <span className='flex items-center gap-1 capitalize'>
-                  <Briefcase size={14} />
-                  {talent.role}
-                </span>
-                <span className='flex items-center gap-1 capitalize'>
-                  <UserRound size={14} />
-                  {talent.character}
-                </span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className='flex gap-2 shrink-0'>
-              <div
-                title='Verified'
-                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-              >
-                <img src='/badge.png' alt='Verified' />
-              </div>
-              <button
-                title='View Talent'
-                onClick={() => onView(talent)}
-                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-              >
-                <Eye size={20} />
-              </button>
-              {/* <button
-                title='Delete Talent'
-                disabled
-                onClick={() => onDelete(String(talent.talent_id))}
-                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
-              >
-                <Trash2 size={20} />
-              </button> */}
-            </div>
+    <div className='fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
+      <div className='bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl'>
+        <h2 className='text-2xl font-bold mb-2'>Welcome!</h2>
+        <p className='text-gray-500 mb-6'>
+          Please enter your details to view and interact with this shortlist.
+        </p>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+          <div>
+            <label className='block text-sm font-medium mb-1'>Full Name</label>
+            <input
+              required
+              type='text'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className='w-full px-4 py-2 border rounded-xl'
+              placeholder='John Doe'
+            />
           </div>
-        ))}
+          <div>
+            <label className='block text-sm font-medium mb-1'>Email</label>
+            <input
+              required
+              type='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className='w-full px-4 py-2 border rounded-xl'
+              placeholder='john@example.com'
+            />
+          </div>
+          <button
+            disabled={isLoading}
+            type='submit'
+            className='mt-2 w-full bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
+          >
+            {isLoading ? "Verifying..." : "Continue"}
+          </button>
+        </form>
       </div>
     </div>
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Chat Widget ──────────────────────────────────────────────────────────────
+
+const ChatWidget = ({
+  jobId,
+  guestToken,
+  guestThread,
+}: {
+  jobId: string;
+  guestToken: string;
+  guestThread: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const { connect, sendMessage, isAuthenticated } = useClientChat();
+
+  const { data: chatData } = useGetChatHistoryQuery(
+    { jobId, token: guestToken },
+    { skip: !guestToken || !isOpen },
+  );
+  const messages = chatData?.data ?? chatData ?? [];
+
+  useEffect(() => {
+    if (isOpen && guestToken && guestThread) {
+      connect(guestThread, guestToken, true);
+    }
+  }, [isOpen, guestToken, guestThread, connect]);
+
+  const handleSend = () => {
+    if (message.trim() && isAuthenticated) {
+      sendMessage({ action: "send_message", message: message.trim() });
+      setMessage("");
+    }
+  };
+
+  return (
+    <div className='fixed bottom-6 right-6 z-50'>
+      {isOpen && (
+        <div className='absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col mb-4 origin-bottom-right transition-all'>
+          {/* Header */}
+          <div className='bg-blue-600 text-white p-4 flex justify-between items-center'>
+            <div className='flex items-center gap-3'>
+              <div className='relative'>
+                <div className='w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold'>
+                  A
+                </div>
+                <div className='absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full'></div>
+              </div>
+              <div>
+                <h3 className='font-semibold'>Agent</h3>
+                <p className='text-xs text-blue-100'>Online</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className='text-blue-100 hover:text-white transition-colors'
+            >
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M6 18L18 6M6 6l12 12'
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          {/* Chat Messages */}
+          <div className='h-80 bg-gray-50 p-4 overflow-y-auto flex flex-col gap-4'>
+            {messages.length > 0 ? (
+              messages.map((msg: any, i: number) => (
+                <div
+                  key={i}
+                  className={`flex items-start gap-2 ${msg.sender === "client" ? "flex-row-reverse" : ""}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${msg.sender === "client" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
+                  >
+                    {msg.sender === "client" ? "Me" : "A"}
+                  </div>
+                  <div
+                    className={`p-3 rounded-2xl shadow-sm text-sm border ${
+                      msg.sender === "client"
+                        ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
+                        : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
+                    }`}
+                  >
+                    {msg.text || msg.content}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className='flex items-start gap-2'>
+                <div className='w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0'>
+                  A
+                </div>
+                <div className='bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800 border border-gray-100'>
+                  Hi! Let me know if you have any questions about this
+                  shortlist.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className='p-3 bg-white border-t border-gray-100 flex items-center gap-2'>
+            <input
+              type='text'
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder='Reply...'
+              className='flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50'
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && message.trim()) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+            <button
+              disabled={!message.trim() || !isAuthenticated}
+              className='w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0'
+              onClick={handleSend}
+            >
+              <svg
+                className='w-4 h-4 ml-0.5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8'
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className='w-14 h-14 bg-blue-600 hover:bg-blue-700 transition-transform hover:scale-105 active:scale-95 rounded-full shadow-lg flex justify-center items-center text-white relative'
+      >
+        <svg
+          className='w-6 h-6'
+          fill='none'
+          stroke='currentColor'
+          viewBox='0 0 24 24'
+        >
+          {isOpen ? (
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M6 18L18 6M6 6l12 12'
+            ></path>
+          ) : (
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
+            ></path>
+          )}
+        </svg>
+        {!isOpen && (
+          <span className='absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full'></span>
+        )}
+      </button>
+    </div>
+  );
+};
+
+// ── Grid Model Card ─────────────────────────────────────────────────────────
+
+function ModelCard({
+  talent,
+  onView,
+  onDelete,
+  jobId,
+  guestToken,
+}: {
+  talent: Talent;
+  onView: (talent: Talent) => void;
+  onDelete: (talentId: string) => void;
+  jobId: string;
+  guestToken: string;
+}) {
+  const [showChat, setShowChat] = useState(false);
+  const [commentText, setCommentText] = useState("");
+
+  const { data: favs } = useGetFavoritesQuery(
+    { jobId, token: guestToken },
+    { skip: !guestToken },
+  );
+  const [addFavorite] = useAddFavoriteMutation();
+  const [removeFavorite] = useRemoveFavoriteMutation();
+
+  const favList = favs?.data ?? favs ?? [];
+  const isFavorited = Array.isArray(favList)
+    ? favList.some((f: any) => String(f.talent_id) === String(talent.talent_id))
+    : false;
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!guestToken) return;
+    try {
+      if (isFavorited) {
+        await removeFavorite({
+          jobId,
+          token: guestToken,
+          talent_id: talent.talent_id,
+        });
+      } else {
+        await addFavorite({
+          jobId,
+          token: guestToken,
+          talent_id: talent.talent_id,
+        });
+      }
+    } catch (err) {
+      toast.error("Failed to update favorite");
+    }
+  };
+
+  const { data: commentsData } = useGetCommentsQuery(
+    { jobId, token: guestToken, talent_id: talent.talent_id },
+    { skip: !guestToken || !showChat },
+  );
+  const [addComment, { isLoading: isCommenting }] = useAddCommentMutation();
+
+  const comments = commentsData?.data ?? commentsData ?? [];
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (commentText.trim() && guestToken) {
+      try {
+        await addComment({
+          jobId,
+          token: guestToken,
+          talent_id: talent.talent_id,
+          text: commentText.trim(),
+        });
+        setCommentText("");
+      } catch (err) {
+        toast.error("Failed to send comment");
+      }
+    }
+  };
+
+  return (
+    <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]'>
+      {/* Image & Stats Overlay */}
+      <div
+        className='relative aspect-4/3 w-full h-72 overflow-hidden group cursor-pointer'
+        onClick={() => onView(talent)}
+      >
+        <Image
+          src={talent.primaryImage || "/preview/1.jpg"}
+          alt={talent.name}
+          fill
+          unoptimized
+          className='object-contain w-full h-full bg-gray-100'
+        />
+
+        {/* Top left status indicators */}
+        <div className='absolute top-3 left-3 flex items-center gap-1.5'>
+          <button
+            onClick={toggleFavorite}
+            className='hover:scale-110 transition-transform'
+          >
+            <Star
+              className={`w-5 h-5 drop-shadow-sm transition-colors ${isFavorited ? "text-yellow-400 fill-yellow-400" : "text-white"}`}
+            />
+          </button>
+        </div>
+
+        {/* Bottom Stats Gradient Overlay */}
+        <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none'>
+          <h3 className='text-white font-semibold text-lg mb-2 pointer-events-auto truncate'>
+            {talent.name}
+          </h3>
+          <div className='grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] text-gray-200 pointer-events-auto'>
+            <p>
+              Height{" "}
+              <span className='text-white font-medium'>
+                {talent.height || "—"}
+              </span>
+            </p>
+            <p>
+              Shoe{" "}
+              <span className='text-white font-medium'>
+                {talent.shoe_size || "—"}
+              </span>
+            </p>
+            <p>
+              Bust{" "}
+              <span className='text-white font-medium'>
+                {talent.bust || "—"}
+              </span>
+            </p>
+            <p>
+              Hair{" "}
+              <span className='text-white font-medium'>
+                {talent.hair_colour || "—"}
+              </span>
+            </p>
+            <p>
+              Waist{" "}
+              <span className='text-white font-medium'>
+                {talent.waist || "—"}
+              </span>
+            </p>
+            <p>
+              Eyes{" "}
+              <span className='text-white font-medium'>
+                {talent.eye_colour || "—"}
+              </span>
+            </p>
+            <p>
+              Hips{" "}
+              <span className='text-white font-medium'>
+                {talent.hips || "—"}
+              </span>
+            </p>
+            <p>
+              Role{" "}
+              <span className='text-white font-medium capitalize truncate'>
+                {talent.role || "—"}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className='flex justify-between items-center p-3 px-4 bg-white border-t border-gray-100'>
+        <button
+          onClick={toggleFavorite}
+          className='transition-colors'
+          title={isFavorited ? "Unfavorite" : "Favorite"}
+        >
+          <Heart
+            className={`w-5 h-5 ${isFavorited ? "text-blue-500 fill-blue-500" : "text-gray-400 hover:text-blue-500"}`}
+          />
+        </button>
+
+        <button
+          onClick={() => setShowChat(!showChat)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${
+            showChat || comments.length > 0
+              ? "bg-blue-50 text-blue-600 border-blue-100"
+              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <svg
+            className='w-4 h-4'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
+            ></path>
+          </svg>
+          {comments.length > 0 ? `${comments.length} notes` : "Chat"}
+        </button>
+
+        <button
+          onClick={() => onView(talent)}
+          className='text-gray-400 transition-colors hover:text-gray-600'
+          title='View Details'
+        >
+          <Eye className='w-5 h-5' />
+        </button>
+
+        {/* Delete button removed for shared public link */}
+      </div>
+
+      {/* Inline Thread Bubble */}
+      {showChat && (
+        <div className='bg-gray-50/80 p-3 border-t border-gray-100 flex flex-col gap-3'>
+          {comments.length > 0 && (
+            <div className='flex flex-col gap-2 max-h-40 overflow-y-auto pr-1'>
+              {comments.map((comment: any, idx: number) => (
+                <div
+                  key={idx}
+                  className='bg-white p-2.5 rounded-xl rounded-tr-none shadow-sm text-xs text-gray-700 border border-gray-100 self-end max-w-[90%]'
+                >
+                  {comment.text || comment.content || comment}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form onSubmit={handleCommentSubmit} className='flex items-end gap-2'>
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder='Add a note...'
+              className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none shadow-inner bg-white min-h-[40px]'
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleCommentSubmit(e as any);
+                }
+              }}
+            />
+            <button
+              type='submit'
+              disabled={!commentText.trim() || isCommenting}
+              className='bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shrink-0'
+            >
+              <svg
+                className='w-4 h-4'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M12 19l9 2-9-18-9 18 9-2zm0 0v-8'
+                ></path>
+              </svg>
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Page Header Component ───────────────────────────────────────────────────
+const Header = ({
+  jobTitle,
+  totalCount,
+}: {
+  jobTitle: string;
+  totalCount: number;
+}) => (
+  <header className='flex flex-col md:flex-row justify-between items-center py-6 px-4 md:px-8 bg-transparent'>
+    <div className='flex flex-col items-center mb-4 md:mb-0'>
+      <Image src='/shortlist-logo.png' alt='Logo' width={64} height={64} />
+    </div>
+
+    <div className='text-center'>
+      <h1 className='text-2xl md:text-3xl font-bold text-gray-900'>
+        {jobTitle}
+      </h1>
+      <p className='text-sm text-gray-500 mt-1'>
+        {totalCount} talent{totalCount !== 1 ? "s" : ""} selected
+      </p>
+    </div>
+
+    <div className='flex flex-col items-center mb-4 md:mb-0'>
+      {/* Optional right-side image block */}
+    </div>
+  </header>
+);
+
+const CampaignStats = ({
+  roleCount,
+  modelCount,
+}: {
+  roleCount: number;
+  modelCount: number;
+}) => (
+  <div className='flex flex-wrap justify-around items-center py-6 px-4 md:px-8 border-b-2 border-t-2 border-gray-100 bg-transparent text-sm'>
+    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
+      <svg
+        className='w-5 h-5 text-gray-400'
+        fill='none'
+        stroke='currentColor'
+        viewBox='0 0 24 24'
+      >
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='2'
+          d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+        ></path>
+      </svg>
+      <div>
+        <p className='text-gray-500 text-xs'>Date</p>
+        <p className='font-semibold text-gray-900'>
+          {new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+    </div>
+    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
+      <svg
+        className='w-5 h-5 text-gray-400'
+        fill='none'
+        stroke='currentColor'
+        viewBox='0 0 24 24'
+      >
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='2'
+          d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+        ></path>
+      </svg>
+      <div>
+        <p className='text-gray-500 text-xs'>Roles</p>
+        <p className='font-semibold text-gray-900'>{roleCount}</p>
+      </div>
+    </div>
+    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
+      <svg
+        className='w-5 h-5 text-gray-400'
+        fill='none'
+        stroke='currentColor'
+        viewBox='0 0 24 24'
+      >
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='2'
+          d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+        ></path>
+      </svg>
+      <div>
+        <p className='text-gray-500 text-xs'>Models</p>
+        <p className='font-semibold text-gray-900'>{modelCount}</p>
+      </div>
+    </div>
+    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
+      <svg
+        className='w-5 h-5 text-gray-400'
+        fill='none'
+        stroke='currentColor'
+        viewBox='0 0 24 24'
+      >
+        <path
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='2'
+          d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+        ></path>
+      </svg>
+      <div>
+        <p className='text-gray-500 text-xs'>Reference</p>
+        <p className='font-semibold text-gray-900'>Live Job</p>
+      </div>
+    </div>
+  </div>
+);
+
+// ── Main Page ──────────────────────────────────────────────────────────────────────
 
 export default function ShortlistDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
+  const [guestToken, setGuestToken] = useState<string>("");
+  const [guestThread, setGuestThread] = useState<string>("");
+  const [showIdentify, setShowIdentify] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem(`guest_token_${id}`);
+    const thread = localStorage.getItem(`guest_thread_${id}`);
+    const client = localStorage.getItem(`guest_client_${id}`);
+    
+    if (token && client) {
+      setGuestToken(token);
+      if (thread) setGuestThread(thread);
+    } else {
+      setShowIdentify(true);
+    }
+  }, [id]);
+
+  const { isError: isSessionError, error: sessionError } = useCheckGuestSessionQuery(
+    { jobId: id, token: guestToken },
+    { skip: !guestToken },
+  );
+
+  useEffect(() => {
+    // Only wipe session and show modal if the server explicitly rejects the token (401)
+    if (isSessionError && sessionError && (sessionError as any).status === 401) {
+      localStorage.removeItem(`guest_token_${id}`);
+      localStorage.removeItem(`guest_thread_${id}`);
+      localStorage.removeItem(`guest_client_${id}`);
+      setGuestToken("");
+      setGuestThread("");
+      setShowIdentify(true);
+    }
+  }, [isSessionError, sessionError, id]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [grouped, setGrouped] = useState<Record<string, Talent[]>>({});
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
   const [availabilityModal, setAvailabilityModal] = useState(false);
   const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
     useState<Talent | null>(null);
+
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
     action: (() => void) | null;
     label: string;
   }>({ open: false, action: null, label: "" });
-  // 1. Add state near your other modal states
   const [activeImage, setActiveImage] = useState<string>("");
 
   const [deleteSingleTalentFromShortlistMutation] =
     useDeleteSingleTalentFromShortlistMutation();
 
-  // 2. Set activeImage when opening the modal
   const handleViewTalent = (talent: Talent) => {
     setSelectedTalent(talent);
-    setActiveImage(talent.primaryImage); // ← initialize with primary
+    setActiveImage(talent.primaryImage);
     setIsOpen(true);
   };
 
@@ -427,35 +965,15 @@ export default function ShortlistDetailPage() {
 
   const allTalents = Object.values(grouped).flat();
   const totalCount = allTalents.length;
+  const roleCount = Object.keys(grouped).length;
 
   const withConfirm = (action: () => void, label: string) => {
     setConfirmModal({ open: true, action, label });
   };
 
-  // ── Drag-and-drop ─────────────────────────────────────────────────────────
-
-  const handleDragStart = (id: string) => setDraggedItem(id);
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
-
-  const handleDrop = (targetId: string, groupKey: string) => {
-    if (draggedItem === null || draggedItem === targetId) return;
-    setGrouped((prev) => {
-      const list = [...(prev[groupKey] ?? [])];
-      const from = list.findIndex((t) => t.id === draggedItem);
-      const to = list.findIndex((t) => t.id === targetId);
-      if (from === -1 || to === -1) return prev;
-      const [moved] = list.splice(from, 1);
-      list.splice(to, 0, moved);
-      return { ...prev, [groupKey]: list };
-    });
-    setDraggedItem(null);
-  };
-
   // ── Actions ───────────────────────────────────────────────────────────────
 
   const handleDeleteTalent = async (talentId: string) => {
-    console.log({ jobId, talentId });
-
     try {
       const res = await deleteSingleTalentFromShortlistMutation({
         job_id: jobId,
@@ -463,8 +981,6 @@ export default function ShortlistDetailPage() {
       }).unwrap();
       refetch();
       toast.success("Deleted the talent successfully!");
-
-      console.log(res);
     } catch (error) {
       console.error(error);
     }
@@ -630,80 +1146,79 @@ export default function ShortlistDetailPage() {
   const jobDescription = job?.description?.trim() ?? "";
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
-        {/* Page Header */}
-        <div className='mb-8'>
-          <h1 className='text-2xl font-bold text-[#000000] sm:text-3xl'>
-            Shortlist: {jobTitle}
-          </h1>
-          <p className='mt-2 text-sm text-[#404145] sm:text-base'>
-            {jobDescription ||
-              `Drag to reorder • ${totalCount} talent${totalCount !== 1 ? "s" : ""} selected`}
-          </p>
-          {jobDescription && (
-            <p className='mt-1 text-xs text-[#404145]'>
-              Drag to reorder • {totalCount} talent{totalCount !== 1 ? "s" : ""}{" "}
-              selected
-            </p>
-          )}
+    <div className='min-h-screen bg-gray-50/50 pb-24 relative'>
+      {showIdentify && (
+        <IdentifyModal
+          jobId={id}
+          onSuccess={(token, threadId) => {
+            setGuestToken(token);
+            setGuestThread(threadId);
+            setShowIdentify(false);
+          }}
+        />
+      )}
 
-          <div className='flex flex-wrap items-end justify-between mt-6'>
+      <main className='container mx-auto px-4 md:px-8 py-8 space-y-12'>
+        <Header jobTitle={jobTitle} totalCount={totalCount} />
+
+        {/* Render utility buttons above the grid */}
+        <div className='flex flex-wrap items-end justify-between mt-6 max-w-7xl mx-auto'>
+          <button
+            onClick={() => router.back()}
+            className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+          >
+            <ArrowLeft size={18} />
+            Go Back
+          </button>
+
+          <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+                >
+                  <Filter size={18} />
+                  {filter === "" ? "Filter" : filter}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-36' align='start'>
+                <DropdownMenuItem onSelect={() => setFilter("")}>
+                  All
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
+                  1st Option
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
+                  2nd Option
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("Not available")}>
+                  Not available
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <button
-              onClick={() => router.back()}
+              onClick={handleShareLink}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
             >
-              <ArrowLeft size={18} />
-              Go Back
+              <Share2 size={18} />
+              Share Link
             </button>
 
-            <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center justify-end sm:gap-4'>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-                  >
-                    <Filter size={18} />
-                    {filter === "" ? "Filter" : filter}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='w-36' align='start'>
-                  <DropdownMenuItem onSelect={() => setFilter("")}>
-                    All
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
-                    1st Option
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
-                    2nd Option
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("Not available")}>
-                    Not available
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <button
-                onClick={handleShareLink}
-                className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-              >
-                <Share2 size={18} />
-                Share Link
-              </button>
-
-              <button
-                onClick={handleDownloadPDF}
-                className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
-              >
-                <Download size={18} />
-                Download PDF
-              </button>
-            </div>
+            <button
+              onClick={handleDownloadPDF}
+              className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
+            >
+              <Download size={18} />
+              Download PDF
+            </button>
           </div>
         </div>
 
-        {/* Dynamic Talent Groups */}
+        <CampaignStats roleCount={roleCount} modelCount={totalCount} />
+
+        {/* Dynamic Talent Grids */}
         {isLoading ? (
           <PageSkeleton />
         ) : totalCount === 0 ? (
@@ -715,22 +1230,40 @@ export default function ShortlistDetailPage() {
             {Object.entries(grouped)
               ?.filter(([, talents]) => talents?.length > 0)
               ?.map(([roleKey, talents]) => (
-                <TalentGroup
-                  key={roleKey}
-                  title={roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}
-                  groupKey={roleKey}
-                  talents={talents}
-                  draggedItem={draggedItem}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  onView={handleViewTalent}
-                  onDelete={handleDeleteTalent}
-                />
+                <section key={roleKey}>
+                  <div className='flex justify-between items-end mb-6'>
+                    <h2 className='text-xl md:text-2xl font-bold text-gray-900 capitalize'>
+                      {roleKey}
+                    </h2>
+                    <span className='text-sm font-semibold text-gray-500'>
+                      {talents.length} models
+                    </span>
+                  </div>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10'>
+                    {talents.map((talent) => (
+                      <ModelCard
+                        key={talent.id}
+                        talent={talent}
+                        onView={handleViewTalent}
+                        onDelete={handleDeleteTalent}
+                        jobId={id}
+                        guestToken={guestToken}
+                      />
+                    ))}
+                  </div>
+                </section>
               ))}
           </>
         )}
-      </div>
+      </main>
+
+      {/* Footer Branding */}
+      <footer className='text-center py-12'>
+        <h2 className='text-2xl font-bold text-gray-900'>
+          <span className='text-blue-600'>Pool</span> Of Cast.
+        </h2>
+        <p className='text-xs text-gray-500 mt-1'>Cast. Book. Manage.</p>
+      </footer>
 
       {/* ── View Talent Modal ── */}
       {isOpen && selectedTalent && (
@@ -1074,875 +1607,14 @@ export default function ShortlistDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {guestToken && (
+        <ChatWidget
+          jobId={id}
+          guestToken={guestToken}
+          guestThread={guestThread}
+        />
+      )}
     </div>
   );
 }
-
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// /* eslint-disable @next/next/no-img-element */
-// /* eslint-disable react-hooks/set-state-in-effect */
-// "use client";
-
-// import type React from "react";
-// import { useState, useEffect } from "react";
-// import {
-//   Eye,
-//   Trash2,
-//   Filter,
-//   Share2,
-//   Download,
-//   UserRoundPlus,
-//   MapPin,
-//   Briefcase,
-//   UserRound,
-//   Heart,
-//   Calendar,
-//   Camera,
-//   Phone,
-//   Check,
-//   ScanFace,
-//   Loader,
-// } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
-// import { useParams } from "next/navigation";
-// import Image from "next/image";
-// import { toast } from "sonner";
-// import jsPDF from "jspdf";
-// import autoTable from "jspdf-autotable";
-
-// const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
-
-// // ── Types matching actual API shape ──────────────────────────────────────────
-
-// export interface TalentImage {
-//   image_id: number;
-//   image: string;
-//   is_primary: boolean;
-//   uploaded_at: string;
-// }
-
-// export interface TalentInfo {
-//   talent_id: number;
-//   name: string;
-//   gender: string;
-//   role: string;
-//   character: string;
-//   height: string;
-//   waist: string;
-//   bust: string;
-//   hips: string;
-//   dress_size: string;
-//   shoe_size: string;
-//   hair_colour: string;
-//   eye_colour: string;
-//   skin_color: string;
-//   hair_type: string;
-//   continent: string;
-//   country: string;
-//   location: string;
-//   skills: string;
-//   is_available: boolean;
-//   images: TalentImage[];
-// }
-
-// export interface ShortlistedTalent {
-//   shortlisted_id: number;
-//   session_id: string;
-//   created_at: string;
-//   talent_info: TalentInfo;
-// }
-
-// export interface ShortlistJobDetail {
-//   job_id: string;
-//   title: string;
-//   description: string;
-//   casting_roles: string;
-//   location: string;
-//   budget_min: string;
-//   budget_max: string;
-//   job_type: string;
-//   status: string;
-//   applicants_count: number;
-//   shortlisted_count: number;
-//   selftapes_count: number;
-//   ecastings_count: number;
-//   polas_count: number;
-//   created_at: string;
-//   updated_at: string;
-//   shortlisted_talents: ShortlistedTalent[];
-// }
-
-// // ── Internal normalised UI shape ─────────────────────────────────────────────
-
-// interface Talent {
-//   id: string;
-//   talent_id: number;
-//   name: string;
-//   role: string;
-//   character: string;
-//   gender: string;
-//   location: string;
-//   country: string;
-//   height: string;
-//   waist: string;
-//   bust: string;
-//   hips: string;
-//   dress_size: string;
-//   shoe_size: string;
-//   hair_colour: string;
-//   eye_colour: string;
-//   skin_color: string;
-//   hair_type: string;
-//   skills: string;
-//   is_available: boolean;
-//   primaryImage: string;
-//   images: TalentImage[];
-//   created_at: string;
-// }
-
-// // ── Helpers ───────────────────────────────────────────────────────────────────
-
-// function getPrimaryImage(images: TalentImage[]): string {
-//   if (!images || images.length === 0) return "";
-//   return (images.find((img) => img.is_primary) ?? images[0]).image;
-// }
-
-// function resolveImageUrl(url: string): string {
-//   if (!url) return "";
-//   if (/^https?:\/\//i.test(url)) return url;
-//   return `${BASE_URL}${url}`;
-// }
-
-// function normalise(raw: ShortlistedTalent): Talent {
-//   const ti = raw.talent_info;
-//   return {
-//     id: String(raw.shortlisted_id),
-//     talent_id: ti.talent_id,
-//     name: ti.name,
-//     role: ti.role,
-//     character: ti.character,
-//     gender: ti.gender,
-//     location: ti.location,
-//     country: ti.country,
-//     height: ti.height,
-//     waist: ti.waist,
-//     bust: ti.bust,
-//     hips: ti.hips,
-//     dress_size: ti.dress_size,
-//     shoe_size: ti.shoe_size,
-//     hair_colour: ti.hair_colour,
-//     eye_colour: ti.eye_colour,
-//     skin_color: ti.skin_color,
-//     hair_type: ti.hair_type,
-//     skills: ti.skills,
-//     is_available: ti.is_available,
-//     primaryImage: resolveImageUrl(getPrimaryImage(ti.images)),
-//     images: ti.images,
-//     created_at: raw.created_at,
-//   };
-// }
-
-// /** Group talents dynamically by their role field */
-// function groupByRole(talents: ShortlistedTalent[]): Record<string, Talent[]> {
-//   const groups: Record<string, Talent[]> = {};
-//   for (const raw of talents) {
-//     const t = normalise(raw);
-//     const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
-//     if (!groups[key]) groups[key] = [];
-//     groups[key].push(t);
-//   }
-//   return groups;
-// }
-
-// function formatDate(iso: string) {
-//   return new Date(iso).toLocaleDateString("en-GB", {
-//     day: "2-digit",
-//     month: "short",
-//     year: "numeric",
-//   });
-// }
-
-// // ── Skeleton ──────────────────────────────────────────────────────────────────
-
-// function SkeletonCard() {
-//   return (
-//     <div className='w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:gap-4 sm:p-6 animate-pulse'>
-//       <div className='h-6 w-6 rounded-full bg-gray-200 shrink-0' />
-//       <div className='h-12 w-12 rounded-lg bg-gray-200 shrink-0' />
-//       <div className='flex-1 space-y-2 min-w-0'>
-//         <div className='h-4 w-1/3 rounded bg-gray-200' />
-//         <div className='h-3 w-1/2 rounded bg-gray-200' />
-//         <div className='flex gap-2'>
-//           <div className='h-3 w-16 rounded bg-gray-200' />
-//           <div className='h-3 w-16 rounded bg-gray-200' />
-//           <div className='h-3 w-16 rounded bg-gray-200' />
-//         </div>
-//       </div>
-//       <div className='flex gap-2 shrink-0'>
-//         <div className='h-8 w-8 rounded-lg bg-gray-200' />
-//         <div className='h-8 w-8 rounded-lg bg-gray-200' />
-//         <div className='h-8 w-8 rounded-lg bg-gray-200' />
-//       </div>
-//     </div>
-//   );
-// }
-
-// function PageSkeleton() {
-//   return (
-//     <div className='min-h-screen bg-gray-50'>
-//       <div className='space-y-3 sm:space-y-4'>
-//         {Array.from({ length: 4 }).map((_, i) => (
-//           <SkeletonCard key={i} />
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ── Talent Group ──────────────────────────────────────────────────────────────
-
-// interface TalentGroupProps {
-//   title: string;
-//   talents: Talent[];
-//   draggedItem: string | null;
-//   onDragStart: (id: string) => void;
-//   onDragOver: (e: React.DragEvent) => void;
-//   onDrop: (id: string, group: string) => void;
-//   groupKey: string;
-//   onView: (talent: Talent) => void;
-//   onDelete: (id: string, group: string) => void;
-// }
-
-// function TalentGroup({
-//   title,
-//   talents,
-//   draggedItem,
-//   onDragStart,
-//   onDragOver,
-//   onDrop,
-//   groupKey,
-//   onView,
-//   onDelete,
-// }: TalentGroupProps) {
-//   if (talents.length === 0) return null;
-
-//   return (
-//     <div className='mb-8'>
-//       {/* Group Heading */}
-//       <div className='flex items-center gap-3 mb-4'>
-//         <h2 className='text-lg font-bold text-[#000000] sm:text-xl'>{title}</h2>
-//         <span className='inline-flex items-center justify-center rounded-full bg-[#E9EFFD] px-2.5 py-0.5 text-xs font-semibold text-[#2563EB]'>
-//           {talents.length}
-//         </span>
-//         <div className='flex-1 border-t border-gray-200' />
-//       </div>
-
-//       {/* Cards */}
-//       <div className='space-y-3 sm:space-y-4'>
-//         {talents.map((talent, index) => (
-//           <div
-//             key={talent.id}
-//             draggable
-//             onDragStart={() => onDragStart(talent.id)}
-//             onDragOver={onDragOver}
-//             onDrop={() => onDrop(talent.id, groupKey)}
-//             className={`flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all sm:gap-4 sm:p-6 ${
-//               draggedItem === talent.id ? "opacity-50" : ""
-//             } hover:shadow-md cursor-move active:cursor-grabbing`}
-//           >
-//             {/* Number Badge */}
-//             <div className='flex h-6 w-6 items-center justify-center rounded-full bg-[#2563EB] text-sm font-bold text-white shrink-0'>
-//               {index + 1}
-//             </div>
-
-//             {/* Avatar */}
-//             <div className='relative h-12 w-12 rounded-lg bg-[#2563EB] overflow-hidden shrink-0'>
-//               {talent.primaryImage ? (
-//                 <Image
-//                   src={talent.primaryImage}
-//                   alt={talent.name}
-//                   fill
-//                   unoptimized
-//                   className='object-cover'
-//                 />
-//               ) : (
-//                 <div className='flex h-full w-full items-center justify-center text-white'>
-//                   <UserRoundPlus />
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* Info */}
-//             <div className='flex-1 min-w-0'>
-//               <h3 className='font-bold text-[#000000] text-sm sm:text-base truncate'>
-//                 {talent.name}
-//               </h3>
-//               <div className='flex items-center gap-5 flex-wrap'>
-//                 <p className='text-[#2563EB] text-sm'>
-//                   Added: {formatDate(talent.created_at)}
-//                 </p>
-//                 {talent.is_available && (
-//                   <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
-//                     Available
-//                   </span>
-//                 )}
-//               </div>
-//               <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
-//                 <span className='flex items-center gap-1'>
-//                   <MapPin size={14} />
-//                   {talent.location}, {talent.country}
-//                 </span>
-//                 <span className='flex items-center gap-1 capitalize'>
-//                   <Briefcase size={14} />
-//                   {talent.role}
-//                 </span>
-//                 <span className='flex items-center gap-1 capitalize'>
-//                   <UserRound size={14} />
-//                   {talent.character}
-//                 </span>
-//               </div>
-//             </div>
-
-//             {/* Actions */}
-//             <div className='flex gap-2 shrink-0'>
-//               <div
-//                 title='Verified'
-//                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-//               >
-//                 <img src={"/badge.png"} alt={"Verified"} />
-//               </div>
-//               <button
-//                 title='View Talent'
-//                 onClick={() => onView(talent)}
-//                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
-//               >
-//                 <Eye size={20} />
-//               </button>
-//               {/* <button
-//                 title='Delete Talent'
-//                 onClick={() => onDelete(talent.id, groupKey)}
-//                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
-//               >
-//                 <Trash2 size={20} />
-//               </button> */}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ── Page ──────────────────────────────────────────────────────────────────────
-
-// export default function ShortlistDetailPage() {
-//   const params = useParams();
-//   const id = params.id as string;
-
-//   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
-//   const [grouped, setGrouped] = useState<Record<string, Talent[]>>({});
-//   const [draggedItem, setDraggedItem] = useState<string | null>(null);
-//   const [filter, setFilter] = useState<string>("");
-//   const [dummyLoading, setDummyLoading] = useState(false);
-
-//   const { data, isLoading } = useGetSingleShortlistJobQuery(id);
-
-//   useEffect(() => {
-//     if (!data) return;
-//     const job: ShortlistJobDetail = data?.data ?? data;
-//     const talents: ShortlistedTalent[] = job?.shortlisted_talents ?? [];
-//     setGrouped(groupByRole(talents));
-//   }, [data]);
-
-//   const allTalents = Object.values(grouped).flat();
-//   const totalCount = allTalents.length;
-
-//   // ── Drag-and-drop ─────────────────────────────────────────────────────────
-
-//   const handleDragStart = (id: string) => setDraggedItem(id);
-//   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
-
-//   const handleDrop = (targetId: string, groupKey: string) => {
-//     if (draggedItem === null || draggedItem === targetId) return;
-//     setGrouped((prev) => {
-//       const list = [...(prev[groupKey] ?? [])];
-//       const from = list.findIndex((t) => t.id === draggedItem);
-//       const to = list.findIndex((t) => t.id === targetId);
-//       if (from === -1 || to === -1) return prev;
-//       const [moved] = list.splice(from, 1);
-//       list.splice(to, 0, moved);
-//       return { ...prev, [groupKey]: list };
-//     });
-//     setDraggedItem(null);
-//   };
-
-//   // ── Actions ───────────────────────────────────────────────────────────────
-
-//   const handleDeleteTalent = (id: string, groupKey: string) => {
-//     setGrouped((prev) => ({
-//       ...prev,
-//       [groupKey]: prev[groupKey].filter((t) => t.id !== id),
-//     }));
-//   };
-
-//   const handleViewTalent = (talent: Talent) => {
-//     setSelectedTalent(talent);
-//     setIsOpen(true);
-//   };
-
-//   const handleShareLink = () => {
-//     navigator.clipboard?.writeText(window.location.href);
-//     toast.success("Got it! Link copied to clipboard.");
-//   };
-
-//   const handleDownloadPDF = () => {
-//     const doc = new jsPDF();
-//     const pageWidth = doc.internal.pageSize.getWidth();
-
-//     doc.setFillColor(37, 99, 235);
-//     doc.rect(0, 0, pageWidth, 32, "F");
-
-//     doc.setTextColor(255, 255, 255);
-//     doc.setFontSize(18);
-//     doc.setFont("helvetica", "bold");
-//     doc.text(`Shortlist: ${jobTitle}`, 14, 14);
-
-//     if (jobDescription) {
-//       doc.setFontSize(9);
-//       doc.setFont("helvetica", "normal");
-//       const descLines = doc.splitTextToSize(jobDescription, pageWidth - 28);
-//       doc.text(descLines.slice(0, 2), 14, 23);
-//     }
-
-//     doc.setTextColor(100, 116, 139);
-//     doc.setFontSize(9);
-//     doc.setFont("helvetica", "normal");
-//     doc.text(
-//       `Generated: ${new Date().toLocaleDateString("en-GB", {
-//         day: "2-digit",
-//         month: "short",
-//         year: "numeric",
-//       })}   •   ${totalCount} talent${totalCount !== 1 ? "s" : ""}`,
-//       14,
-//       40,
-//     );
-
-//     autoTable(doc, {
-//       startY: 46,
-//       head: [
-//         ["#", "Name", "Role", "Character", "Location", "Country", "Added"],
-//       ],
-//       body: allTalents.map((t, i) => [
-//         i + 1,
-//         t.name,
-//         t.role,
-//         t.character,
-//         t.location,
-//         t.country,
-//         formatDate(t.created_at),
-//       ]),
-//       headStyles: {
-//         fillColor: [37, 99, 235],
-//         textColor: 255,
-//         fontStyle: "bold",
-//         fontSize: 9,
-//       },
-//       bodyStyles: { fontSize: 8.5, textColor: [30, 30, 30] },
-//       alternateRowStyles: { fillColor: [239, 246, 255] },
-//       columnStyles: {
-//         0: { halign: "center", cellWidth: 10 },
-//         6: { cellWidth: 24 },
-//       },
-//       margin: { left: 14, right: 14 },
-//       didDrawPage: (hookData) => {
-//         const pageCount = (doc as any).internal.getNumberOfPages();
-//         doc.setFontSize(8);
-//         doc.setTextColor(160, 160, 160);
-//         doc.text(
-//           `Page ${hookData.pageNumber} of ${pageCount}`,
-//           pageWidth / 2,
-//           doc.internal.pageSize.getHeight() - 8,
-//           { align: "center" },
-//         );
-//       },
-//     });
-
-//     doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
-//   };
-
-//   const handleDummyAction = (message: string) => {
-//     setDummyLoading(true);
-//     const timer = setTimeout(() => {
-//       toast.success(message);
-//       setDummyLoading(false);
-//     }, 1500);
-//     return () => clearTimeout(timer);
-//   };
-
-//   // ── Derive job meta ───────────────────────────────────────────────────────
-
-//   const job: ShortlistJobDetail | undefined = data?.data ?? data;
-//   const jobTitle = job?.title ?? "Shortlist";
-//   const jobDescription = job?.description?.trim() ?? "";
-
-//   // ── Render ────────────────────────────────────────────────────────────────
-
-//   return (
-//     <div className='min-h-screen bg-gray-50'>
-//       <div className='ml-auto lg:mr-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8'>
-//         {/* ── Page Header ── */}
-//         <div className='mb-8'>
-//           <h1 className='text-2xl font-bold text-[#000000] sm:text-3xl'>
-//             Shortlist: {jobTitle}
-//           </h1>
-//           <p className='mt-2 text-sm text-[#404145] sm:text-base'>
-//             {jobDescription
-//               ? jobDescription
-//               : `Drag to reorder • ${totalCount} talent${totalCount !== 1 ? "s" : ""} selected`}
-//           </p>
-//           {jobDescription && (
-//             <p className='mt-1 text-xs text-[#404145]'>
-//               Drag to reorder • {totalCount} talent
-//               {totalCount !== 1 ? "s" : ""} selected
-//             </p>
-//           )}
-
-//           <div className='flex flex-wrap items-end justify-end mt-6'>
-//             <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-//               <DropdownMenu>
-//                 <DropdownMenuTrigger asChild>
-//                   <Button
-//                     variant='outline'
-//                     className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-//                   >
-//                     <Filter size={18} />
-//                     {filter === "" ? "Filter" : filter}
-//                   </Button>
-//                 </DropdownMenuTrigger>
-//                 <DropdownMenuContent className='w-36' align='start'>
-//                   <DropdownMenuItem onSelect={() => setFilter("")}>
-//                     All
-//                   </DropdownMenuItem>
-//                   <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
-//                     1st Option
-//                   </DropdownMenuItem>
-//                   <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
-//                     2nd Option
-//                   </DropdownMenuItem>
-//                   <DropdownMenuItem onSelect={() => setFilter("Not available")}>
-//                     Not available
-//                   </DropdownMenuItem>
-//                 </DropdownMenuContent>
-//               </DropdownMenu>
-
-//               <button
-//                 onClick={handleShareLink}
-//                 className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-//               >
-//                 <Share2 size={18} />
-//                 Share Link
-//               </button>
-
-//               <button
-//                 onClick={handleDownloadPDF}
-//                 className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
-//               >
-//                 <Download size={18} />
-//                 Download PDF
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* ── Dynamic Talent Groups ── */}
-//         {isLoading ? (
-//           <PageSkeleton />
-//         ) : totalCount === 0 ? (
-//           <div className='py-12 text-center'>
-//             <p className='text-gray-500'>No talents in this shortlist yet.</p>
-//           </div>
-//         ) : (
-//           <>
-//             {Object.entries(grouped)
-//               .filter(([, talents]) => talents.length > 0)
-//               .map(([roleKey, talents]) => (
-//                 <TalentGroup
-//                   key={roleKey}
-//                   title={roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}
-//                   groupKey={roleKey}
-//                   talents={talents}
-//                   draggedItem={draggedItem}
-//                   onDragStart={handleDragStart}
-//                   onDragOver={handleDragOver}
-//                   onDrop={handleDrop}
-//                   onView={handleViewTalent}
-//                   onDelete={handleDeleteTalent}
-//                 />
-//               ))}
-//           </>
-//         )}
-//       </div>
-
-//       {/* ── View Talent Modal ── */}
-//       {isOpen && selectedTalent && (
-//         <div
-//           className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
-//           onClick={() => setIsOpen(false)}
-//         >
-//           <div
-//             className='relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl'
-//             onClick={(e) => e.stopPropagation()}
-//           >
-//             {dummyLoading ? (
-//               <div className='flex flex-col items-center justify-center min-h-120 w-full bg-white/30 backdrop-blur-sm rounded-xl'>
-//                 <div className='relative flex items-center gap-3'>
-//                   <Loader className='animate-spin' />
-//                   <span>Processing ...</span>
-//                 </div>
-//               </div>
-//             ) : (
-//               <>
-//                 <button
-//                   onClick={() => setIsOpen(false)}
-//                   className='absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors'
-//                 >
-//                   ✕
-//                 </button>
-
-//                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 md:p-8'>
-//                   <div className='flex flex-col'>
-//                     <h1 className='text-2xl font-bold text-gray-900 mb-6'>
-//                       Profile Details
-//                     </h1>
-//                     <div className='space-y-1.5'>
-//                       {[
-//                         { label: "Name", value: selectedTalent.name },
-//                         { label: "Role", value: selectedTalent.role },
-//                         { label: "Character", value: selectedTalent.character },
-//                         { label: "Gender", value: selectedTalent.gender },
-//                         {
-//                           label: "Location",
-//                           value: `${selectedTalent.location}, ${selectedTalent.country}`,
-//                         },
-//                         {
-//                           label: "Height",
-//                           value: selectedTalent.height
-//                             ? `${selectedTalent.height} cm`
-//                             : "—",
-//                         },
-//                         { label: "Waist", value: selectedTalent.waist || "—" },
-//                         { label: "Bust", value: selectedTalent.bust || "—" },
-//                         { label: "Hips", value: selectedTalent.hips || "—" },
-//                         {
-//                           label: "Dress size",
-//                           value: selectedTalent.dress_size || "—",
-//                         },
-//                         {
-//                           label: "Shoe size",
-//                           value: selectedTalent.shoe_size || "—",
-//                         },
-//                         {
-//                           label: "Hair",
-//                           value: `${selectedTalent.hair_colour} / ${selectedTalent.hair_type}`,
-//                         },
-//                         { label: "Eyes", value: selectedTalent.eye_colour },
-//                         { label: "Skin", value: selectedTalent.skin_color },
-//                         ...(selectedTalent.skills
-//                           ? [{ label: "Skills", value: selectedTalent.skills }]
-//                           : []),
-//                         {
-//                           label: "Available",
-//                           value: selectedTalent.is_available ? "Yes" : "No",
-//                         },
-//                         {
-//                           label: "Added",
-//                           value: formatDate(selectedTalent.created_at),
-//                         },
-//                       ].map(({ label, value }) => (
-//                         <div
-//                           key={label}
-//                           className='flex gap-6 items-center pb-3'
-//                         >
-//                           <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
-//                             {label}:
-//                           </span>
-//                           <span className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
-//                             {value}
-//                           </span>
-//                         </div>
-//                       ))}
-//                     </div>
-//                   </div>
-
-//                   <div className='flex flex-col gap-4'>
-//                     <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
-//                       {selectedTalent.primaryImage ? (
-//                         <Image
-//                           src={selectedTalent.primaryImage}
-//                           alt={selectedTalent.name}
-//                           fill
-//                           unoptimized
-//                           className='object-cover'
-//                         />
-//                       ) : (
-//                         <div className='flex h-full w-full items-center justify-center text-gray-400'>
-//                           <UserRoundPlus size={48} />
-//                         </div>
-//                       )}
-//                     </div>
-
-//                     {selectedTalent.images.length > 1 && (
-//                       <div className='flex gap-2 flex-wrap'>
-//                         {selectedTalent.images
-//                           .filter((img) => !img.is_primary)
-//                           .map((img) => (
-//                             <div
-//                               key={img.image_id}
-//                               className='relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0'
-//                             >
-//                               <Image
-//                                 src={resolveImageUrl(img.image)}
-//                                 alt={selectedTalent.name}
-//                                 fill
-//                                 unoptimized
-//                                 className='object-cover'
-//                               />
-//                             </div>
-//                           ))}
-//                       </div>
-//                     )}
-//                   </div>
-//                 </div>
-
-//                 <div className='px-6 md:px-8 py-6 flex justify-center gap-6 flex-wrap border-t border-gray-100'>
-//                   <div
-//                     className='flex flex-wrap gap-2 sm:gap-3 mt-4'
-//                     onClick={(e) => e.stopPropagation()}
-//                   >
-//                     <button
-//                       onClick={() =>
-//                         handleDummyAction("Added to your favorites list!")
-//                       }
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='Shortlists'
-//                     >
-//                       <Heart size={20} fill='currentColor' />
-//                     </button>
-//                     <button
-//                       onClick={() => setIsDateModalOpen(true)}
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='Availability'
-//                     >
-//                       <Calendar size={20} />
-//                     </button>
-//                     <button
-//                       onClick={() =>
-//                         handleDummyAction("Selftape request sent to the agent.")
-//                       }
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='Selftapes Request'
-//                     >
-//                       <Camera size={20} />
-//                     </button>
-//                     <button
-//                       onClick={() =>
-//                         handleDummyAction(
-//                           "E-Casting request has been initialized.",
-//                         )
-//                       }
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='E-Casting Request'
-//                     >
-//                       <Phone size={20} />
-//                     </button>
-//                     <button
-//                       onClick={() =>
-//                         handleDummyAction(
-//                           "Booking request submitted for approval.",
-//                         )
-//                       }
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='Booking Request'
-//                     >
-//                       <Check size={20} />
-//                     </button>
-//                     <button
-//                       onClick={() =>
-//                         handleDummyAction(
-//                           "Polaroid (Polas) request sent successfully.",
-//                         )
-//                       }
-//                       className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300'
-//                       title='Polas Request'
-//                     >
-//                       <ScanFace size={20} />
-//                     </button>
-//                   </div>
-//                 </div>
-//               </>
-//             )}
-//           </div>
-//         </div>
-//       )}
-
-//       {/* ── Availability Modal ── */}
-//       {isDateModalOpen && selectedTalent && (
-//         <div
-//           className='fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm'
-//           onClick={() => setIsDateModalOpen(false)}
-//         >
-//           <div
-//             className='bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 overflow-hidden border border-gray-100'
-//             onClick={(e) => e.stopPropagation()}
-//           >
-//             <div className='flex justify-between items-center mb-4'>
-//               <h3 className='text-lg font-bold text-gray-900 flex items-center gap-2'>
-//                 <Calendar size={20} className='text-blue-600' />
-//                 Availability
-//               </h3>
-//               <button
-//                 onClick={() => setIsDateModalOpen(false)}
-//                 className='text-gray-400 hover:text-gray-600 transition-colors'
-//               >
-//                 ✕
-//               </button>
-//             </div>
-
-//             <div className='space-y-2 max-h-60 overflow-y-auto pr-2'>
-//               {selectedTalent.is_available ? (
-//                 <div className='flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100'>
-//                   <span className='text-green-900 font-medium'>
-//                     {selectedTalent.name} is currently available
-//                   </span>
-//                   <span className='text-[10px] uppercase tracking-wider font-bold text-green-600 bg-white px-2 py-1 rounded shadow-sm'>
-//                     Available
-//                   </span>
-//                 </div>
-//               ) : (
-//                 <p className='text-center text-gray-500 py-4'>
-//                   Not currently available.
-//                 </p>
-//               )}
-//             </div>
-
-//             <button
-//               onClick={() => setIsDateModalOpen(false)}
-//               className='w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md shadow-blue-200'
-//             >
-//               Got it
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }

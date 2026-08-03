@@ -13,13 +13,26 @@ import { toast } from "sonner";
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
-  prepareHeaders: (headers) => {
+  prepareHeaders: (headers, api) => {
     console.log("Preparing headers for API request", window?.location?.href);
 
     if (typeof window !== "undefined") {
-      const token = localStorage?.getItem("access_token");
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+      const guestEndpoints = [
+        "identifyGuest",
+        "checkGuestSession",
+        "getFavorites",
+        "addFavorite",
+        "removeFavorite",
+        "getComments",
+        "addComment",
+        "getChatHistory",
+      ];
+      
+      if (!guestEndpoints.includes(api.endpoint)) {
+        const token = localStorage?.getItem("access_token");
+        if (token) {
+          headers.set("authorization", `Bearer ${token}`);
+        }
       }
     }
     return headers;
@@ -45,7 +58,18 @@ const customBaseQuery: BaseQueryFn<
     const status = result.error.status;
 
     if (status === 401) {
-      if (!isLoggingOut && pathname !== "/login") {
+      const guestEndpoints = [
+        "identifyGuest",
+        "checkGuestSession",
+        "getFavorites",
+        "addFavorite",
+        "removeFavorite",
+        "getComments",
+        "addComment",
+        "getChatHistory",
+      ];
+      
+      if (!guestEndpoints.includes(api.endpoint) && !isLoggingOut && pathname !== "/login") {
         isLoggingOut = true;
         localStorage?.removeItem("access_token");
         toast.error("Session expired. Please login again.");
@@ -74,7 +98,18 @@ const customBaseQuery: BaseQueryFn<
     const appStatus = data.status_code as number;
 
     if (appStatus === 401) {
-      if (!isLoggingOut && pathname !== "/login") {
+      const guestEndpoints = [
+        "identifyGuest",
+        "checkGuestSession",
+        "getFavorites",
+        "addFavorite",
+        "removeFavorite",
+        "getComments",
+        "addComment",
+        "getChatHistory",
+      ];
+      
+      if (!guestEndpoints.includes(api.endpoint) && !isLoggingOut && pathname !== "/login") {
         isLoggingOut = true;
         localStorage?.removeItem("access_token");
         toast.error(data.message || "Session expired. Please login again.");
