@@ -81,7 +81,7 @@ const ClientSidebar = () => {
             }
           />
 
-          <NavItem
+          {/* <NavItem
             href='/dashboard/client/chat'
             icon={MessageCircleMore}
             label='Quick Chat'
@@ -89,7 +89,7 @@ const ClientSidebar = () => {
               pathname === "/dashboard/client/chat" ||
               pathname.startsWith("/dashboard/client/chat/")
             }
-          />
+          /> */}
 
           <NavItem
             href='/dashboard/client/settings'

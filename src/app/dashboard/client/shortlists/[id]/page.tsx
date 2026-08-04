@@ -22,6 +22,7 @@ import {
   Check,
   ScanFace,
   ArrowLeft,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -657,32 +658,13 @@ export default function ShortlistDetailPage() {
             </button>
 
             <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-                  >
-                    <Filter size={18} />
-                    {filter === "" ? "Filter" : filter}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='w-36' align='start'>
-                  <DropdownMenuItem onSelect={() => setFilter("")}>
-                    All
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
-                    1st Option
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
-                    2nd Option
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setFilter("Not available")}>
-                    Not available
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
+              <button
+                onClick={() => router.push(`/dashboard/client/chat/${id}`)}
+                className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              >
+                <MessageCircle size={18} />
+                View Messages & Notes
+              </button>
               <button
                 onClick={handleShareLink}
                 className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
@@ -985,8 +967,8 @@ export default function ShortlistDetailPage() {
                   <div
                     key={dateStr}
                     className={`flex items-center justify-between px-4 py-3 rounded-lg border ${isPast
-                        ? "border-gray-200 bg-gray-50 opacity-60"
-                        : "border-blue-100 bg-blue-50"
+                      ? "border-gray-200 bg-gray-50 opacity-60"
+                      : "border-blue-100 bg-blue-50"
                       }`}
                   >
                     <div className='flex items-center gap-3'>
@@ -1003,8 +985,8 @@ export default function ShortlistDetailPage() {
                         </span>
                         <span
                           className={`text-sm font-medium ${isPast
-                              ? "text-gray-400 line-through"
-                              : "text-gray-800"
+                            ? "text-gray-400 line-through"
+                            : "text-gray-800"
                             }`}
                         >
                           {date}
@@ -1013,8 +995,8 @@ export default function ShortlistDetailPage() {
                     </div>
                     <span
                       className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${isPast
-                          ? "text-gray-400 bg-white border-gray-200"
-                          : "text-green-600 bg-white border-green-100"
+                        ? "text-gray-400 bg-white border-gray-200"
+                        : "text-green-600 bg-white border-green-100"
                         }`}
                     >
                       {isPast ? "Past" : "Available"}
