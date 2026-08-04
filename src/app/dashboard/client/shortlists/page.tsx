@@ -9,6 +9,7 @@ import {
   Calendar,
   Briefcase,
   Trash,
+  MessageCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -259,15 +260,15 @@ function ShortlistCard({
     >
       {/* Header */}
       <div className='mb-3 flex items-start justify-between gap-2'>
-        <div className='min-w-0'>
-          <h3 className='truncate text-lg sm:text-xl font-bold leading-tight text-black'>
+        <div className='flex-1 min-w-0'>
+          <h3 className='text-lg sm:text-xl font-bold leading-tight text-black'>
             {shortlist.title}
           </h3>
           <span className='mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 capitalize'>
             {shortlist.job_type}
           </span>
         </div>
-        <div className='w-36 flex shrink flex-row items-center justify-between gap-1'>
+        <div className='flex shrink flex-row items-center justify-between gap-1'>
           <span className='rounded-full bg-gray-100 px-3 py-1 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap'>
             {deduped.length} Shortlisted
           </span>
@@ -276,7 +277,16 @@ function ShortlistCard({
             className='rounded px-2 py-0.5 text-xs text-red-400  transition hover:text-red-600'
           >
             <Trash size={20} />
-          </button>
+          </button>      
+        </div>
+        <div>
+           <button
+              onClick={() => router.push(`/dashboard/client/chat/${shortlist.job_id}`)}
+              className="flex items-center justify-center gap-2 rounded-lg bg-[linear-gradient(110deg,#3b82f6,45%,#9333ea,55%,#3b82f6)] bg-[length:200%_100%] px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform animate-shimmer hover:scale-[1.02] active:scale-95 sm:text-base cursor-pointer"
+            >
+              <MessageCircle size={18} />
+              <span>View</span>
+            </button>
         </div>
       </div>
 
