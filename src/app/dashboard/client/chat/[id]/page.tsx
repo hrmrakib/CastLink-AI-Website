@@ -46,7 +46,7 @@ export default function AgentChatDashboard() {
       {/* Main Inbox List */}
       <div className={`overflow-y-auto border-r border-gray-200 transition-all ${selectedClient ? 'hidden md:block w-1/3 lg:w-1/4 shrink-0' : 'w-full flex-1'}`}>
         <div className='p-6 md:p-8'>
-          <h1 className='text-2xl font-bold text-gray-900 mb-6'>Global Inbox</h1>
+          <h1 className='text-2xl font-bold text-gray-900 mb-6'>Quick Chat</h1>
 
           {guestsLoading ? (
             <div className="flex items-center justify-center h-40">
