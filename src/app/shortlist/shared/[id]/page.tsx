@@ -362,15 +362,15 @@ const ChatWidget = ({
   const rawData = chatData?.data ?? chatData;
   const fallbackHistory = Array.isArray(rawData)
     ? rawData
-    : (Array.isArray(rawData?.results) ? rawData.results : (Array.isArray(rawData?.data) ? rawData.data : []));
+    : (Array.isArray(rawData?.results) ? rawData.results : (Array.isArray(rawData?.messages) ? rawData.messages : (Array.isArray(rawData?.data?.messages) ? rawData.data.messages : (Array.isArray(rawData?.data) ? rawData.data : []))));
 
   // Use WS messages if we have hydrated history, otherwise combine REST history with optimistic messages
   // We can assume we have hydrated history if isAuthenticated is true or if we received a fetch_chat event (which populates non-optimistic messages).
   const hasServerMessages = messages.some(m => !m.isOptimistic);
 
-  const displayMessages = hasServerMessages || isAuthenticated
+  const displayMessages = hasServerMessages
     ? messages
-    : [...fallbackHistory, ...messages];
+    : [...fallbackHistory, ...messages.filter(m => m.isOptimistic)];
 
   useEffect(() => {
     if (guestToken && guestThread) {
@@ -445,26 +445,29 @@ const ChatWidget = ({
             className='h-80 bg-gray-50 p-4 overflow-y-auto flex flex-col gap-4'
           >
             {displayMessages.length > 0 ? (
-              displayMessages.map((msg: any, i: number) => (
-                <div
-                  key={i}
-                  className={`flex items-start gap-2 ${msg.sender === "client" ? "flex-row-reverse" : ""}`}
-                >
+              displayMessages.map((msg: any, i: number) => {
+                const isClient = msg.sender === "client" || msg.sender_type === "client";
+                return (
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${msg.sender === "client" ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
+                    key={i}
+                    className={`flex items-start gap-2 ${isClient ? "flex-row-reverse" : ""}`}
                   >
-                    {msg.sender === "client" ? "Me" : "A"}
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isClient ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
+                    >
+                      {isClient ? "Me" : "A"}
+                    </div>
+                    <div
+                      className={`p-3 rounded-2xl shadow-sm text-sm border ${isClient
+                        ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
+                        : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
+                        }`}
+                    >
+                      {msg.text || msg.content}
+                    </div>
                   </div>
-                  <div
-                    className={`p-3 rounded-2xl shadow-sm text-sm border ${msg.sender === "client"
-                      ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
-                      : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
-                      }`}
-                  >
-                    {msg.text || msg.content}
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className='flex items-start gap-2'>
                 <div className='w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0'>

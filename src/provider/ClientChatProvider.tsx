@@ -112,7 +112,7 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
           // Received hydrated history, merge with any optimistic messages we already have
           setMessages((prev) => {
             const optimisticMsgs = prev.filter((m) => m.isOptimistic);
-            const serverMsgs = message.data?.messages || [];
+            const serverMsgs = Array.isArray(message.data) ? message.data : (message.data?.messages || []);
             return [...serverMsgs, ...optimisticMsgs];
           });
         } else if (message.type === "message") {
