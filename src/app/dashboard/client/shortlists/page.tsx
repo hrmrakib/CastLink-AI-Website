@@ -278,12 +278,15 @@ function ShortlistCard({
           >
             <Trash size={20} />
           </button>      
-        </div>
+        </div> 
         <div>
            <button
-              onClick={() => router.push(`/dashboard/client/chat/${shortlist.job_id}`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/dashboard/client/chat/${shortlist.job_id}`)
+              }}
               className="flex items-center justify-center gap-2 rounded-lg bg-[linear-gradient(110deg,#3b82f6,45%,#9333ea,55%,#3b82f6)] bg-[length:200%_100%] px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform animate-shimmer hover:scale-[1.02] active:scale-95 sm:text-base cursor-pointer"
-            >
+            > 
               <MessageCircle size={18} />
               <span>View</span>
             </button>
