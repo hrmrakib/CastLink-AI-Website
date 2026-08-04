@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { 
   useGetChatCommentInfoQuery, 
   useGetCommentAndActivitiesMutation 
 } from "@/redux/features/client/chatCommentAPI";
 import { ClientChatProvider, useClientChat } from "@/provider/ClientChatProvider";
-import { Eye, CheckCircle2, Send, MessageCircle, Heart, User, Clock } from "lucide-react";
+import { Eye, CheckCircle2, Send, MessageCircle, Heart, User, Clock, ArrowLeft } from "lucide-react";
 
 // --- Types ---
 interface Guest {
@@ -27,6 +27,7 @@ interface Guest {
 export default function AgentChatDashboard() {
   const params = useParams();
   const jobId = params.id as string;
+  const router = useRouter()
   
   const { data: guestsData, isLoading: guestsLoading, refetch: refetchGuests } = useGetChatCommentInfoQuery({ jobId }, { skip: !jobId, pollingInterval: 10000 });
   const guests: Guest[] = guestsData?.data || [];
@@ -46,7 +47,15 @@ export default function AgentChatDashboard() {
       {/* Main Inbox List */}
       <div className={`overflow-y-auto border-r border-gray-200 transition-all ${selectedClient ? 'hidden md:block w-1/3 lg:w-1/4 shrink-0' : 'w-full flex-1'}`}>
         <div className='p-6 md:p-8'>
-          <h1 className='text-2xl font-bold text-gray-900 mb-6'>Quick Chat</h1>
+          <div className='flex items-center gap-2 mb-6'>
+            <button
+              onClick={()=> router.back()}
+              className='text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100'
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className='text-2xl font-bold text-gray-900'>Quick Chat</h1>
+          </div>
 
           {guestsLoading ? (
             <div className="flex items-center justify-center h-40">
