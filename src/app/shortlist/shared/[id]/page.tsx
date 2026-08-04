@@ -7,7 +7,6 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import {
   Eye,
-  Filter,
   Share2,
   Download,
   UserRoundPlus,
@@ -17,12 +16,6 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
 import {
   useIdentifyGuestMutation,
@@ -1007,11 +1000,48 @@ export default function ShortlistDetailPage() {
   const [showIdentify, setShowIdentify] = useState(false);
 
   useEffect(() => {
+    // 1. Global cleanup: prevent localStorage bloat by purging ALL expired sessions
+    const cleanupExpiredSessions = () => {
+      const now = Date.now();
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      const keys = Object.keys(localStorage);
+      
+      keys.forEach((key) => {
+        if (key.startsWith("guest_client_")) {
+          const jobId = key.replace("guest_client_", "");
+          try {
+            const clientStr = localStorage.getItem(key);
+            if (clientStr) {
+              const client = JSON.parse(clientStr);
+              if (client.created_at) {
+                const createdAtTime = new Date(client.created_at).getTime();
+                if (now - createdAtTime > thirtyDaysMs) {
+                  localStorage.removeItem(`guest_token_${jobId}`);
+                  localStorage.removeItem(`guest_thread_${jobId}`);
+                  localStorage.removeItem(`guest_client_${jobId}`);
+                  localStorage.removeItem(`favs_${jobId}`);
+                }
+              }
+            }
+          } catch (e) {
+            // Corrupted data, purge it
+            localStorage.removeItem(`guest_token_${jobId}`);
+            localStorage.removeItem(`guest_thread_${jobId}`);
+            localStorage.removeItem(`guest_client_${jobId}`);
+            localStorage.removeItem(`favs_${jobId}`);
+          }
+        }
+      });
+    };
+
+    cleanupExpiredSessions();
+
+    // 2. Load current session after cleanup
     const token = localStorage.getItem(`guest_token_${id}`);
     const thread = localStorage.getItem(`guest_thread_${id}`);
-    const client = localStorage.getItem(`guest_client_${id}`);
+    const clientStr = localStorage.getItem(`guest_client_${id}`);
 
-    if (token && client) {
+    if (token && clientStr) {
       setGuestToken(token);
       if (thread) setGuestThread(thread);
     } else {
