@@ -146,8 +146,15 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
             return [...prev, newMsg];
           });
 
-          if (newMsg.sender_type === "agent" || newMsg.sender === "agent") {
-            setUnreadCount((prev) => prev + 1);
+          // Increment unread count based on role
+          if (isGuest) {
+             if (newMsg.sender_type === "agent" || newMsg.sender === "agent") {
+               setUnreadCount((prev) => prev + 1);
+             }
+          } else {
+             if (newMsg.sender_type === "client" || newMsg.sender === "client") {
+               setUnreadCount((prev) => prev + 1);
+             }
           }
         } else if (message.type === "seen") {
           console.log("ClientChat messages seen by", message.data?.seen_by);
