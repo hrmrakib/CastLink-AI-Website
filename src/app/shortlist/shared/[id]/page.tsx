@@ -1347,11 +1347,11 @@ export default function ShortlistDetailPage() {
         />
       )}
 
-      <main className='container mx-auto px-4 md:px-8 py-8 space-y-12'>
+      <main className='container mx-auto py-8 space-y-10'>
         <Header jobTitle={jobTitle} totalCount={totalCount} />
 
         {/* Render utility buttons above the grid */}
-        <div className='flex flex-wrap items-end justify-between mt-6 max-w-7xl mx-auto'>
+        <div className='flex flex-wrap items-end justify-between mt-6 container mx-auto'>
           <button
             onClick={() => router.back()}
             className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
@@ -1361,31 +1361,7 @@ export default function ShortlistDetailPage() {
           </button>
 
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='outline'
-                  className='h-11! flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-                >
-                  <Filter size={18} />
-                  {filter === "" ? "Filter" : filter}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-36' align='start'>
-                <DropdownMenuItem onSelect={() => setFilter("")}>
-                  All
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("1st Option")}>
-                  1st Option
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("2nd Option")}>
-                  2nd Option
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setFilter("Not available")}>
-                  Not available
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
+            
 
             <button
               onClick={handleShareLink}
