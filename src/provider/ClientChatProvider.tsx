@@ -109,9 +109,22 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
           }
         } else if (message.type === "fetch_chat") {
           // Received hydrated history, merge with any optimistic messages we already have
+          const serverMsgs = Array.isArray(message.data) ? message.data : (message.data?.messages || []);
+          
+          // Calculate initial unread count based on role
+          const initialUnread = serverMsgs.reduce((acc: number, msg: any) => {
+            if (isGuest) {
+               if ((msg.sender === "agent" || msg.sender_type === "agent") && !msg.is_seen_by_client) return acc + 1;
+            } else {
+               if ((msg.sender === "client" || msg.sender_type === "client") && !msg.is_seen_by_agent) return acc + 1;
+            }
+            return acc;
+          }, 0);
+          
+          setUnreadCount(initialUnread);
+
           setMessages((prev) => {
             const optimisticMsgs = prev.filter((m) => m.isOptimistic);
-            const serverMsgs = Array.isArray(message.data) ? message.data : (message.data?.messages || []);
             return [...serverMsgs, ...optimisticMsgs];
           });
         } else if (message.type === "message") {

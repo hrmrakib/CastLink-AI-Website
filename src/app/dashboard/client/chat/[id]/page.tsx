@@ -28,7 +28,7 @@ export default function AgentChatDashboard() {
   const params = useParams();
   const jobId = params.id as string;
   
-  const { data: guestsData, isLoading: guestsLoading } = useGetChatCommentInfoQuery({ jobId });
+  const { data: guestsData, isLoading: guestsLoading, refetch: refetchGuests } = useGetChatCommentInfoQuery({ jobId }, { skip: !jobId, pollingInterval: 10000 });
   const guests: Guest[] = guestsData?.data || [];
   
   const [selectedClient, setSelectedClient] = useState<Guest | null>(null);
@@ -42,7 +42,7 @@ export default function AgentChatDashboard() {
   });
 
   return (
-    <div className='flex h-screen bg-gray-50'>
+    <div className='flex h-[78vh] bg-gray-50'>
       {/* Main Inbox List */}
       <div className={`overflow-y-auto border-r border-gray-200 transition-all ${selectedClient ? 'hidden md:block w-1/3 lg:w-1/4 shrink-0' : 'w-full flex-1'}`}>
         <div className='p-6 md:p-8'>
@@ -124,6 +124,7 @@ export default function AgentChatDashboard() {
              guest={selectedClient} 
              jobId={jobId} 
              onClose={() => setSelectedClient(null)} 
+             refetchGuests={refetchGuests}
            />
         </ClientChatProvider>
       )}
@@ -132,7 +133,7 @@ export default function AgentChatDashboard() {
 }
 
 // --- Chat & Activity Sub-Component ---
-function ChatAndActivityView({ guest, jobId, onClose }: { guest: Guest, jobId: string, onClose: () => void }) {
+function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: Guest, jobId: string, onClose: () => void, refetchGuests: () => void }) {
   const { connect, messages, sendMessage, isAuthenticated, markSeen } = useClientChat();
   const [getActivities, { data: activityData, isLoading: isActivityLoading }] = useGetCommentAndActivitiesMutation();
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -158,8 +159,10 @@ function ChatAndActivityView({ guest, jobId, onClose }: { guest: Guest, jobId: s
   useEffect(() => {
     if (isAuthenticated) {
       markSeen();
+      // Refetch the global guests list so the left-pane 'unread' badge disappears immediately
+      refetchGuests();
     }
-  }, [isAuthenticated, messages.length, markSeen]);
+  }, [isAuthenticated, messages.length, markSeen, refetchGuests]);
 
   // Auto-scroll chat
   useEffect(() => {
