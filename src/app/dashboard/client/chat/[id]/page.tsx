@@ -357,16 +357,20 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
                 {isMe && (
                   <div className="h-8 flex items-center shrink-0">
                     {msg.is_seen_by_client ? (
-                      <Eye size={14} className="text-blue-500" />
+                      <span title="Seen" className="text-blue-500">
+                        <Eye size={14}  />
+                      </span>
                     ) : (
-                      <CheckCircle2 size={14} className="text-gray-400" />
+                      <span title="Sent" className="text-gray-400">
+                        <CheckCircle2 size={14} />
+                      </span>
                     )}
                   </div>
                 )}
                 
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 uppercase'}`}>
-                  {isMe ? "Me" : guest.name.substring(0, 2)}
-                </div>
+                {/* <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 uppercase'}`}>
+                  {isMe ? null : guest.name.substring(0, 2)}
+                </div> */}
                 
                 <div className={`p-3 rounded-2xl shadow-sm text-sm border max-w-[75%] ${
                   isMe 

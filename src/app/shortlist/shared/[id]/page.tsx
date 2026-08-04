@@ -466,11 +466,7 @@ const ChatWidget = ({
                         )}
                       </div>
                     )}
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isClient ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
-                    >
-                      {isClient ? "Me" : "A"}
-                    </div>
+                  
                     <div
                       className={`p-3 rounded-2xl shadow-sm text-sm border ${isClient
                         ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
