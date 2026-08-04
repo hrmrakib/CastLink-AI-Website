@@ -7,6 +7,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import {
   Eye,
+  CheckCircle2,
   Share2,
   Download,
   UserRoundPlus,
@@ -452,6 +453,19 @@ const ChatWidget = ({
                     key={i}
                     className={`flex items-start gap-2 ${isClient ? "flex-row-reverse" : ""}`}
                   >
+                    {isClient && (
+                      <div className="h-8 flex items-center shrink-0">
+                        {msg.is_seen_by_agent ? (
+                          <span title="Seen by agent">
+                            <Eye size={14} className="text-blue-500" />
+                          </span>
+                        ) : (
+                          <span title="Not seen by agent">
+                            <CheckCircle2 size={14} className="text-gray-400" />
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isClient ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600"}`}
                     >
@@ -463,7 +477,7 @@ const ChatWidget = ({
                         : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
                         }`}
                     >
-                      {msg.text || msg.content}
+                      <span className="break-words">{msg.text || msg.content}</span>
                     </div>
                   </div>
                 );
@@ -1008,7 +1022,7 @@ export default function ShortlistDetailPage() {
       const now = Date.now();
       const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
       const keys = Object.keys(localStorage);
-      
+
       keys.forEach((key) => {
         if (key.startsWith("guest_client_")) {
           const jobId = key.replace("guest_client_", "");

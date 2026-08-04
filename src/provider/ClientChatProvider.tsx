@@ -32,10 +32,10 @@ const ClientChatContext = createContext<ClientChatContextType>({
   isAuthenticated: false,
   messages: [],
   unreadCount: 0,
-  connect: () => {},
-  sendMessage: () => {},
-  markSeen: () => {},
-  disconnect: () => {},
+  connect: () => { },
+  sendMessage: () => { },
+  markSeen: () => { },
+  disconnect: () => { },
 });
 
 export const useClientChat = () => useContext(ClientChatContext);
@@ -63,7 +63,7 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
     if (currentSocket) {
       currentSocket.close();
     }
-    
+
     setSocket(null);
     socketRef.current = null;
 
@@ -72,16 +72,15 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
 
     // Dynamic protocol to avoid SSL errors in local dev
     const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//api.poolofcast.com/ws/client-chat/${threadId}/`);
-
+    const ws = new WebSocket(`${protocol}//10.10.29.50:8050/ws/client-chat/${threadId}/`);
     ws.onopen = () => {
       console.log("ClientChat WebSocket connected. Authenticating...");
-      
+
       // The socket closes if we don't auth within 5 seconds
-      const authPayload = isGuest 
+      const authPayload = isGuest
         ? { action: "auth", guest_token: token }
         : { action: "auth", token: token };
-        
+
       ws.send(JSON.stringify(authPayload));
     };
 
@@ -133,12 +132,22 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
             }
             return [...prev, newMsg];
           });
-          
+
           if (newMsg.sender_type === "agent" || newMsg.sender === "agent") {
             setUnreadCount((prev) => prev + 1);
           }
         } else if (message.type === "seen") {
           console.log("ClientChat messages seen by", message.data?.seen_by);
+          const seenBy = message.data?.seen_by;
+          setMessages((prev) => prev.map(m => {
+            if (seenBy === "agent" && (m.sender === "client" || m.sender_type === "client")) {
+              return { ...m, is_seen_by_agent: true };
+            }
+            if (seenBy === "client" && (m.sender === "agent" || m.sender_type === "agent")) {
+              return { ...m, is_seen_by_client: true };
+            }
+            return m;
+          }));
         } else if (message.type === "error") {
           console.error("ClientChat error:", message);
         } else {
@@ -176,7 +185,13 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
     }
 
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && isAuthenticated) {
-      socketRef.current.send(JSON.stringify(payload));
+      const payloadString = JSON.stringify(payload);
+      console.log("ClientChat sending message:", payloadString);
+      try {
+        socketRef.current.send(payloadString);
+      } catch (err) {
+        console.error("ClientChat send error:", err);
+      }
     } else {
       console.warn("Socket is not open or not authenticated yet. Queuing message...");
       messageQueue.current.push(payload);
