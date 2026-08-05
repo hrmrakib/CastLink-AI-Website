@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
 import {
   useIdentifyGuestMutation,
+  useVerifyGuestMutation,
   useCheckGuestSessionQuery,
   useGetFavoritesQuery,
   useAddFavoriteMutation,
@@ -233,14 +234,59 @@ function IdentifyModal({
   jobId: string;
   onSuccess: (token: string, threadId: string) => void;
 }) {
+  const [step, setStep] = useState<"identity" | "otp">("identity");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [identifyGuest, { isLoading }] = useIdentifyGuestMutation();
+  const [otp, setOtp] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [identifyGuest, { isLoading: isIdentifying }] = useIdentifyGuestMutation();
+  const [verifyGuest, { isLoading: isVerifying }] = useVerifyGuestMutation();
+
+  const handleIdentitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await identifyGuest({ jobId, name, email }).unwrap();
+      
+      // Look for otp_required flag
+      if (res?.data?.otp_required || res?.otp_required) {
+        setStep("otp");
+        toast.success(res?.message || "Verification code sent to your email.");
+      } else {
+        // Fallback in case backend just returns tokens immediately (legacy behavior)
+        const token = res?.guest_token || res?.data?.guest_token;
+        const threadId = res?.thread_id || res?.data?.thread_id;
+        const guestClient = res?.guest_client || res?.data?.guest_client;
+
+        if (token) {
+          localStorage.setItem(`guest_token_${jobId}`, token);
+          if (threadId) localStorage.setItem(`guest_thread_${jobId}`, threadId);
+          if (guestClient)
+            localStorage.setItem(
+              `guest_client_${jobId}`,
+              JSON.stringify(guestClient),
+            );
+
+          onSuccess(token, threadId || "");
+          toast.success("Welcome!");
+        } else {
+          toast.error("Failed to receive session token.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to identify. Please try again.",
+      );
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await verifyGuest({ 
+        jobId, 
+        body: { email, otp, name } // passing email, otp, and name
+      }).unwrap();
+      
       const token = res?.guest_token || res?.data?.guest_token;
       const threadId = res?.thread_id || res?.data?.thread_id;
       const guestClient = res?.guest_client || res?.data?.guest_client;
@@ -255,77 +301,138 @@ function IdentifyModal({
           );
 
         onSuccess(token, threadId || "");
-        toast.success("Welcome!");
+        toast.success(res?.message || "Verified successfully!");
       } else {
         toast.error("Failed to receive session token.");
       }
     } catch (err: any) {
       toast.error(
-        err?.data?.message || "Failed to identify. Please try again.",
+        err?.data?.message || "Failed to verify code. Please try again.",
       );
     }
   };
 
   return (
     <div className='fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-      <div className='bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl'>
-        <h2 className='text-2xl font-bold mb-2'>Welcome!</h2>
-        <p className='text-gray-500 mb-6'>
-          Please enter your details to view and interact with this shortlist.
-        </p>
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-1'>Full Name</label>
-            <input
-              required
-              type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className='w-full px-4 py-2 border rounded-xl'
-              placeholder='John Doe'
-            />
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-1'>Email</label>
-            <input
-              required
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className='w-full px-4 py-2 border rounded-xl'
-              placeholder='john@example.com'
-            />
-          </div>
-          <button
-            disabled={isLoading}
-            type='submit'
-            className='mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
+      <div className='bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative'>
+        {step === "otp" && (
+          <button 
+            onClick={() => setStep("identity")}
+            className="absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            {isLoading && (
-              <svg
-                className='animate-spin h-4 w-4 text-white'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-              >
-                <circle
-                  className='opacity-25'
-                  cx='12'
-                  cy='12'
-                  r='10'
-                  stroke='currentColor'
-                  strokeWidth='4'
-                ></circle>
-                <path
-                  className='opacity-75'
-                  fill='currentColor'
-                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                ></path>
-              </svg>
-            )}
-            {isLoading ? "Verifying..." : "Continue"}
+            <ArrowLeft size={20} />
           </button>
-        </form>
+        )}
+        <div className={step === "otp" ? "mt-4" : ""}>
+          <h2 className='text-2xl font-bold mb-2'>
+            {step === "identity" ? "Welcome!" : "Verify Your Email"}
+          </h2>
+          <p className='text-gray-500 mb-6'>
+            {step === "identity" 
+              ? "Please enter your details to view and interact with this shortlist." 
+              : `We've sent a verification code to ${email}.`}
+          </p>
+        </div>
+
+        {step === "identity" ? (
+          <form onSubmit={handleIdentitySubmit} className='flex flex-col gap-4'>
+            <div>
+              <label className='block text-sm font-medium mb-1'>Full Name</label>
+              <input
+                required
+                type='text'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className='w-full px-4 py-2 border rounded-xl'
+                placeholder='John Doe'
+              />
+            </div>
+            <div>
+              <label className='block text-sm font-medium mb-1'>Email</label>
+              <input
+                required
+                type='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className='w-full px-4 py-2 border rounded-xl'
+                placeholder='john@example.com'
+              />
+            </div>
+            <button
+              disabled={isIdentifying}
+              type='submit'
+              className='mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
+            >
+              {isIdentifying && (
+                <svg
+                  className='animate-spin h-4 w-4 text-white'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  ></circle>
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                  ></path>
+                </svg>
+              )}
+              {isIdentifying ? "Sending Code..." : "Continue"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleOtpSubmit} className='flex flex-col gap-4'>
+            <div>
+              <label className='block text-sm font-medium mb-1'>Verification Code</label>
+              <input
+                required
+                type='text'
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className='w-full px-4 py-2 border rounded-xl tracking-widest text-center text-lg font-mono'
+                placeholder='000000'
+                maxLength={6}
+              />
+            </div>
+            <button
+              disabled={isVerifying || otp.length < 4}
+              type='submit'
+              className='mt-2 w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-medium py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors'
+            >
+              {isVerifying && (
+                <svg
+                  className='animate-spin h-4 w-4 text-white'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  ></circle>
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                  ></path>
+                </svg>
+              )}
+              {isVerifying ? "Verifying..." : "Verify & Continue"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

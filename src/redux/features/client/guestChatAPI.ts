@@ -4,15 +4,25 @@ const guestChatAPI = baseAPI.injectEndpoints({
   endpoints: (build) => ({
     identifyGuest: build.mutation({
       query: ({ jobId, name, email }) => ({
-        url: `client/talents/shortlisted/${jobId}/identify/`,
+        url: `/client/talents/shortlisted/${jobId}/identify/`,
         method: "POST",
         body: { name, email },
       }),
     }),
 
+    // => /client/talents/shortlisted/{job_id}/verify/
+    verifyGuest: build.mutation({
+      query: ({ jobId, token, body }) => ({
+        url: `/client/talents/shortlisted/${jobId}/verify/`,
+        method: "POST",
+        headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
+        body
+      }),
+    }),
+
     checkGuestSession: build.query({
       query: ({ jobId, token }) => ({
-        url: `client/talents/shortlisted/${jobId}/session/`,
+        url: `/client/talents/shortlisted/${jobId}/session/`,
         method: "GET",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
       }),
@@ -20,7 +30,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     getFavorites: build.query({
       query: ({ jobId, token }) => ({
-        url: `client/talents/shortlisted/${jobId}/favorites/`,
+        url: `/client/talents/shortlisted/${jobId}/favorites/`,
         method: "GET",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
       }),
@@ -31,7 +41,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     addFavorite: build.mutation({
       query: ({ jobId, token, talent_id }) => ({
-        url: `client/talents/shortlisted/${jobId}/favorites/`,
+        url: `/client/talents/shortlisted/${jobId}/favorites/`,
         method: "POST",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
         body: { talent_id },
@@ -43,7 +53,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     removeFavorite: build.mutation({
       query: ({ jobId, token, talent_id }) => ({
-        url: `client/talents/shortlisted/${jobId}/favorites/${talent_id}/`,
+        url: `/client/talents/shortlisted/${jobId}/favorites/${talent_id}/`,
         method: "DELETE",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
       }),
@@ -54,7 +64,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     getComments: build.query({
       query: ({ jobId, token, talent_id }) => ({
-        url: `client/talents/shortlisted/${jobId}/talents/${talent_id}/comments/`,
+        url: `/client/talents/shortlisted/${jobId}/talents/${talent_id}/comments/`,
         method: "GET",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
       }),
@@ -65,7 +75,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     addComment: build.mutation({
       query: ({ jobId, token, talent_id, comment }) => ({
-        url: `client/talents/shortlisted/${jobId}/talents/${talent_id}/comments/`,
+        url: `/client/talents/shortlisted/${jobId}/talents/${talent_id}/comments/`,
         method: "POST",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
         body: { comment },
@@ -77,7 +87,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
     getChatHistory: build.query({
       query: ({ jobId, token }) => ({
-        url: `client/talents/shortlisted/${jobId}/chat/messages/`,
+        url: `/client/talents/shortlisted/${jobId}/chat/messages/`,
         method: "GET",
         headers: token ? { "X-Guest-Token": `Bearer ${token}` } : undefined,
       }),
@@ -90,6 +100,7 @@ const guestChatAPI = baseAPI.injectEndpoints({
 
 export const {
   useIdentifyGuestMutation,
+  useVerifyGuestMutation,
   useCheckGuestSessionQuery,
   useGetFavoritesQuery,
   useAddFavoriteMutation,
