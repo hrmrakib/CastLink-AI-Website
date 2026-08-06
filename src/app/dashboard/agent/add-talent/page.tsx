@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useCreateTalentMutation } from "@/redux/features/talent/talentAPI";
-import { Calendar, X } from "lucide-react";
+import { Calendar, X, Upload, FileText, CheckCircle, AlertCircle, Download } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -372,6 +372,126 @@ function formatDisplay(dates: string[]): string {
   return `${dates.length} dates selected`;
 }
 
+// Simple CSV Parser
+const parseCSV = (text: string) => {
+  const result: string[][] = [];
+  let row: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (inQuotes) {
+      if (char === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        row.push(current);
+        current = "";
+      } else if (char === '\n' || char === '\r') {
+        if (char === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
+          i++; // skip \n
+        }
+        row.push(current);
+        if (row.some(val => val.trim() !== '')) {
+          result.push(row);
+        }
+        row = [];
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+  }
+  if (current !== "" || row.length > 0) {
+    row.push(current);
+    if (row.some(val => val.trim() !== '')) {
+        result.push(row);
+    }
+  }
+  return result;
+};
+
+function BulkSuccessMessage({
+  results,
+  total,
+  success,
+  failed,
+  onReset,
+}: {
+  results: { row: number; status: 'success' | 'failed'; message?: string }[];
+  total: number;
+  success: number;
+  failed: number;
+  onReset: () => void;
+}) {
+  return (
+    <div className='mx-auto max-w-2xl'>
+      <div className='bg-white dark:bg-slate-800 rounded-lg p-8 md:p-12 shadow-lg text-center space-y-6'>
+        <div className='flex justify-center'>
+          <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+            <CheckCircle className='w-8 h-8 text-blue-600 dark:text-blue-400' />
+          </div>
+        </div>
+
+        <div>
+          <h1 className='text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2'>
+            Bulk Upload Complete
+          </h1>
+          <p className='text-slate-600 dark:text-slate-300'>
+            Processed {total} talents from CSV.
+          </p>
+        </div>
+
+        <div className='bg-slate-50 dark:bg-slate-700/50 rounded-lg p-6 text-left space-y-3'>
+          <div className='flex justify-between'>
+            <span className='text-slate-600 dark:text-slate-400'>Successfully Added:</span>
+            <span className='font-medium text-green-600 dark:text-green-400'>
+              {success}
+            </span>
+          </div>
+          <div className='flex justify-between'>
+            <span className='text-slate-600 dark:text-slate-400'>Failed:</span>
+            <span className='font-medium text-red-600 dark:text-red-400'>
+              {failed}
+            </span>
+          </div>
+        </div>
+
+        {failed > 0 && (
+          <div className='text-left mt-4 border border-red-200 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 max-h-40 overflow-y-auto'>
+            <h3 className='text-sm font-semibold text-red-800 dark:text-red-400 mb-2'>Errors:</h3>
+            <ul className='text-xs space-y-1'>
+              {results.filter(r => r.status === 'failed').map((r, i) => (
+                <li key={i} className='text-red-600 dark:text-red-300'>
+                  Row {r.row}: {r.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <button
+          onClick={onReset}
+          className='w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-colors'
+        >
+          Add More Talents
+        </button>
+      </div>
+    </div>
+  );
+}
+
 interface ImageItem {
   id: string;
   url: string;
@@ -419,7 +539,10 @@ export default function AddTalentPage() {
   const [role, setRole] = useState("Actor");
   const router = useRouter();
 
-  console.log({ role });
+  const [uploadMode, setUploadMode] = useState<"manual" | "bulk">("manual");
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [bulkProgress, setBulkProgress] = useState({ total: 0, current: 0, success: 0, failed: 0 });
+  const [bulkResults, setBulkResults] = useState<{ row: number; status: "success" | "failed"; message?: string }[]>([]);
 
   // Logic to handle skill tags
   const [skillInput, setSkillInput] = useState("");
@@ -589,32 +712,294 @@ export default function AddTalentPage() {
   const handleReset = () => {
     setSubmitted(false);
     setTalentData(null);
+    setCsvFile(null);
+    setBulkResults([]);
     handleCancel();
   };
 
-  if (submitted && talentData) {
-    return (
-      <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
-        <div className='container mx-auto px-4 py-8 md:py-12'>
-          <SuccessMessage data={talentData} onReset={handleReset} />
-        </div>
-      </main>
-    );
+  const downloadTemplate = () => {
+    const headers = ["Gender", "Name", "Height", "Waist", "Bust", "Hips", "Dress Size", "Shoe Size", "Hair Colour", "Eye Colour", "Skin Color", "Hair Type", "Continent", "Country", "Location", "Date of Birth", "Availability", "Skills", "Character"];
+    const sampleRow = ["female", "Jane Doe", "170", "60", "85", "90", "8", "39", "Brown", "Blue", "White", "Straight", "Europe", "UK", "London", "1995-05-15", "Available", "Acting, Dancing", "Actor"];
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + sampleRow.join(",");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "talent_bulk_upload_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleBulkSubmit = async () => {
+    if (!csvFile) return;
+    
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      const text = await csvFile.text();
+      const parsed = parseCSV(text);
+      
+      if (parsed.length < 2) {
+        setSubmitError("CSV file must contain a header row and at least one data row.");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const headers = parsed[0].map(h => h.trim().toLowerCase());
+      const dataRows = parsed.slice(1);
+      
+      setBulkProgress({ total: dataRows.length, current: 0, success: 0, failed: 0 });
+      setBulkResults([]);
+      
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        const rowData: Record<string, string> = {};
+        
+        headers.forEach((header, index) => {
+          rowData[header] = row[index]?.trim() || "";
+        });
+        
+        try {
+          const payload = new window.FormData();
+          
+          const genderMap: Record<string, string> = {
+            "female": "female", "f": "female", 
+            "male": "male", "m": "male", 
+            "nonbinary": "nonbinary", "nb": "nonbinary"
+          };
+          
+          const inputGender = rowData["gender"] || "";
+          const gender = genderMap[inputGender.toLowerCase()] || "female";
+          
+          payload.append("gender", gender);
+          payload.append("name", rowData["name"] || "Unknown");
+          payload.append("height", rowData["height"] || "");
+          payload.append("waist", rowData["waist"] || "");
+          payload.append("bust", rowData["bust"] || "");
+          payload.append("hips", rowData["hips"] || "");
+          payload.append("dress_size", rowData["dress size"] || "");
+          payload.append("shoe_size", rowData["shoe size"] || "");
+          payload.append("hair_colour", rowData["hair colour"] || rowData["hair color"] || "");
+          payload.append("eye_colour", rowData["eye colour"] || rowData["eye color"] || "");
+          payload.append("skin_color", rowData["skin color"] || rowData["skin colour"] || "");
+          payload.append("hair_type", rowData["hair type"] || "");
+          payload.append("continent", rowData["continent"] || "");
+          payload.append("country", rowData["country"] || "");
+          payload.append("location", rowData["location"] || "");
+          
+          let dob = rowData["date of birth"] || "";
+          if (dob && dob.includes("/")) {
+             const parts = dob.split("/");
+             if (parts.length === 3) {
+                 // Convert DD/MM/YYYY to YYYY-MM-DD
+                 dob = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+             }
+          }
+          payload.append("date_of_birth", dob);
+          
+          const availabilityInput = (rowData["availability"] || "Available").toLowerCase();
+          let isAvailable = "true";
+          let onReq = "false";
+          if (availabilityInput === "unavailable") {
+             isAvailable = "false";
+          } else if (availabilityInput === "request" || availabilityInput === "available on request") {
+             isAvailable = "true";
+             onReq = "true";
+          }
+          
+          payload.append("is_available", isAvailable);
+          payload.append("is_available_on_request", onReq);
+          payload.append("skills", rowData["skills"] || "");
+          payload.append("character", rowData["character"] || "Model");
+          
+          await createTalentMutation(payload).unwrap();
+          
+          setBulkProgress(prev => ({ ...prev, current: prev.current + 1, success: prev.success + 1 }));
+          setBulkResults(prev => [...prev, { row: i + 2, status: 'success' }]);
+        } catch (err: any) {
+          console.error("Failed to create talent from row", i + 2, err);
+          const message = err?.data?.message || err?.message || "Failed";
+          setBulkProgress(prev => ({ ...prev, current: prev.current + 1, failed: prev.failed + 1 }));
+          setBulkResults(prev => [...prev, { row: i + 2, status: 'failed', message }]);
+        }
+      }
+      
+      setSubmitted(true);
+    } catch (err) {
+       setSubmitError("Failed to parse or process CSV file.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    if (uploadMode === 'bulk') {
+      return (
+        <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
+          <div className='container mx-auto px-4 py-8 md:py-12'>
+            <BulkSuccessMessage 
+              results={bulkResults} 
+              total={bulkProgress.total} 
+              success={bulkProgress.success} 
+              failed={bulkProgress.failed} 
+              onReset={() => {
+                setSubmitted(false);
+                setCsvFile(null);
+                setBulkResults([]);
+                setUploadMode('manual');
+              }} 
+            />
+          </div>
+        </main>
+      );
+    } else if (talentData) {
+      return (
+        <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
+          <div className='container mx-auto px-4 py-8 md:py-12'>
+            <SuccessMessage data={talentData} onReset={handleReset} />
+          </div>
+        </main>
+      );
+    }
   }
 
   return (
     <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
       <div className='container mx-auto px-4 py-8 md:py-12'>
         <div className='mx-auto max-w-2xl'>
-          <div className='mb-8'>
-            <h1 className='text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2'>
-              As an Agent when adding Talent
-            </h1>
-            <p className='text-slate-600 dark:text-slate-300'>
-              Manually add a new talent profile
-            </p>
+          <div className='mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4'>
+            <div>
+              <h1 className='text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2'>
+                As an Agent when adding Talent
+              </h1>
+              <p className='text-slate-600 dark:text-slate-300'>
+                {uploadMode === 'manual' ? 'Manually add a new talent profile' : 'Bulk upload talents using a CSV file'}
+              </p>
+            </div>
+            <div className='flex p-1 bg-slate-200 dark:bg-slate-700 rounded-lg shrink-0'>
+              <button
+                onClick={() => setUploadMode('manual')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  uploadMode === 'manual' 
+                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' 
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                Manual Entry
+              </button>
+              <button
+                onClick={() => setUploadMode('bulk')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  uploadMode === 'bulk' 
+                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' 
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                Bulk Upload
+              </button>
+            </div>
           </div>
 
+          {uploadMode === 'bulk' ? (
+            <div className='space-y-6 bg-white dark:bg-slate-800 rounded-lg p-6 md:p-8 shadow-lg'>
+              <div className='flex justify-between items-center mb-4'>
+                <h2 className='text-lg font-semibold text-slate-900 dark:text-white'>Upload CSV File</h2>
+                <button
+                  type="button"
+                  onClick={downloadTemplate}
+                  className='flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors'
+                >
+                  <Download className='w-4 h-4' />
+                  Download Template
+                </button>
+              </div>
+
+              <div className='border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors'>
+                <input
+                  type='file'
+                  accept='.csv'
+                  className='hidden'
+                  id='csvUpload'
+                  onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+                />
+                <label htmlFor='csvUpload' className='cursor-pointer flex flex-col items-center gap-3'>
+                  <div className='w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center'>
+                    {csvFile ? (
+                      <FileText className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+                    ) : (
+                      <Upload className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+                    )}
+                  </div>
+                  <div>
+                    {csvFile ? (
+                      <p className='text-slate-700 dark:text-slate-200 font-medium'>{csvFile.name}</p>
+                    ) : (
+                      <p className='text-slate-700 dark:text-slate-200 font-medium'>Click to upload or drag and drop</p>
+                    )}
+                    <p className='text-sm text-slate-500 dark:text-slate-400 mt-1'>CSV files only</p>
+                  </div>
+                </label>
+              </div>
+
+              {submitError && (
+                <div className='p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2'>
+                  <AlertCircle className='w-5 h-5 text-red-500 shrink-0 mt-0.5' />
+                  <p className='text-sm text-red-600'>{submitError}</p>
+                </div>
+              )}
+
+              {isSubmitting && bulkProgress.total > 0 && (
+                <div className='space-y-2'>
+                  <div className='flex justify-between text-sm'>
+                    <span className='text-slate-600 dark:text-slate-400'>Processing...</span>
+                    <span className='text-slate-900 dark:text-white font-medium'>
+                      {bulkProgress.current} / {bulkProgress.total}
+                    </span>
+                  </div>
+                  <div className='w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2'>
+                    <div 
+                      className='bg-blue-600 h-2 rounded-full transition-all duration-300' 
+                      style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className='flex flex-col sm:flex-row gap-3 pt-4'>
+                <button
+                  type='button'
+                  onClick={handleBulkSubmit}
+                  disabled={!csvFile || isSubmitting}
+                  className='flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-full transition-colors flex items-center justify-center gap-2'
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                      Processing...
+                    </>
+                  ) : (
+                    "Upload and Process"
+                  )}
+                </button>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setCsvFile(null);
+                    setSubmitError(null);
+                  }}
+                  disabled={isSubmitting || !csvFile}
+                  className='flex-1 px-6 py-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 disabled:opacity-60 disabled:cursor-not-allowed text-slate-900 dark:text-white font-semibold rounded-full transition-colors'
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+          ) : (
           <form
             onSubmit={handleSubmit}
             className='space-y-6 bg-white dark:bg-slate-800 rounded-lg p-6 md:p-8 shadow-lg'
@@ -1197,6 +1582,7 @@ export default function AddTalentPage() {
               </button>
             </div>
           </form>
+          )}
         </div>
       </div>
 
