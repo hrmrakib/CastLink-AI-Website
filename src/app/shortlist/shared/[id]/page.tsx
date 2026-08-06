@@ -15,6 +15,7 @@ import {
   Calendar,
   ArrowLeft,
   Star,
+  MessageSquareText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -115,6 +116,12 @@ export interface ShortlistJobDetail {
   created_at: string;
   updated_at: string;
   shortlisted_talents: ShortlistedTalent[];
+  job_roles?: {
+    id: number;
+    job_role: string;
+    assign_status: boolean;
+    talent_id: number | null;
+  }[];
 }
 
 // ── Internal normalised UI shape ─────────────────────────────────────────────
@@ -189,14 +196,44 @@ function normalise(raw: ShortlistedTalent): Talent {
   };
 }
 
-function groupByRole(talents: ShortlistedTalent[]): Record<string, Talent[]> {
+function groupByRole(talents: ShortlistedTalent[], jobRoles?: any[]): Record<string, Talent[]> {
   const groups: Record<string, Talent[]> = {};
-  for (const raw of talents) {
-    const t = normalise(raw);
-    const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(t);
+  
+  if (!jobRoles || jobRoles.length === 0) {
+    for (const raw of talents) {
+      const t = normalise(raw);
+      const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(t);
+    }
+    return groups;
   }
+  
+  const normalisedTalents = new Map(talents.map(t => [t.talent_info.talent_id, normalise(t)]));
+
+  for (const jr of jobRoles) {
+    if (!jr.job_role) continue;
+    const roleName = jr.job_role.trim();
+    if (!groups[roleName]) {
+      groups[roleName] = [];
+    }
+    
+    if (jr.talent_id && normalisedTalents.has(jr.talent_id)) {
+      const talent = normalisedTalents.get(jr.talent_id)!;
+      if (!groups[roleName].some(t => t.talent_id === talent.talent_id)) {
+        groups[roleName].push(talent);
+      }
+    }
+  }
+  
+  const assignedTalentIds = new Set(jobRoles.map(jr => jr.talent_id).filter(id => id != null));
+  for (const t of talents) {
+    if (!assignedTalentIds.has(t.talent_info.talent_id)) {
+      if (!groups["Unassigned"]) groups["Unassigned"] = [];
+      groups["Unassigned"].push(normalisedTalents.get(t.talent_info.talent_id)!);
+    }
+  }
+
   return groups;
 }
 
@@ -854,19 +891,7 @@ function ModelCard({
             : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
             }`}
         >
-          <svg
-            className='w-4 h-4'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth='2'
-              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
-            ></path>
-          </svg>
+          <MessageSquareText size={16} />
           {comments.length > 0 ? `${comments.length} comments` : "Comment"}
         </button>
 
@@ -1198,7 +1223,7 @@ export default function ShortlistDetailPage() {
     if (!data) return;
     const job: ShortlistJobDetail = data?.data ?? data;
     const talents: ShortlistedTalent[] = job?.shortlisted_talents ?? [];
-    setGrouped(groupByRole(talents));
+    setGrouped(groupByRole(talents, job?.job_roles));
   }, [data]);
 
   const allTalents = Object.values(grouped).flat();
@@ -1402,11 +1427,11 @@ export default function ShortlistDetailPage() {
           <>
             {Object.entries(grouped)
               ?.filter(([, talents]) => talents?.length > 0)
-              ?.map(([roleKey, talents]) => (
+              ?.map(([roleKey, talents], index) => (
                 <section key={roleKey}>
                   <div className='flex justify-between items-end mb-6'>
                     <h2 className='text-xl md:text-2xl font-bold text-gray-900 capitalize'>
-                      {roleKey}
+                      {roleKey.toLowerCase() === "unassigned" ? roleKey : `Role-${index + 1}: ${roleKey}`}
                     </h2>
                     <span className='text-sm font-semibold text-gray-500'>
                       {talents.length} models

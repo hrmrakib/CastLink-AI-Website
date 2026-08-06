@@ -751,113 +751,75 @@ export default function AddTalentPage() {
       }
       
       const headers = parsed[0].map(h => h.trim().toLowerCase());
-      const dataRows = parsed.slice(1);
+      const row = parsed[1];
+      const rowData: Record<string, string> = {};
       
-      setBulkProgress({ total: dataRows.length, current: 0, success: 0, failed: 0 });
-      setBulkResults([]);
+      headers.forEach((header, index) => {
+        rowData[header] = row[index]?.trim() || "";
+      });
       
-      for (let i = 0; i < dataRows.length; i++) {
-        const row = dataRows[i];
-        const rowData: Record<string, string> = {};
-        
-        headers.forEach((header, index) => {
-          rowData[header] = row[index]?.trim() || "";
-        });
-        
-        try {
-          const payload = new window.FormData();
-          
-          const genderMap: Record<string, string> = {
-            "female": "female", "f": "female", 
-            "male": "male", "m": "male", 
-            "nonbinary": "nonbinary", "nb": "nonbinary"
-          };
-          
-          const inputGender = rowData["gender"] || "";
-          const gender = genderMap[inputGender.toLowerCase()] || "female";
-          
-          payload.append("gender", gender);
-          payload.append("name", rowData["name"] || "Unknown");
-          payload.append("height", rowData["height"] || "");
-          payload.append("waist", rowData["waist"] || "");
-          payload.append("bust", rowData["bust"] || "");
-          payload.append("hips", rowData["hips"] || "");
-          payload.append("dress_size", rowData["dress size"] || "");
-          payload.append("shoe_size", rowData["shoe size"] || "");
-          payload.append("hair_colour", rowData["hair colour"] || rowData["hair color"] || "");
-          payload.append("eye_colour", rowData["eye colour"] || rowData["eye color"] || "");
-          payload.append("skin_color", rowData["skin color"] || rowData["skin colour"] || "");
-          payload.append("hair_type", rowData["hair type"] || "");
-          payload.append("continent", rowData["continent"] || "");
-          payload.append("country", rowData["country"] || "");
-          payload.append("location", rowData["location"] || "");
-          
-          let dob = rowData["date of birth"] || "";
-          if (dob && dob.includes("/")) {
-             const parts = dob.split("/");
-             if (parts.length === 3) {
-                 // Convert DD/MM/YYYY to YYYY-MM-DD
-                 dob = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-             }
+      const genderMap: Record<string, string> = {
+        "female": "female", "f": "female", 
+        "male": "male", "m": "male", 
+        "nonbinary": "nonbinary", "nb": "nonbinary"
+      };
+      
+      const inputGender = rowData["gender"] || "";
+      const gender = genderMap[inputGender.toLowerCase()] || "female";
+      
+      let dob = rowData["date of birth"] || "";
+      if (dob && dob.includes("/")) {
+          const parts = dob.split("/");
+          if (parts.length === 3) {
+              // Convert DD/MM/YYYY to YYYY-MM-DD
+              dob = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
           }
-          payload.append("date_of_birth", dob);
-          
-          const availabilityInput = (rowData["availability"] || "Available").toLowerCase();
-          let isAvailable = "true";
-          let onReq = "false";
-          if (availabilityInput === "unavailable") {
-             isAvailable = "false";
-          } else if (availabilityInput === "request" || availabilityInput === "available on request") {
-             isAvailable = "true";
-             onReq = "true";
-          }
-          
-          payload.append("is_available", isAvailable);
-          payload.append("is_available_on_request", onReq);
-          payload.append("skills", rowData["skills"] || "");
-          payload.append("character", rowData["character"] || "Model");
-          
-          await createTalentMutation(payload).unwrap();
-          
-          setBulkProgress(prev => ({ ...prev, current: prev.current + 1, success: prev.success + 1 }));
-          setBulkResults(prev => [...prev, { row: i + 2, status: 'success' }]);
-        } catch (err: any) {
-          console.error("Failed to create talent from row", i + 2, err);
-          const message = err?.data?.message || err?.message || "Failed";
-          setBulkProgress(prev => ({ ...prev, current: prev.current + 1, failed: prev.failed + 1 }));
-          setBulkResults(prev => [...prev, { row: i + 2, status: 'failed', message }]);
-        }
       }
       
-      setSubmitted(true);
+      const availabilityInput = (rowData["availability"] || "Available").toLowerCase();
+      let availability = true;
+      let availableOnRequest = false;
+      if (availabilityInput === "unavailable") {
+         availability = false;
+      } else if (availabilityInput === "request" || availabilityInput === "available on request") {
+         availability = true;
+         availableOnRequest = true;
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        gender: gender as any,
+        name: rowData["name"] || "",
+        height: rowData["height"] || "",
+        waist: rowData["waist"] || "",
+        bust: rowData["bust"] || "",
+        hips: rowData["hips"] || "",
+        dressSize: rowData["dress size"] || "",
+        shoeSize: rowData["shoe size"] || "",
+        hairColor: rowData["hair colour"] || rowData["hair color"] || "",
+        eyeColor: rowData["eye colour"] || rowData["eye color"] || "",
+        skinColor: rowData["skin color"] || rowData["skin colour"] || "",
+        hairType: rowData["hair type"] || "",
+        continent: rowData["continent"] || "",
+        country: rowData["country"] || "",
+        location: rowData["location"] || "",
+        dateOfBirth: dob,
+        availability,
+        availableOnRequest,
+        skills: rowData["skills"] || "",
+      }));
+      
+      setUploadMode('manual');
+      setCsvFile(null);
     } catch (err) {
-       setSubmitError("Failed to parse or process CSV file.");
+       setSubmitError("Failed to parse CSV file.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (submitted) {
-    if (uploadMode === 'bulk') {
-      return (
-        <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
-          <div className='container mx-auto px-4 py-8 md:py-12'>
-            <BulkSuccessMessage 
-              results={bulkResults} 
-              total={bulkProgress.total} 
-              success={bulkProgress.success} 
-              failed={bulkProgress.failed} 
-              onReset={() => {
-                setSubmitted(false);
-                setCsvFile(null);
-                setBulkResults([]);
-                setUploadMode('manual');
-              }} 
-            />
-          </div>
-        </main>
-      );
-    } else if (talentData) {
+    if (talentData) {
       return (
         <main className='min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800'>
           <div className='container mx-auto px-4 py-8 md:py-12'>
@@ -953,18 +915,14 @@ export default function AddTalentPage() {
                 </div>
               )}
 
-              {isSubmitting && bulkProgress.total > 0 && (
+              {isSubmitting && (
                 <div className='space-y-2'>
                   <div className='flex justify-between text-sm'>
                     <span className='text-slate-600 dark:text-slate-400'>Processing...</span>
-                    <span className='text-slate-900 dark:text-white font-medium'>
-                      {bulkProgress.current} / {bulkProgress.total}
-                    </span>
                   </div>
                   <div className='w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2'>
                     <div 
-                      className='bg-blue-600 h-2 rounded-full transition-all duration-300' 
-                      style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
+                      className='bg-blue-600 h-2 rounded-full transition-all duration-300 w-full' 
                     />
                   </div>
                 </div>
@@ -983,7 +941,7 @@ export default function AddTalentPage() {
                       Processing...
                     </>
                   ) : (
-                    "Upload and Process"
+                    "Autofill Form"
                   )}
                 </button>
                 <button
