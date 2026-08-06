@@ -786,10 +786,10 @@ function ModelCard({
   };
 
   return (
-    <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]'>
+    <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group'>
       {/* Image & Stats Overlay */}
       <div
-        className='relative aspect-4/3 w-full h-72 overflow-hidden group cursor-pointer'
+        className='relative aspect-[3/4] w-full sm:h-[400px] overflow-hidden cursor-pointer'
         onClick={() => onView(talent)}
       >
         <Image
@@ -797,63 +797,39 @@ function ModelCard({
           alt={talent.name}
           fill
           unoptimized
-          className='object-contain w-full h-full bg-gray-100'
+          className='object-cover w-full h-full bg-gray-100 transition-transform duration-500 group-hover:scale-105'
         />
 
-        {/* Bottom Stats Gradient Overlay */}
-        <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 pointer-events-none'>
-          <h3 className='text-white font-semibold text-lg mb-2 pointer-events-auto truncate'>
+        {/* Default View (Name only with slight gradient) */}
+        <div className='absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-4 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none'>
+          <h3 className='text-white font-semibold text-lg truncate'>
             {talent.name}
           </h3>
-          <div className='grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] text-gray-200 pointer-events-auto'>
-            <p>
-              Height{" "}
-              <span className='text-white font-medium'>
-                {talent.height || "—"}
-              </span>
-            </p>
-            <p>
-              Shoe{" "}
-              <span className='text-white font-medium'>
-                {talent.shoe_size || "—"}
-              </span>
-            </p>
-            <p>
-              Bust{" "}
-              <span className='text-white font-medium'>
-                {talent.bust || "—"}
-              </span>
-            </p>
-            <p>
-              Hair{" "}
-              <span className='text-white font-medium'>
-                {talent.hair_colour || "—"}
-              </span>
-            </p>
-            <p>
-              Waist{" "}
-              <span className='text-white font-medium'>
-                {talent.waist || "—"}
-              </span>
-            </p>
-            <p>
-              Eyes{" "}
-              <span className='text-white font-medium'>
-                {talent.eye_colour || "—"}
-              </span>
-            </p>
-            <p>
-              Hips{" "}
-              <span className='text-white font-medium'>
-                {talent.hips || "—"}
-              </span>
-            </p>
-            <p>
-              Role{" "}
-              <span className='text-white font-medium capitalize truncate'>
-                {talent.role || "—"}
-              </span>
-            </p>
+        </div>
+
+        {/* Hover Stats Overlay */}
+        <div className='absolute inset-0 bg-black/70 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none'>
+          <h3 className='text-white font-semibold text-lg mb-4 pointer-events-auto truncate'>
+            {talent.name}
+          </h3>
+          <div className='flex flex-col gap-2 text-[12px] font-medium tracking-wide text-gray-300'>
+            {[
+              { label: "Height", value: talent.height },
+              { label: "Bust", value: talent.bust },
+              { label: "Waist", value: talent.waist },
+              { label: "Hips", value: talent.hips },
+              { label: "Dress", value: talent.dress_size },
+              { label: "Shoe", value: talent.shoe_size },
+              { label: "Hair", value: talent.hair_colour },
+            ].map(
+              (stat, i) =>
+                stat.value && (
+                  <div key={i} className='grid grid-cols-2 gap-4 text-left pointer-events-auto'>
+                    <span className='opacity-80'>{stat.label}</span>
+                    <span className='text-white font-normal truncate'>{stat.value}</span>
+                  </div>
+                ),
+            )}
           </div>
         </div>
       </div>
@@ -888,7 +864,7 @@ function ModelCard({
               strokeLinecap='round'
               strokeLinejoin='round'
               strokeWidth='2'
-              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
+              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
             ></path>
           </svg>
           {comments.length > 0 ? `${comments.length} comments` : "Comment"}
@@ -901,8 +877,6 @@ function ModelCard({
         >
           <Eye className='w-5 h-5' />
         </button>
-
-        {/* Delete button removed for shared public link */}
       </div>
 
       {/* Inline Thread Bubble */}
@@ -1328,79 +1302,6 @@ export default function ShortlistDetailPage() {
     });
 
     doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
-  };
-
-  // ── Mutations ────────────────────────────────────────────────────────────
-
-  const [polasRequestMutation, { isLoading: polasLoading }] =
-    usePolasRequestMutation();
-  const [selfTapRequestMutation, { isLoading: selfTapLoading }] =
-    useSelfTapRequestMutation();
-  const [eCastingRequestMutation, { isLoading: eCastingLoading }] =
-    useECastingRequestMutation();
-  const [shortlistTalentMutation, { isLoading: shortlistLoading }] =
-    useShortlistTalentMutation();
-  const [bookTalentMutation, { isLoading: bookLoading }] =
-    useBookTalentMutation();
-
-  const handlePolasRequest = async (talentId: number) => {
-    try {
-      const res = await polasRequestMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
-    } catch (error: any) {
-      toast.error(error?.data?.status_message);
-    }
-  };
-
-  const handleTalentBooking = async (talentId: number) => {
-    try {
-      const res = await bookTalentMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
-    } catch (error: any) {
-      toast.error(error?.data?.status_message);
-    }
-  };
-
-  const handleECastingRequest = async (talentId: number) => {
-    try {
-      const res = await eCastingRequestMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
-    } catch (error: any) {
-      toast.error(error?.data?.status_message);
-    }
-  };
-
-  const handleSelftapRequest = async (talentId: number) => {
-    try {
-      const res = await selfTapRequestMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
-    } catch (error: any) {
-      toast.error(error?.data?.status_message);
-    }
-  };
-
-  const handleShortListTalent = async (talentId: number) => {
-    try {
-      const res = await shortlistTalentMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
-    } catch (error: any) {
-      toast.error(error?.data?.status_message);
-    }
   };
 
   // ── Derive job meta ───────────────────────────────────────────────────────
