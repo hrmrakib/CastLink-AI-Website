@@ -149,6 +149,16 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
   const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"chat" | "activity">("chat");
 
+  const [showChatPane, setShowChatPane] = useState(true);
+  const [showActivityPane, setShowActivityPane] = useState(true);
+
+  // If both panes are closed by the user, close the entire view
+  useEffect(() => {
+    if (!showChatPane && !showActivityPane) {
+      onClose();
+    }
+  }, [showChatPane, showActivityPane, onClose]);
+
   // Fetch comments & activity
   useEffect(() => {
     if (guest.id && jobId) {
@@ -240,23 +250,125 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
         )}
       </div>
 
-      {/* Column 1: Comments & Activity Feed */}
-      {(activities.length > 0 || isActivityLoading) && (
-        <div className={`h-full w-full md:w-1/2 lg:w-5/12 border-r border-gray-200 bg-gray-50/30 overflow-hidden flex-col ${activeTab === 'activity' ? 'flex flex-1' : 'hidden md:flex md:shrink-0'}`}>
+      {/* Column 1 (Now Chat Feed) */}
+      {showChatPane && (
+        <div className={`h-full bg-gray-50 overflow-hidden flex-col ${(!showActivityPane || (activities.length === 0 && !isActivityLoading)) ? 'w-full flex-1 flex' : 'w-full md:w-1/2 lg:w-7/12 md:flex-1'} ${activeTab === 'chat' ? 'flex flex-1' : 'hidden md:flex'}`}>
           <div className='hidden md:flex p-4 border-b border-gray-200 shrink-0 bg-white items-center justify-between'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold uppercase'>
-                {guest.name.substring(0, 2)}
-              </div>
+               {(!showActivityPane || (activities.length === 0 && !isActivityLoading)) && (
+                  <div className='w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold uppercase'>
+                    {guest.name.substring(0, 2)}
+                  </div>
+               )}
+               <div>
+                 <h2 className='font-bold text-gray-900'>{(!showActivityPane || (activities.length === 0 && !isActivityLoading)) ? guest.name : "Live Chat"}</h2>
+                 <p className='text-xs text-gray-500'>
+                   {isAuthenticated ? (
+                     <span className="text-green-500 font-medium flex items-center gap-1">
+                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Connected
+                     </span>
+                   ) : "Connecting..."}
+                 </p>
+               </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowChatPane(false)}
+              className='p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100'
+              title="Close Chat"
+            >
+              <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12'></path></svg>
+            </button>
+          </div>
+          
+          <div ref={chatContainerRef} className='flex-1 overflow-y-auto p-4 flex flex-col gap-4'>
+            <div className="text-center my-2">
+               <span className="bg-gray-200/60 text-gray-500 text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full">
+                 Chat History
+               </span>
+            </div>
+            {displayMessages.map((msg: any, i: number) => {
+              const isMe = msg.sender === "agent" || msg.sender_type === "agent";
+              
+              return (
+                <div key={i} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                  {isMe && (
+                    <div className="h-8 flex items-center shrink-0">
+                      {msg.is_seen_by_client ? (
+                        <span title="Seen" className="text-blue-500">
+                          <Eye size={14}  />
+                        </span>
+                      ) : (
+                        <span title="Sent" className="text-gray-400">
+                          <CheckCircle2 size={14} />
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className={`p-3 rounded-2xl shadow-sm text-sm border max-w-[75%] ${
+                    isMe 
+                      ? 'bg-blue-600 text-white border-blue-600 rounded-tr-none' 
+                      : 'bg-white text-gray-800 border-gray-100 rounded-tl-none'
+                  }`}>
+                    <span className="break-words">{msg.text || msg.content}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Input Area */}
+          <div className='p-4 bg-white border-t border-gray-100 shrink-0'>
+            <div className='flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl p-1.5 shadow-inner focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all'>
+              <textarea 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={`Reply to ${guest.name}...`}
+                className='flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none resize-none min-h-[40px] max-h-[120px]'
+                rows={1}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+              />
+              <button 
+                onClick={handleSend}
+                disabled={!message.trim() || !isAuthenticated}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                  message.trim() && isAuthenticated 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                <Send className='w-4 h-4 ml-0.5' />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Column 2 (Now Comments & Activity Feed) */}
+      {(activities.length > 0 || isActivityLoading) && showActivityPane && (
+        <div className={`h-full w-full ${!showChatPane ? 'md:w-full flex-1 flex' : 'md:w-1/2 lg:w-5/12 hidden md:flex md:shrink-0'} border-l border-gray-200 bg-gray-50/30 overflow-hidden flex-col ${activeTab === 'activity' ? 'flex flex-1' : ''}`}>
+          <div className='hidden md:flex p-4 border-b border-gray-200 shrink-0 bg-white items-center justify-between'>
+            <div className='flex items-center gap-3'>
+              {(!showChatPane) && (
+                <div className='w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold uppercase'>
+                  {guest.name.substring(0, 2)}
+                </div>
+              )}
               <div>
-                <h2 className='font-bold text-gray-900'>{guest.name}</h2>
-                <p className='text-xs text-gray-500'>Guest Activity</p>
+                <h2 className='font-bold text-gray-900'>{(!showChatPane) ? guest.name : "Guest Activity"}</h2>
+                <p className='text-xs text-gray-500'>{(!showChatPane) ? "Guest Activity" : "Activity & Comments"}</p>
               </div>
             </div>
             <button 
-              onClick={onClose}
+              onClick={() => setShowActivityPane(false)}
               className='p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100'
-              title="Close"
+              title="Close Activity"
             >
               <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12'></path></svg>
             </button>
@@ -311,109 +423,6 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
           </div>
         </div>
       )}
-
-      {/* Column 2: Chat Feed */}
-      <div className={`h-full bg-gray-50 overflow-hidden flex-col ${(activities.length === 0 && !isActivityLoading) ? 'w-full flex-1 flex' : 'w-full md:w-1/2 lg:w-7/12 md:flex-1'} ${activeTab === 'chat' ? 'flex flex-1' : 'hidden md:flex'}`}>
-
-        <div className='hidden md:flex p-4 border-b border-gray-200 shrink-0 bg-white items-center justify-between'>
-          <div className='flex items-center gap-3'>
-             {(activities.length === 0 && !isActivityLoading) && (
-                <div className='w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold uppercase'>
-                  {guest.name.substring(0, 2)}
-                </div>
-             )}
-             <div>
-               <h2 className='font-bold text-gray-900'>{(activities.length === 0 && !isActivityLoading) ? guest.name : "Live Chat"}</h2>
-               <p className='text-xs text-gray-500'>
-                 {isAuthenticated ? (
-                   <span className="text-green-500 font-medium flex items-center gap-1">
-                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Connected
-                   </span>
-                 ) : "Connecting..."}
-               </p>
-             </div>
-          </div>
-          {(activities.length === 0 && !isActivityLoading) && (
-             <button 
-               onClick={onClose}
-               className='p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100'
-             >
-               <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12'></path></svg>
-             </button>
-          )}
-        </div>
-        
-        <div ref={chatContainerRef} className='flex-1 overflow-y-auto p-4 flex flex-col gap-4'>
-          <div className="text-center my-2">
-             <span className="bg-gray-200/60 text-gray-500 text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full">
-               Chat History
-             </span>
-          </div>
-          {displayMessages.map((msg: any, i: number) => {
-            const isMe = msg.sender === "agent" || msg.sender_type === "agent";
-            
-            return (
-              <div key={i} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                {isMe && (
-                  <div className="h-8 flex items-center shrink-0">
-                    {msg.is_seen_by_client ? (
-                      <span title="Seen" className="text-blue-500">
-                        <Eye size={14}  />
-                      </span>
-                    ) : (
-                      <span title="Sent" className="text-gray-400">
-                        <CheckCircle2 size={14} />
-                      </span>
-                    )}
-                  </div>
-                )}
-                
-                {/* <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 uppercase'}`}>
-                  {isMe ? null : guest.name.substring(0, 2)}
-                </div> */}
-                
-                <div className={`p-3 rounded-2xl shadow-sm text-sm border max-w-[75%] ${
-                  isMe 
-                    ? 'bg-blue-600 text-white border-blue-600 rounded-tr-none' 
-                    : 'bg-white text-gray-800 border-gray-100 rounded-tl-none'
-                }`}>
-                  <span className="break-words">{msg.text || msg.content}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Input Area */}
-        <div className='p-4 bg-white border-t border-gray-100 shrink-0'>
-          <div className='flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl p-1.5 shadow-inner focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all'>
-            <textarea 
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={`Reply to ${guest.name}...`}
-              className='flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none resize-none min-h-[40px] max-h-[120px]'
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-            />
-            <button 
-              onClick={handleSend}
-              disabled={!message.trim() || !isAuthenticated}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                message.trim() && isAuthenticated 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <Send className='w-4 h-4 ml-0.5' />
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
