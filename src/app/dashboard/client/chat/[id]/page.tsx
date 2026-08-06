@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { 
@@ -8,7 +8,7 @@ import {
   useGetCommentAndActivitiesMutation 
 } from "@/redux/features/client/chatCommentAPI";
 import { ClientChatProvider, useClientChat } from "@/provider/ClientChatProvider";
-import { Eye, CheckCircle2, Send, MessageCircle, Heart, User, Clock, ArrowLeft } from "lucide-react";
+import { Eye, CheckCircle2, Send, MessageCircle, Heart, Clock, ArrowLeft } from "lucide-react";
 
 // --- Types ---
 interface Guest {
