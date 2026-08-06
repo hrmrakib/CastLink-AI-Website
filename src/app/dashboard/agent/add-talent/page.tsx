@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { getImageUrl } from "@/lib/imagePath";
+import { toast } from "sonner";
 
 interface FormData {
   gender: "female" | "male" | "nonbinary";
@@ -650,13 +651,11 @@ export default function AddTalentPage() {
       setTalentData({ ...formData, uploadedImages: images.map((i) => i.file) });
       setShootDates([]);
       setSubmitted(true);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Failed to create talent:", err);
-      const message =
-        err && typeof err === "object" && "data" in err
-          ? (err as { data?: { message?: string } }).data?.message
-          : undefined;
-      setSubmitError(message ?? "Something went wrong. Please try again.");
+      const message = err?.data?.detail || err?.data?.message || "Something went wrong. Please try again.";
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -811,8 +810,10 @@ export default function AddTalentPage() {
       
       setUploadMode('manual');
       setCsvFile(null);
-    } catch (err) {
-       setSubmitError("Failed to parse CSV file.");
+    } catch (err: any) {
+       const message = err?.data?.detail || err?.data?.message || "Failed to parse or process CSV file.";
+       setSubmitError(message);
+       toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

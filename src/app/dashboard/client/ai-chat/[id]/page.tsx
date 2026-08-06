@@ -58,6 +58,7 @@ import { ChatSkeleton } from "@/components/loading/ChatSkeleton";
 import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
 import { setConversation } from "@/redux/features/messages/conversationSlice";
 import { formatAvailabilityDate } from "@/utils/formatAvailabilityDate";
+import { getAIImageUrl, getImageUrl } from "@/lib/imagePath";
 
 interface Message {
   id: number;
@@ -664,7 +665,7 @@ export default function AIDynamicPage() {
                                   {/* Profile Card */}
                                   <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
                                     <Image
-                                      src={imageUrl}
+                                      src={getImageUrl(imageUrl)}
                                       alt={profile.name}
                                       width={600}
                                       height={600}
