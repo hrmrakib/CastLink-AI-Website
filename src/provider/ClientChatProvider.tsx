@@ -70,9 +70,11 @@ export const ClientChatProvider = ({ children }: { children: React.ReactNode }) 
     currentThreadId.current = threadId;
     setIsAuthenticated(false);
 
-    // Dynamic protocol to avoid SSL errors in local dev
     const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//10.10.29.50:8050/ws/client-chat/${threadId}/`);
+    const baseWsUrl = process.env.NEXT_PUBLIC_SOCKET_API_URL 
+      ? process.env.NEXT_PUBLIC_SOCKET_API_URL.replace(/\/ws\/chat\/?$/, '') 
+      : `${protocol}//10.10.29.50:8050`;
+    const ws = new WebSocket(`${baseWsUrl}/ws/client-chat/${threadId}/`);
     ws.onopen = () => {
       console.log("ClientChat WebSocket connected. Authenticating...");
 
