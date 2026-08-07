@@ -35,7 +35,10 @@ import Image from "next/image";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useClientChat, ClientChatProvider } from "@/provider/ClientChatProvider";
+import {
+  useClientChat,
+  ClientChatProvider,
+} from "@/provider/ClientChatProvider";
 import {
   useBookTalentMutation,
   useDeleteSingleTalentFromShortlistMutation,
@@ -196,9 +199,12 @@ function normalise(raw: ShortlistedTalent): Talent {
   };
 }
 
-function groupByRole(talents: ShortlistedTalent[], jobRoles?: any[]): Record<string, Talent[]> {
+function groupByRole(
+  talents: ShortlistedTalent[],
+  jobRoles?: any[],
+): Record<string, Talent[]> {
   const groups: Record<string, Talent[]> = {};
-  
+
   if (!jobRoles || jobRoles.length === 0) {
     for (const raw of talents) {
       const t = normalise(raw);
@@ -208,8 +214,10 @@ function groupByRole(talents: ShortlistedTalent[], jobRoles?: any[]): Record<str
     }
     return groups;
   }
-  
-  const normalisedTalents = new Map(talents.map(t => [t.talent_info.talent_id, normalise(t)]));
+
+  const normalisedTalents = new Map(
+    talents.map((t) => [t.talent_info.talent_id, normalise(t)]),
+  );
 
   for (const jr of jobRoles) {
     if (!jr.job_role) continue;
@@ -217,20 +225,24 @@ function groupByRole(talents: ShortlistedTalent[], jobRoles?: any[]): Record<str
     if (!groups[roleName]) {
       groups[roleName] = [];
     }
-    
+
     if (jr.talent_id && normalisedTalents.has(jr.talent_id)) {
       const talent = normalisedTalents.get(jr.talent_id)!;
-      if (!groups[roleName].some(t => t.talent_id === talent.talent_id)) {
+      if (!groups[roleName].some((t) => t.talent_id === talent.talent_id)) {
         groups[roleName].push(talent);
       }
     }
   }
-  
-  const assignedTalentIds = new Set(jobRoles.map(jr => jr.talent_id).filter(id => id != null));
+
+  const assignedTalentIds = new Set(
+    jobRoles.map((jr) => jr.talent_id).filter((id) => id != null),
+  );
   for (const t of talents) {
     if (!assignedTalentIds.has(t.talent_info.talent_id)) {
       if (!groups["Unassigned"]) groups["Unassigned"] = [];
-      groups["Unassigned"].push(normalisedTalents.get(t.talent_info.talent_id)!);
+      groups["Unassigned"].push(
+        normalisedTalents.get(t.talent_info.talent_id)!,
+      );
     }
   }
 
@@ -276,14 +288,15 @@ function IdentifyModal({
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
 
-  const [identifyGuest, { isLoading: isIdentifying }] = useIdentifyGuestMutation();
+  const [identifyGuest, { isLoading: isIdentifying }] =
+    useIdentifyGuestMutation();
   const [verifyGuest, { isLoading: isVerifying }] = useVerifyGuestMutation();
 
   const handleIdentitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await identifyGuest({ jobId, name, email }).unwrap();
-      
+
       // Look for otp_required flag
       if (res?.data?.otp_required || res?.otp_required) {
         setStep("otp");
@@ -319,11 +332,11 @@ function IdentifyModal({
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await verifyGuest({ 
-        jobId, 
-        body: { email, otp, name } // passing email, otp, and name
+      const res = await verifyGuest({
+        jobId,
+        body: { email, otp, name }, // passing email, otp, and name
       }).unwrap();
-      
+
       const token = res?.guest_token || res?.data?.guest_token;
       const threadId = res?.thread_id || res?.data?.thread_id;
       const guestClient = res?.guest_client || res?.data?.guest_client;
@@ -353,9 +366,9 @@ function IdentifyModal({
     <div className='fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
       <div className='bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative'>
         {step === "otp" && (
-          <button 
+          <button
             onClick={() => setStep("identity")}
-            className="absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors"
+            className='absolute top-6 left-6 text-gray-400 hover:text-gray-600 transition-colors'
           >
             <ArrowLeft size={20} />
           </button>
@@ -365,8 +378,8 @@ function IdentifyModal({
             {step === "identity" ? "Welcome!" : "Verify Your Email"}
           </h2>
           <p className='text-gray-500 mb-6'>
-            {step === "identity" 
-              ? "Please enter your details to view and interact with this shortlist." 
+            {step === "identity"
+              ? "Please enter your details to view and interact with this shortlist."
               : `We've sent a verification code to ${email}.`}
           </p>
         </div>
@@ -374,7 +387,9 @@ function IdentifyModal({
         {step === "identity" ? (
           <form onSubmit={handleIdentitySubmit} className='flex flex-col gap-4'>
             <div>
-              <label className='block text-sm font-medium mb-1'>Full Name</label>
+              <label className='block text-sm font-medium mb-1'>
+                Full Name
+              </label>
               <input
                 required
                 type='text'
@@ -428,7 +443,9 @@ function IdentifyModal({
         ) : (
           <form onSubmit={handleOtpSubmit} className='flex flex-col gap-4'>
             <div>
-              <label className='block text-sm font-medium mb-1'>Verification Code</label>
+              <label className='block text-sm font-medium mb-1'>
+                Verification Code
+              </label>
               <input
                 required
                 type='text'
@@ -507,15 +524,23 @@ const ChatWidget = ({
   const rawData = chatData?.data ?? chatData;
   const fallbackHistory = Array.isArray(rawData)
     ? rawData
-    : (Array.isArray(rawData?.results) ? rawData.results : (Array.isArray(rawData?.messages) ? rawData.messages : (Array.isArray(rawData?.data?.messages) ? rawData.data.messages : (Array.isArray(rawData?.data) ? rawData.data : []))));
+    : Array.isArray(rawData?.results)
+      ? rawData.results
+      : Array.isArray(rawData?.messages)
+        ? rawData.messages
+        : Array.isArray(rawData?.data?.messages)
+          ? rawData.data.messages
+          : Array.isArray(rawData?.data)
+            ? rawData.data
+            : [];
 
   // Use WS messages if we have hydrated history, otherwise combine REST history with optimistic messages
   // We can assume we have hydrated history if isAuthenticated is true or if we received a fetch_chat event (which populates non-optimistic messages).
-  const hasServerMessages = messages.some(m => !m.isOptimistic);
+  const hasServerMessages = messages.some((m) => !m.isOptimistic);
 
   const displayMessages = hasServerMessages
     ? messages
-    : [...fallbackHistory, ...messages.filter(m => m.isOptimistic)];
+    : [...fallbackHistory, ...messages.filter((m) => m.isOptimistic)];
 
   useEffect(() => {
     if (guestToken && guestThread) {
@@ -591,33 +616,37 @@ const ChatWidget = ({
           >
             {displayMessages.length > 0 ? (
               displayMessages.map((msg: any, i: number) => {
-                const isClient = msg.sender === "client" || msg.sender_type === "client";
+                const isClient =
+                  msg.sender === "client" || msg.sender_type === "client";
                 return (
                   <div
                     key={i}
                     className={`flex items-start gap-2 ${isClient ? "flex-row-reverse" : ""}`}
                   >
                     {isClient && (
-                      <div className="h-8 flex items-center shrink-0">
+                      <div className='h-8 flex items-center shrink-0'>
                         {msg.is_seen_by_agent ? (
-                          <span title="Seen by agent">
-                            <Eye size={14} className="text-blue-500" />
+                          <span title='Seen by agent'>
+                            <Eye size={14} className='text-blue-500' />
                           </span>
                         ) : (
-                          <span title="Not seen by agent">
-                            <CheckCircle2 size={14} className="text-gray-400" />
+                          <span title='Not seen by agent'>
+                            <CheckCircle2 size={14} className='text-gray-400' />
                           </span>
                         )}
                       </div>
                     )}
-                  
+
                     <div
-                      className={`p-3 rounded-2xl shadow-sm text-sm border ${isClient
-                        ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
-                        : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
-                        }`}
+                      className={`p-3 rounded-2xl shadow-sm text-sm border ${
+                        isClient
+                          ? "bg-blue-600 text-white border-blue-600 rounded-tr-none"
+                          : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
+                      }`}
                     >
-                      <span className="break-words">{msg.text || msg.content}</span>
+                      <span className='break-words'>
+                        {msg.text || msg.content}
+                      </span>
                     </div>
                   </div>
                 );
@@ -861,9 +890,14 @@ function ModelCard({
             ].map(
               (stat, i) =>
                 stat.value && (
-                  <div key={i} className='grid grid-cols-2 gap-4 text-left pointer-events-auto'>
+                  <div
+                    key={i}
+                    className='grid grid-cols-2 gap-4 text-left pointer-events-auto'
+                  >
                     <span className='opacity-80'>{stat.label}</span>
-                    <span className='text-white font-normal truncate'>{stat.value}</span>
+                    <span className='text-white font-normal truncate'>
+                      {stat.value}
+                    </span>
                   </div>
                 ),
             )}
@@ -886,10 +920,11 @@ function ModelCard({
 
         <button
           onClick={() => setShowChat(!showChat)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${showChat || comments.length > 0
-            ? "bg-blue-50 text-blue-600 border-blue-100"
-            : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-            }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${
+            showChat || comments.length > 0
+              ? "bg-blue-50 text-blue-600 border-blue-100"
+              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+          }`}
         >
           <MessageSquareText size={16} />
           {comments.length > 0 ? `${comments.length} comments` : "Comment"}
@@ -1384,18 +1419,8 @@ export default function ShortlistDetailPage() {
         <Header jobTitle={jobTitle} totalCount={totalCount} />
 
         {/* Render utility buttons above the grid */}
-        <div className='flex flex-wrap items-end justify-between mt-6 container mx-auto'>
-          <button
-            onClick={() => router.back()}
-            className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
-          >
-            <ArrowLeft size={18} />
-            Go Back
-          </button>
-
+        <div className='flex flex-wrap items-end justify-end mt-6 container mx-auto'>
           <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
-            
-
             <button
               onClick={handleShareLink}
               className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
@@ -1431,7 +1456,9 @@ export default function ShortlistDetailPage() {
                 <section key={roleKey}>
                   <div className='flex justify-between items-end mb-6'>
                     <h2 className='text-xl md:text-2xl font-bold text-gray-900 capitalize'>
-                      {roleKey.toLowerCase() === "unassigned" ? roleKey : `Role-${index + 1}: ${roleKey}`}
+                      {roleKey.toLowerCase() === "unassigned"
+                        ? roleKey
+                        : `Role-${index + 1}: ${roleKey}`}
                     </h2>
                     <span className='text-sm font-semibold text-gray-500'>
                       {talents.length} models
@@ -1586,10 +1613,11 @@ export default function ShortlistDetailPage() {
                           key={img.image_id}
                           onClick={() => setActiveImage(url)}
                           className={`relative h-16 w-16 rounded-md overflow-hidden bg-gray-100 shrink-0 cursor-pointer transition-all
-                          ${isActive
+                          ${
+                            isActive
                               ? "ring-2 ring-[#2563EB] ring-offset-1"
                               : "opacity-70 hover:opacity-100"
-                            }`}
+                          }`}
                         >
                           <Image
                             src={url}
@@ -1710,16 +1738,17 @@ export default function ShortlistDetailPage() {
 
           <div className='py-3 space-y-2 overflow-y-auto flex-1 min-h-0 pr-1'>
             {selectedAvailabilityTalent?.available_dates &&
-              selectedAvailabilityTalent.available_dates.length > 0 ? (
+            selectedAvailabilityTalent.available_dates.length > 0 ? (
               selectedAvailabilityTalent.available_dates.map((dateStr) => {
                 const { day, date, isPast } = formatAvailabilityDate(dateStr);
                 return (
                   <div
                     key={dateStr}
-                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${isPast
-                      ? "border-gray-200 bg-gray-50 opacity-60"
-                      : "border-blue-100 bg-blue-50"
-                      }`}
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
+                      isPast
+                        ? "border-gray-200 bg-gray-50 opacity-60"
+                        : "border-blue-100 bg-blue-50"
+                    }`}
                   >
                     <div className='flex items-center gap-3'>
                       <Calendar
@@ -1728,26 +1757,29 @@ export default function ShortlistDetailPage() {
                       />
                       <div className='flex flex-col'>
                         <span
-                          className={`text-xs font-semibold uppercase tracking-wide ${isPast ? "text-gray-400" : "text-[#2563EB]"
-                            }`}
+                          className={`text-xs font-semibold uppercase tracking-wide ${
+                            isPast ? "text-gray-400" : "text-[#2563EB]"
+                          }`}
                         >
                           {day}
                         </span>
                         <span
-                          className={`text-sm font-medium ${isPast
-                            ? "text-gray-400 line-through"
-                            : "text-gray-800"
-                            }`}
+                          className={`text-sm font-medium ${
+                            isPast
+                              ? "text-gray-400 line-through"
+                              : "text-gray-800"
+                          }`}
                         >
                           {date}
                         </span>
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${isPast
-                        ? "text-gray-400 bg-white border-gray-200"
-                        : "text-green-600 bg-white border-green-100"
-                        }`}
+                      className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full border shadow-sm ${
+                        isPast
+                          ? "text-gray-400 bg-white border-gray-200"
+                          : "text-green-600 bg-white border-green-100"
+                      }`}
                     >
                       {isPast ? "Past" : "Available"}
                     </span>
