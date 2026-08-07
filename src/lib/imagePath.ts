@@ -3,7 +3,7 @@ const base_AI_Img_url = process.env.NEXT_PUBLIC_AI_MEDIA_URL || "";
 
 export const getImageUrl = (path: string | undefined | null) => {
   if (!path) return "/images/placeholder.png";
-  if (path.startsWith("http") || path.startsWith("/images/")) return path;
+  if (path.startsWith("http") || path.startsWith("/images/") || path.startsWith("data:")) return path;
 
   const cleanBase = baseImg_url.endsWith("/")
     ? baseImg_url.slice(0, -1)
@@ -15,7 +15,7 @@ export const getImageUrl = (path: string | undefined | null) => {
 
 export const getAIImageUrl = (path: string | undefined | null) => {
   if (!path) return "/images/placeholder.png";
-  if (path.startsWith("http") || path.startsWith("/images/")) return path;
+  if (path.startsWith("http") || path.startsWith("/images/") || path.startsWith("data:")) return path;
 
   const cleanBase = base_AI_Img_url.endsWith("/")
     ? base_AI_Img_url.slice(0, -1)
