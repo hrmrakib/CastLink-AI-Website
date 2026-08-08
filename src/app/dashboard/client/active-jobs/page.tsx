@@ -220,8 +220,8 @@ export default function Page() {
                     <div className='flex items-start gap-4'>
                       <div>
                         <Image
-                          src={getImageUrl(job?.job_photo) ?? "/job.jpg"}
-                          alt={"test"}
+                          src={job?.job_photo ? getImageUrl(job.job_photo) : "/job.jpg"}
+                          alt={job.title || "job"}
                           width={80}
                           height={80}
                           className='w-15 h-15 rounded-full object-cover shrink-0 border-2 border-white shadow-sm'
