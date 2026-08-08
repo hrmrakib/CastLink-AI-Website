@@ -16,6 +16,9 @@ import {
   ArrowLeft,
   Star,
   MessageSquareText,
+  Users,
+  Briefcase,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -40,12 +43,7 @@ import {
   ClientChatProvider,
 } from "@/provider/ClientChatProvider";
 import {
-  useBookTalentMutation,
   useDeleteSingleTalentFromShortlistMutation,
-  useECastingRequestMutation,
-  usePolasRequestMutation,
-  useSelfTapRequestMutation,
-  useShortlistTalentMutation,
 } from "@/redux/features/ai-chat/aiChatAPI";
 import {
   Dialog,
@@ -852,10 +850,10 @@ function ModelCard({
   };
 
   return (
-    <div className='flex flex-col bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group'>
+    <div className='flex flex-col bg-white rounded-2xl overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100/60 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] group relative'>
       {/* Image & Stats Overlay */}
       <div
-        className='relative aspect-[3/4] w-full sm:h-[400px] overflow-hidden cursor-pointer'
+        className='relative aspect-[3/4] w-full sm:h-[420px] overflow-hidden cursor-pointer bg-gray-50'
         onClick={() => onView(talent)}
       >
         <Image
@@ -863,22 +861,22 @@ function ModelCard({
           alt={talent.name}
           fill
           unoptimized
-          className='object-cover w-full h-full bg-gray-100 transition-transform duration-500 group-hover:scale-105'
+          className='object-cover w-full h-full transition-transform duration-700 group-hover:scale-110'
         />
 
         {/* Default View (Name only with slight gradient) */}
-        <div className='absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-4 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none'>
-          <h3 className='text-white font-semibold text-lg truncate'>
+        <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none'>
+          <h3 className='text-white font-bold text-xl tracking-wide drop-shadow-md truncate'>
             {talent.name}
           </h3>
         </div>
 
-        {/* Hover Stats Overlay */}
-        <div className='absolute inset-0 bg-black/70 flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none'>
-          <h3 className='text-white font-semibold text-lg mb-4 pointer-events-auto truncate'>
+        {/* Hover Stats Overlay - Glassmorphism */}
+        <div className='absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none translate-y-4 group-hover:translate-y-0'>
+          <h3 className='text-white font-bold text-2xl mb-4 pointer-events-auto truncate drop-shadow-lg'>
             {talent.name}
           </h3>
-          <div className='flex flex-col gap-2 text-[12px] font-medium tracking-wide text-gray-300'>
+          <div className='flex flex-col gap-2.5 text-[13px] font-medium tracking-wide text-gray-100'>
             {[
               { label: "Height", value: talent.height },
               { label: "Bust", value: talent.bust },
@@ -892,10 +890,10 @@ function ModelCard({
                 stat.value && (
                   <div
                     key={i}
-                    className='grid grid-cols-2 gap-4 text-left pointer-events-auto'
+                    className='grid grid-cols-2 gap-4 text-left pointer-events-auto items-center'
                   >
-                    <span className='opacity-80'>{stat.label}</span>
-                    <span className='text-white font-normal truncate'>
+                    <span className='opacity-70 text-xs uppercase tracking-widest'>{stat.label}</span>
+                    <span className='text-white font-semibold truncate'>
                       {stat.value}
                     </span>
                   </div>
@@ -906,36 +904,36 @@ function ModelCard({
       </div>
 
       {/* Action Bar */}
-      <div className='flex justify-between items-center p-3 px-4 bg-white border-t border-gray-100'>
+      <div className='flex justify-between items-center p-4 bg-white/95 backdrop-blur-md border-t border-gray-100/80 z-10'>
         <button
           onClick={toggleFavorite}
           disabled={isAddingFavorite || isRemovingFavorite}
-          className='transition-colors disabled:opacity-50'
+          className='transition-all duration-300 disabled:opacity-50 hover:scale-110 active:scale-95'
           title={isFavorited ? "Unfavorite" : "Favorite"}
         >
           <Heart
-            className={`w-5 h-5 ${isFavorited ? "text-blue-500 fill-blue-500" : "text-gray-400 hover:text-blue-500"}`}
+            className={`w-6 h-6 transition-colors duration-300 ${isFavorited ? "text-rose-500 fill-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]" : "text-gray-300 hover:text-rose-400"}`}
           />
         </button>
 
         <button
           onClick={() => setShowChat(!showChat)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 shrink-0 ${
             showChat || comments.length > 0
-              ? "bg-blue-50 text-blue-600 border-blue-100"
-              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+              ? "bg-blue-50 text-blue-600 border border-blue-200/50 shadow-sm"
+              : "bg-gray-50 text-gray-600 border border-gray-200/50 hover:bg-gray-100 hover:text-gray-900"
           }`}
         >
-          <MessageSquareText size={16} />
+          <MessageSquareText size={16} className={showChat || comments.length > 0 ? "text-blue-500" : "text-gray-400"} />
           {comments.length > 0 ? `${comments.length} comments` : "Comment"}
         </button>
 
         <button
           onClick={() => onView(talent)}
-          className='text-gray-400 transition-colors hover:text-gray-600'
+          className='text-gray-400 transition-all duration-300 hover:text-blue-600 hover:scale-110 active:scale-95'
           title='View Details'
         >
-          <Eye className='w-5 h-5' />
+          <Eye className='w-6 h-6' />
         </button>
       </div>
 
@@ -1029,22 +1027,26 @@ const Header = ({
   jobTitle: string;
   totalCount: number;
 }) => (
-  <header className='flex flex-col md:flex-row justify-between items-center py-6 px-4 md:px-8 bg-transparent'>
+  <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
+    <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500'></div>
     <div className='flex flex-col items-center mb-4 md:mb-0'>
-      <Image src='/shortlist-logo.png' alt='Logo' width={64} height={64} />
+      <div className='p-3 bg-white rounded-2xl shadow-sm border border-gray-100/50'>
+        <Image src='/shortlist-logo.png' alt='Logo' width={56} height={56} className='object-contain' />
+      </div>
     </div>
 
-    <div className='text-center'>
-      <h1 className='text-2xl md:text-3xl font-bold text-gray-900'>
+    <div className='text-center md:flex-1'>
+      <h1 className='text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 tracking-tight'>
         {jobTitle}
       </h1>
-      <p className='text-sm text-gray-500 mt-1'>
+      <div className='inline-flex items-center gap-2 mt-3 bg-blue-50/80 text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium border border-blue-100/50 shadow-sm'>
+        <Star className='w-4 h-4' />
         {totalCount} talent{totalCount !== 1 ? "s" : ""} selected
-      </p>
+      </div>
     </div>
 
-    <div className='flex flex-col items-center mb-4 md:mb-0'>
-      {/* Optional right-side image block */}
+    <div className='hidden md:block md:w-[80px]'>
+      {/* Spacer to balance the logo on the left */}
     </div>
   </header>
 );
@@ -1056,89 +1058,23 @@ const CampaignStats = ({
   roleCount: number;
   modelCount: number;
 }) => (
-  <div className='flex flex-wrap justify-around items-center py-6 px-4 md:px-8 border-b-2 border-t-2 border-gray-100 bg-transparent text-sm'>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
-      <svg
-        className='w-5 h-5 text-gray-400'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth='2'
-          d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-        ></path>
-      </svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Date</p>
-        <p className='font-semibold text-gray-900'>
-          {new Date().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </p>
+  <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10'>
+    {[
+      { label: "Date", value: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), icon: Calendar, color: "text-blue-500", bg: "bg-blue-50" },
+      { label: "Roles", value: roleCount, icon: Briefcase, color: "text-indigo-500", bg: "bg-indigo-50" },
+      { label: "Models", value: modelCount, icon: Users, color: "text-pink-500", bg: "bg-pink-50" },
+      { label: "Reference", value: "Live Job", icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
+    ].map((stat, i) => (
+      <div key={i} className='flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100/50 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group'>
+        <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+          <stat.icon className='w-6 h-6' strokeWidth={1.5} />
+        </div>
+        <div>
+          <p className='text-gray-400 text-xs font-medium uppercase tracking-wider'>{stat.label}</p>
+          <p className='font-bold text-gray-900 text-lg mt-0.5'>{stat.value}</p>
+        </div>
       </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto mb-4 md:mb-0'>
-      <svg
-        className='w-5 h-5 text-gray-400'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth='2'
-          d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
-        ></path>
-      </svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Roles</p>
-        <p className='font-semibold text-gray-900'>{roleCount}</p>
-      </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
-      <svg
-        className='w-5 h-5 text-gray-400'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth='2'
-          d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-        ></path>
-      </svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Models</p>
-        <p className='font-semibold text-gray-900'>{modelCount}</p>
-      </div>
-    </div>
-    <div className='flex items-center gap-3 w-1/2 md:w-auto'>
-      <svg
-        className='w-5 h-5 text-gray-400'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth='2'
-          d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-        ></path>
-      </svg>
-      <div>
-        <p className='text-gray-500 text-xs'>Reference</p>
-        <p className='font-semibold text-gray-900'>Live Job</p>
-      </div>
-    </div>
+    ))}
   </div>
 );
 
@@ -1403,7 +1339,7 @@ export default function ShortlistDetailPage() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50/50 pb-24 relative'>
+    <div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/40 pb-24 relative'>
       {showIdentify && (
         <IdentifyModal
           jobId={id}
@@ -1415,25 +1351,25 @@ export default function ShortlistDetailPage() {
         />
       )}
 
-      <main className='container mx-auto py-8 space-y-10'>
+      <main className='container mx-auto space-y-10'>
         <Header jobTitle={jobTitle} totalCount={totalCount} />
 
         {/* Render utility buttons above the grid */}
-        <div className='flex flex-wrap items-end justify-end mt-6 container mx-auto'>
-          <div className='mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+        <div className='flex flex-wrap items-end justify-end container mx-auto mb-8'>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
             <button
               onClick={handleShareLink}
-              className='flex items-center justify-center gap-2 rounded-lg border border-[#E7E8EA] bg-white px-4 py-2 text-sm font-medium text-[#000000] transition-colors hover:bg-gray-50 active:scale-95 sm:text-base'
+              className='group flex items-center justify-center gap-2 rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm active:scale-95 sm:text-base'
             >
-              <Share2 size={18} />
+              <Share2 size={18} className='text-gray-400 group-hover:text-blue-500 transition-colors' />
               Share Link
             </button>
 
             <button
               onClick={handleDownloadPDF}
-              className='flex items-center justify-center gap-2 rounded-lg border border-[#BBCFF9] bg-[#E9EFFD] px-4 py-2 text-sm font-medium text-[#2563EB] transition-colors hover:bg-blue-100 active:scale-95 sm:text-base'
+              className='group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 sm:text-base'
             >
-              <Download size={18} />
+              <Download size={18} className='transition-transform group-hover:-translate-y-0.5' />
               Download PDF
             </button>
           </div>
@@ -1454,15 +1390,18 @@ export default function ShortlistDetailPage() {
               ?.filter(([, talents]) => talents?.length > 0)
               ?.map(([roleKey, talents], index) => (
                 <section key={roleKey}>
-                  <div className='flex justify-between items-end mb-6'>
-                    <h2 className='text-xl md:text-2xl font-bold text-gray-900 capitalize'>
+                  <div className='flex justify-between items-end mb-8 mt-4 pb-4 border-b border-gray-200/60'>
+                    <h2 className='text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 capitalize tracking-tight'>
                       {roleKey.toLowerCase() === "unassigned"
                         ? roleKey
-                        : `Role-${index + 1}: ${roleKey}`}
+                        : `${roleKey}`}
                     </h2>
-                    <span className='text-sm font-semibold text-gray-500'>
-                      {talents.length} models
-                    </span>
+                    <div className='flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm'>
+                      <span className='w-2 h-2 rounded-full bg-blue-500 animate-pulse'></span>
+                      <span className='text-sm font-bold text-gray-700'>
+                        {talents.length} <span className="font-medium text-gray-500">models</span>
+                      </span>
+                    </div>
                   </div>
                   <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-10 items-start'>
                     {talents?.map((talent) => (
