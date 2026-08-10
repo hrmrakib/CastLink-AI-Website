@@ -18,7 +18,7 @@ import {
   MessageSquareText,
   Users,
   Briefcase,
-  Layers
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -42,9 +42,7 @@ import {
   useClientChat,
   ClientChatProvider,
 } from "@/provider/ClientChatProvider";
-import {
-  useDeleteSingleTalentFromShortlistMutation,
-} from "@/redux/features/ai-chat/aiChatAPI";
+import { useDeleteSingleTalentFromShortlistMutation } from "@/redux/features/ai-chat/aiChatAPI";
 import {
   Dialog,
   DialogClose,
@@ -892,7 +890,9 @@ function ModelCard({
                     key={i}
                     className='grid grid-cols-2 gap-4 text-left pointer-events-auto items-center'
                   >
-                    <span className='opacity-70 text-xs uppercase tracking-widest'>{stat.label}</span>
+                    <span className='opacity-70 text-xs uppercase tracking-widest'>
+                      {stat.label}
+                    </span>
                     <span className='text-white font-semibold truncate'>
                       {stat.value}
                     </span>
@@ -924,7 +924,14 @@ function ModelCard({
               : "bg-gray-50 text-gray-600 border border-gray-200/50 hover:bg-gray-100 hover:text-gray-900"
           }`}
         >
-          <MessageSquareText size={16} className={showChat || comments.length > 0 ? "text-blue-500" : "text-gray-400"} />
+          <MessageSquareText
+            size={16}
+            className={
+              showChat || comments.length > 0
+                ? "text-blue-500"
+                : "text-gray-400"
+            }
+          />
           {comments.length > 0 ? `${comments.length} comments` : "Comment"}
         </button>
 
@@ -1032,12 +1039,21 @@ const Header = ({
   clientPhoto?: string;
 }) => (
   <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-transparent backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
-  
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='bg-white rounded-2xl shadow-sm border border-gray-100/50 flex items-center justify-center p-2'>
-        <Image src={clientPhoto && clientPhoto.trim() !== '' ? clientPhoto : '/shortlist-logo.png'} alt='Client' width={80} height={80} className={`w-20 h-20 ${clientPhoto ? 'object-cover rounded-xl' : 'object-contain'}`} unoptimized />
+        <Image
+          src={
+            clientPhoto && clientPhoto.trim() !== ""
+              ? clientPhoto
+              : "/shortlist-logo.png"
+          }
+          alt='Client'
+          width={80}
+          height={80}
+          className={`w-20 h-20 ${clientPhoto ? "object-cover rounded-xl" : "object-contain"}`}
+          unoptimized
+        />
       </div>
-      <p className='mt-3 text-xs font-bold text-gray-500 uppercase tracking-wider'>Client</p>
     </div>
 
     <div className='text-center md:flex-1'>
@@ -1052,9 +1068,15 @@ const Header = ({
 
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='bg-white rounded-2xl shadow-sm border border-gray-100/50 flex items-center justify-center p-2'>
-        <Image src={jobPhoto && jobPhoto.trim() !== '' ? jobPhoto : '/job-logo.png'} alt='Job' width={80} height={80} className='object-cover w-20 h-20 rounded-xl' unoptimized />
+        <Image
+          src={jobPhoto && jobPhoto.trim() !== "" ? jobPhoto : "/job-logo.png"}
+          alt='Job'
+          width={80}
+          height={80}
+          className='object-cover w-20 h-20 rounded-xl'
+          unoptimized
+        />
       </div>
-      <p className='mt-3 text-xs font-bold text-gray-500 uppercase tracking-wider'>Job</p>
     </div>
   </header>
 );
@@ -1077,21 +1099,54 @@ const CampaignStats = ({
   modelCount: number;
   jobId?: string;
 }) => (
-
-  
   <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10'>
     {[
-      { label: "Date", value: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), icon: Calendar, color: "text-blue-500", bg: "bg-blue-50" },
-      { label: "Roles", value: roleCount, icon: Briefcase, color: "text-indigo-500", bg: "bg-indigo-50" },
-      { label: "Models", value: modelCount, icon: Users, color: "text-pink-500", bg: "bg-pink-50" },
-      { label: "Reference", value: getNumericRef(jobId), icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
+      {
+        label: "Date",
+        value: new Date().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        icon: Calendar,
+        color: "text-blue-500",
+        bg: "bg-blue-50",
+      },
+      {
+        label: "Roles",
+        value: roleCount,
+        icon: Briefcase,
+        color: "text-indigo-500",
+        bg: "bg-indigo-50",
+      },
+      {
+        label: "Models",
+        value: modelCount,
+        icon: Users,
+        color: "text-pink-500",
+        bg: "bg-pink-50",
+      },
+      {
+        label: "Reference",
+        value: getNumericRef(jobId),
+        icon: Star,
+        color: "text-amber-500",
+        bg: "bg-amber-50",
+      },
     ].map((stat, i) => (
-      <div key={i} className='flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100/50 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group'>
-        <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+      <div
+        key={i}
+        className='flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100/50 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group'
+      >
+        <div
+          className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}
+        >
           <stat.icon className='w-6 h-6' strokeWidth={1.5} />
         </div>
         <div>
-          <p className='text-gray-400 text-xs font-medium uppercase tracking-wider'>{stat.label}</p>
+          <p className='text-gray-400 text-xs font-medium uppercase tracking-wider'>
+            {stat.label}
+          </p>
           <p className='font-bold text-gray-900 text-lg mt-0.5'>{stat.value}</p>
         </div>
       </div>
@@ -1375,7 +1430,12 @@ export default function ShortlistDetailPage() {
       )}
 
       <main className='container mx-auto space-y-10'>
-        <Header jobTitle={jobTitle} totalCount={totalCount} jobPhoto={jobPhoto} clientPhoto={clientPhoto} />
+        <Header
+          jobTitle={jobTitle}
+          totalCount={totalCount}
+          jobPhoto={jobPhoto}
+          clientPhoto={clientPhoto}
+        />
 
         {/* Render utility buttons above the grid */}
         <div className='flex flex-wrap items-end justify-end container mx-auto mb-8'>
@@ -1384,7 +1444,10 @@ export default function ShortlistDetailPage() {
               onClick={handleShareLink}
               className='group flex items-center justify-center gap-2 rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm active:scale-95 sm:text-base'
             >
-              <Share2 size={18} className='text-gray-400 group-hover:text-blue-500 transition-colors' />
+              <Share2
+                size={18}
+                className='text-gray-400 group-hover:text-blue-500 transition-colors'
+              />
               Share Link
             </button>
 
@@ -1392,13 +1455,20 @@ export default function ShortlistDetailPage() {
               onClick={handleDownloadPDF}
               className='group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 sm:text-base'
             >
-              <Download size={18} className='transition-transform group-hover:-translate-y-0.5' />
+              <Download
+                size={18}
+                className='transition-transform group-hover:-translate-y-0.5'
+              />
               Download PDF
             </button>
           </div>
         </div>
 
-        <CampaignStats roleCount={roleCount} modelCount={totalCount} jobId={job?.job_id || id} />
+        <CampaignStats
+          roleCount={roleCount}
+          modelCount={totalCount}
+          jobId={job?.job_id || id}
+        />
 
         {/* Dynamic Talent Grids */}
         {isLoading ? (
@@ -1422,7 +1492,10 @@ export default function ShortlistDetailPage() {
                     <div className='flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm'>
                       <span className='w-2 h-2 rounded-full bg-blue-500 animate-pulse'></span>
                       <span className='text-sm font-bold text-gray-700'>
-                        {talents.length} <span className="font-medium text-gray-500">models</span>
+                        {talents.length}{" "}
+                        <span className='font-medium text-gray-500'>
+                          models
+                        </span>
                       </span>
                     </div>
                   </div>
