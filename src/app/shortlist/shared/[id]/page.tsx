@@ -1065,7 +1065,7 @@ const getNumericRef = (id?: string) => {
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return `#Ref-${Math.abs(hash % 9000) + 1000}`;
+  return `#ref-${Math.abs(hash % 9000) + 1000}`;
 };
 
 const CampaignStats = ({
