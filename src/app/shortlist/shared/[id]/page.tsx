@@ -1024,16 +1024,18 @@ const Header = ({
   jobTitle,
   totalCount,
   jobPhoto,
+  clientPhoto,
 }: {
   jobTitle: string;
   totalCount: number;
   jobPhoto?: string;
+  clientPhoto?: string;
 }) => (
   <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-transparent backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
   
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='bg-white rounded-2xl shadow-sm border border-gray-100/50 flex items-center justify-center p-2'>
-        <Image src='/shortlist-logo.png' alt='Client' width={80} height={80} className='object-contain w-20 h-20' />
+        <Image src={clientPhoto && clientPhoto.trim() !== '' ? clientPhoto : '/shortlist-logo.png'} alt='Client' width={80} height={80} className={`w-20 h-20 ${clientPhoto ? 'object-cover rounded-xl' : 'object-contain'}`} unoptimized />
       </div>
       <p className='mt-3 text-xs font-bold text-gray-500 uppercase tracking-wider'>Client</p>
     </div>
@@ -1050,7 +1052,7 @@ const Header = ({
 
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='bg-white rounded-2xl shadow-sm border border-gray-100/50 flex items-center justify-center p-2'>
-        <Image src={jobPhoto || '/job-logo.png'} alt='Job' width={80} height={80} className='object-cover w-20 h-20 rounded-xl' />
+        <Image src={jobPhoto && jobPhoto.trim() !== '' ? jobPhoto : '/job-logo.png'} alt='Job' width={80} height={80} className='object-cover w-20 h-20 rounded-xl' unoptimized />
       </div>
       <p className='mt-3 text-xs font-bold text-gray-500 uppercase tracking-wider'>Job</p>
     </div>
@@ -1325,6 +1327,7 @@ export default function ShortlistDetailPage() {
   const jobTitle = job?.title ?? "Shortlist";
   const jobDescription = job?.description?.trim() ?? "";
   const jobPhoto = (job as any)?.job_photo ?? "";
+  const clientPhoto = (job as any)?.created_by_image ?? "";
 
   if (isLoading) {
     return (
@@ -1372,7 +1375,7 @@ export default function ShortlistDetailPage() {
       )}
 
       <main className='container mx-auto space-y-10'>
-        <Header jobTitle={jobTitle} totalCount={totalCount} jobPhoto={jobPhoto} />
+        <Header jobTitle={jobTitle} totalCount={totalCount} jobPhoto={jobPhoto} clientPhoto={clientPhoto} />
 
         {/* Render utility buttons above the grid */}
         <div className='flex flex-wrap items-end justify-end container mx-auto mb-8'>
