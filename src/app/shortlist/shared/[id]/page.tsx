@@ -1027,8 +1027,8 @@ const Header = ({
   jobTitle: string;
   totalCount: number;
 }) => (
-  <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
-    <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500'></div>
+  <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-transparent backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
+  
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='p-3 bg-white rounded-2xl shadow-sm border border-gray-100/50'>
         <Image src='/shortlist-logo.png' alt='Logo' width={56} height={56} className='object-contain' />
@@ -1045,25 +1045,40 @@ const Header = ({
       </div>
     </div>
 
-    <div className='hidden md:block md:w-[80px]'>
-      {/* Spacer to balance the logo on the left */}
+    <div className='flex flex-col items-center mb-4 md:mb-0'>
+      <div className='p-3 bg-white rounded-2xl shadow-sm border border-gray-100/50'>
+        <Image src='/shortlist-logo.png' alt='Logo' width={56} height={56} className='object-contain' />
+      </div>
     </div>
   </header>
 );
 
+const getNumericRef = (id?: string) => {
+  if (!id) return "Live Job";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return `#Ref-${Math.abs(hash % 9000) + 1000}`;
+};
+
 const CampaignStats = ({
   roleCount,
   modelCount,
+  jobId,
 }: {
   roleCount: number;
   modelCount: number;
+  jobId?: string;
 }) => (
+
+  
   <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10'>
     {[
       { label: "Date", value: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }), icon: Calendar, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "Roles", value: roleCount, icon: Briefcase, color: "text-indigo-500", bg: "bg-indigo-50" },
       { label: "Models", value: modelCount, icon: Users, color: "text-pink-500", bg: "bg-pink-50" },
-      { label: "Reference", value: "Live Job", icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
+      { label: "Reference", value: getNumericRef(jobId), icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
     ].map((stat, i) => (
       <div key={i} className='flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100/50 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group'>
         <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
@@ -1375,7 +1390,7 @@ export default function ShortlistDetailPage() {
           </div>
         </div>
 
-        <CampaignStats roleCount={roleCount} modelCount={totalCount} />
+        <CampaignStats roleCount={roleCount} modelCount={totalCount} jobId={job?.job_id || id} />
 
         {/* Dynamic Talent Grids */}
         {isLoading ? (
