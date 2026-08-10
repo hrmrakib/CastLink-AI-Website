@@ -539,9 +539,9 @@ function AIChatInner() {
   };
 
   return (
-    <main className='min-h-screen bg-gray-50'>
+    <main className='h-[calc(100vh-80px)] overflow-hidden bg-white rounded-2xl'>
       {/* Header */}
-      <div className='px-6'>
+      <div className='px-6 mt-4'>
         <button
           onClick={() => router.back()}
           className='items-center gap-2 bg-white inline-flex mx-auto px-3 py-2.5 border rounded-xl text-[#404145] hover:text-[#000000] transition font-medium cursor-pointer'
@@ -563,10 +563,10 @@ function AIChatInner() {
               />
             </div>
             <h1 className='text-xl md:text-2xl font-bold text-[#000000] mb-2'>
-              AI-Powered Casting
+              Poolio-Powered Casting
             </h1>
             <p className='text-[#404145]'>
-              Describe what you&apos;re looking for and let AI match the perfect
+              Describe what you&apos;re looking for and let Poolio match the perfect
               talent
             </p>
 
@@ -619,14 +619,13 @@ function AIChatInner() {
             </div>
 
             {/* Optional Details */}
-            <div>
+            {/* <div>
               <div className='mb-6 flex items-center justify-between'>
                 <h2 className='text-lg font-bold text-[#000000] mb-6'>
                   Optional Details
                 </h2>
               </div>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {/* Location */}
                 <div>
                   <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
                     <MapPin className='w-4 h-4' />
@@ -641,7 +640,6 @@ function AIChatInner() {
                   />
                 </div>
 
-                {/* Shoot Date */}
                 <div>
                   <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
                     <Calendar className='w-4 h-4' />
@@ -690,7 +688,6 @@ function AIChatInner() {
                   )}
                 </div>
 
-                {/* Budget */}
                 <div>
                   <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
                     {currency === "USD" ? (
@@ -706,7 +703,6 @@ function AIChatInner() {
                   </label>
 
                   <div className='flex w-full border border-gray-200 rounded-lg overflow-hidden bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition'>
-                    {/* Currency Selector */}
                     <select
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
@@ -719,7 +715,6 @@ function AIChatInner() {
                       ))}
                     </select>
 
-                    {/* Budget Input */}
                     <input
                       type='text'
                       value={budget}
@@ -730,7 +725,6 @@ function AIChatInner() {
                   </div>
                 </div>
 
-                {/* Job Type */}
                 <div>
                   <label className='flex items-center gap-2 text-[#404145] font-medium mb-2'>
                     <Briefcase className='w-4 h-4' />
@@ -745,11 +739,11 @@ function AIChatInner() {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
-            <div className='flex flex-col md:flex-row gap-3 justify-end pt-4'>
-              <button
+            {/* <div className='flex flex-col md:flex-row gap-3 justify-end pt-4'>
+              <button   
                 type='button'
                 onClick={handleSaveDraft}
                 disabled={isSavingDraft || !message.trim()}
@@ -769,7 +763,7 @@ function AIChatInner() {
                 <Sparkles className='w-4 h-4' />
                 {generatingCastingLoading ? "Saving..." : "Save Job"}
               </button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
