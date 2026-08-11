@@ -890,7 +890,7 @@ export default function ShortlistDetailPage() {
                 >
                   <Calendar size={20} />
                 </button>
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleSelftapRequest(selectedTalent.talent_id),
@@ -902,8 +902,8 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Camera size={20} />
-                </button>
-                <button
+                </button> */}
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleECastingRequest(selectedTalent.talent_id),
@@ -915,7 +915,7 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Phone size={20} />
-                </button>
+                </button> */}
                 <button
                   onClick={() =>
                     withConfirm(
@@ -929,7 +929,7 @@ export default function ShortlistDetailPage() {
                 >
                   <Check size={20} />
                 </button>
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handlePolasRequest(selectedTalent.talent_id),
@@ -941,7 +941,7 @@ export default function ShortlistDetailPage() {
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <ScanFace size={20} />
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
