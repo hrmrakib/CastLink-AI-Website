@@ -327,11 +327,19 @@ function TalentGroup({
                 <p className='text-[#2563EB] text-sm'>
                   Added: {formatDate(talent.created_at)}
                 </p>
-                {talent.is_available && (
-                  <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
-                    Available
-                  </span>
-                )}
+                {(() => {
+                  const todayStr = new Date().toISOString().split("T")[0];
+                  const hasFutureDates = talent.available_dates?.some(d => d >= todayStr);
+                  return hasFutureDates ? (
+                    <span className='text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full'>
+                      Available
+                    </span>
+                  ) : (
+                    <span className='text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full'>
+                      Unavailable
+                    </span>
+                  );
+                })()}
               </div>
               <div className='mt-1 flex flex-wrap gap-2 text-xs text-[#404145] sm:text-sm'>
                 <span className='flex items-center gap-1'>
@@ -775,21 +783,24 @@ export default function ShortlistDetailPage() {
                       : []),
                     {
                       label: "Available",
-                      value: selectedTalent?.available_dates?.length ? (
-                        <button
-                          onClick={() => {
-                            setSelectedAvailabilityTalent(selectedTalent);
-                            setAvailabilityModal(true);
-                          }}
-                          className='flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline transition text-sm font-medium'
-                        >
-                          <Calendar size={14} />
-                          {selectedTalent.available_dates.length} date
-                          {selectedTalent.available_dates.length > 1 ? "s" : ""}
-                        </button>
-                      ) : (
-                        "No dates"
-                      ),
+                      value: (() => {
+                        const todayStr = new Date().toISOString().split("T")[0];
+                        const futureDatesCount = selectedTalent?.available_dates?.filter(d => d >= todayStr).length || 0;
+                        return futureDatesCount ? (
+                          <button
+                            onClick={() => {
+                              setSelectedAvailabilityTalent(selectedTalent);
+                              setAvailabilityModal(true);
+                            }}
+                            className='flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline transition text-sm font-medium'
+                          >
+                            <Calendar size={14} />
+                            {futureDatesCount} date{futureDatesCount > 1 ? "s" : ""}
+                          </button>
+                        ) : (
+                          "No dates"
+                        );
+                      })(),
                     },
                     {
                       label: "Added",
@@ -960,10 +971,12 @@ export default function ShortlistDetailPage() {
           </DialogHeader>
 
           <div className='py-3 space-y-2 overflow-y-auto flex-1 min-h-0 pr-1'>
-            {selectedAvailabilityTalent?.available_dates &&
-              selectedAvailabilityTalent.available_dates.length > 0 ? (
-              selectedAvailabilityTalent.available_dates.map((dateStr) => {
-                const { day, date, isPast } = formatAvailabilityDate(dateStr);
+            {(() => {
+              const todayStr = new Date().toISOString().split("T")[0];
+              const futureDates = selectedAvailabilityTalent?.available_dates?.filter(d => d >= todayStr) || [];
+              return futureDates.length > 0 ? (
+                futureDates.map((dateStr) => {
+                  const { day, date, isPast } = formatAvailabilityDate(dateStr);
                 return (
                   <div
                     key={dateStr}
@@ -1012,7 +1025,8 @@ export default function ShortlistDetailPage() {
                   No available dates listed.
                 </p>
               </div>
-            )}
+            );
+            })()}
           </div>
         </DialogContent>
       </Dialog>
