@@ -1038,7 +1038,7 @@ const Header = ({
   jobPhoto?: string;
   clientPhoto?: string;
 }) => (
-  <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-transparent backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-8'>
+  <header className='relative overflow-hidden flex flex-col md:flex-row justify-between items-center py-8 px-6 md:px-10 bg-transparent backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl mb-6'>
     <div className='flex flex-col items-center mb-4 md:mb-0'>
       <div className='bg-white rounded-2xl shadow-sm border border-gray-100/50 flex items-center justify-center p-2'>
         <Image
@@ -1057,7 +1057,7 @@ const Header = ({
     </div>
 
     <div className='text-center md:flex-1'>
-      <h1 className='text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 tracking-tight'>
+      <h1 className='text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-linear-to-br from-gray-900 to-gray-600 tracking-tight'>
         {jobTitle}
       </h1>
       <div className='inline-flex items-center gap-2 mt-3 bg-blue-50/80 text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium border border-blue-100/50 shadow-sm'>
@@ -1099,7 +1099,7 @@ const CampaignStats = ({
   modelCount: number;
   jobId?: string;
 }) => (
-  <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10'>
+  <div className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6'>
     {[
       {
         label: "Date",
@@ -1437,12 +1437,22 @@ export default function ShortlistDetailPage() {
           clientPhoto={clientPhoto}
         />
 
-        {/* Render utility buttons above the grid */}
-        <div className='flex flex-wrap items-end justify-end container mx-auto mb-8'>
-          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4'>
+        {/* Stats + Action buttons in one row */}
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 container mx-auto mb-8'>
+          {/* Campaign Stats */}
+          <div className='flex-1'>
+            <CampaignStats
+              roleCount={roleCount}
+              modelCount={totalCount}
+              jobId={job?.job_id || id}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className='flex items-center gap-3 shrink-0 sm:self-center'>
             <button
               onClick={handleShareLink}
-              className='group flex items-center justify-center gap-2 rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm active:scale-95 sm:text-base'
+              className='group flex items-center justify-center gap-2 rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm active:scale-95'
             >
               <Share2
                 size={18}
@@ -1453,7 +1463,7 @@ export default function ShortlistDetailPage() {
 
             <button
               onClick={handleDownloadPDF}
-              className='group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 sm:text-base'
+              className='group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95'
             >
               <Download
                 size={18}
@@ -1463,12 +1473,6 @@ export default function ShortlistDetailPage() {
             </button>
           </div>
         </div>
-
-        <CampaignStats
-          roleCount={roleCount}
-          modelCount={totalCount}
-          jobId={job?.job_id || id}
-        />
 
         {/* Dynamic Talent Grids */}
         {isLoading ? (
