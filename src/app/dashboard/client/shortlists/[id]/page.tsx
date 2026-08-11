@@ -111,6 +111,7 @@ export interface ShortlistJobDetail {
   created_at: string;
   updated_at: string;
   shortlisted_talents: ShortlistedTalent[];
+  job_roles?: any[];
 }
 
 // ── Internal normalised UI shape ─────────────────────────────────────────────
@@ -184,15 +185,54 @@ function normalise(raw: ShortlistedTalent): Talent {
   };
 }
 
-/** Group talents dynamically by their role field */
-function groupByRole(talents: ShortlistedTalent[]): Record<string, Talent[]> {
+/** Group talents dynamically by their character field or job_roles */
+function groupByRole(
+  talents: ShortlistedTalent[],
+  jobRoles?: any[],
+): Record<string, Talent[]> {
   const groups: Record<string, Talent[]> = {};
-  for (const raw of talents) {
-    const t = normalise(raw);
-    const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(t);
+
+  if (!jobRoles || jobRoles.length === 0) {
+    for (const raw of talents) {
+      const t = normalise(raw);
+      const key = (raw.talent_info.character ?? "other").trim().toLowerCase();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(t);
+    }
+    return groups;
   }
+
+  const normalisedTalents = new Map(
+    talents.map((t) => [t.talent_info.talent_id, normalise(t)]),
+  );
+
+  for (const jr of jobRoles) {
+    if (!jr.job_role) continue;
+    const roleName = jr.job_role.trim();
+    if (!groups[roleName]) {
+      groups[roleName] = [];
+    }
+
+    if (jr.talent_id && normalisedTalents.has(jr.talent_id)) {
+      const talent = normalisedTalents.get(jr.talent_id)!;
+      if (!groups[roleName].some((t) => t.talent_id === talent.talent_id)) {
+        groups[roleName].push(talent);
+      }
+    }
+  }
+
+  const assignedTalentIds = new Set(
+    jobRoles.map((jr) => jr.talent_id).filter((id) => id != null),
+  );
+  for (const t of talents) {
+    if (!assignedTalentIds.has(t.talent_info.talent_id)) {
+      if (!groups["Unassigned"]) groups["Unassigned"] = [];
+      groups["Unassigned"].push(
+        normalisedTalents.get(t.talent_info.talent_id)!,
+      );
+    }
+  }
+
   return groups;
 }
 
@@ -392,7 +432,6 @@ export default function ShortlistDetailPage() {
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [grouped, setGrouped] = useState<Record<string, Talent[]>>({});
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("");
   const [availabilityModal, setAvailabilityModal] = useState(false);
   const [selectedAvailabilityTalent, setSelectedAvailabilityTalent] =
     useState<Talent | null>(null);
@@ -423,7 +462,7 @@ export default function ShortlistDetailPage() {
     if (!data) return;
     const job: ShortlistJobDetail = data?.data ?? data;
     const talents: ShortlistedTalent[] = job?.shortlisted_talents ?? [];
-    setGrouped(groupByRole(talents));
+    setGrouped(groupByRole(talents, job.job_roles));
   }, [data]);
 
   const allTalents = Object.values(grouped).flat();
@@ -901,7 +940,7 @@ export default function ShortlistDetailPage() {
                   title='Selftapes Request'
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
-                  <Camera size={20} />
+                  <Camera size={20} />  
                 </button> */}
                 {/* <button
                   onClick={() =>

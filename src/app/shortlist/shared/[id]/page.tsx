@@ -204,7 +204,7 @@ function groupByRole(
   if (!jobRoles || jobRoles.length === 0) {
     for (const raw of talents) {
       const t = normalise(raw);
-      const key = (raw.talent_info.role ?? "other").trim().toLowerCase();
+      const key = (raw.talent_info.character ?? "other").trim().toLowerCase();
       if (!groups[key]) groups[key] = [];
       groups[key].push(t);
     }
