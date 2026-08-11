@@ -40,7 +40,7 @@ import { Button } from "@/components/ui/button";
 import { useCreateConversationMutation } from "@/redux/features/messages/messagesAPI";
 import { setConversation } from "@/redux/features/messages/conversationSlice";
 import { useRouter } from "next/navigation";
-
+import { getImageUrl } from "@/lib/imagePath";
 interface TalentProfile {
   talent_id: number;
   agent_id?: number;
@@ -145,7 +145,7 @@ export default function ChatModalDetail({
   }, [currentTalentIndex]);
 
   const galleryImages = talent?.images?.length
-    ? talent.images.map((img) => `${BASE_URL}${img}`)
+    ? talent.images.map((img) => getImageUrl(img))
     : ["/placeholder.svg"];
 
   const profileRows: { label: string; value: string }[] = talent
