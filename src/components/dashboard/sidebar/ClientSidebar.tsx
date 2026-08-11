@@ -51,7 +51,7 @@ const ClientSidebar = () => {
             }
           />
 
-          <NavItem
+          {/* <NavItem
             href='/dashboard/client/draft-jobs'
             icon={NotepadTextDashed}
             label='Draft Jobs'
@@ -59,7 +59,7 @@ const ClientSidebar = () => {
               pathname === "/dashboard/client/draft-jobs" ||
               pathname.startsWith("/dashboard/client/draft-jobs/")
             }
-          />
+          /> */}
 
           <NavItem
             href='/dashboard/client/shortlists'

@@ -53,7 +53,13 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Chat"],
+    }),
+
+    unassignRole: builder.mutation({
+      query: ({job_role_id, job_id, talent_id}) => ({
+        url: `/api/jobs/unassign-role?job_role_id=${job_role_id}&job_id=${job_id}&talent_id=${talent_id}`,
+        method: "PATCH",
+      }),
     }),
 
     aiChatCreate: builder.mutation({
@@ -196,6 +202,7 @@ export const {
   useDeleteShortlistMutation,
   useGetAvailableRolesQuery,
   useAssignRoleMutation,
+  useUnassignRoleMutation,
   useDeleteSingleTalentFromShortlistMutation,
 } = aiChatAPI;
 export default aiChatAPI;

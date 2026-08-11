@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   useAiChatCreateMutation,
   useAssignRoleMutation,
+  useUnassignRoleMutation,
   useBookTalentMutation,
   useECastingRequestMutation,
   useGenerateJobFromMessageMutation,
@@ -96,6 +97,12 @@ interface TalentProfile {
   approval_status?: string;
   is_available_on_request?: boolean;
   available_dates?: string[];
+  assigned_roles?: {
+    job_id: number;
+    job_title: string;
+    role: string;
+    status: boolean;
+  }[];
 }
 
 interface AvailableRole {
@@ -225,6 +232,58 @@ export default function AIDynamicPage() {
   // const test: string[] = JSON.parse(roles[0]?.job_role ?? "[]");
 
   const [assignRoleMutation] = useAssignRoleMutation();
+  const [unassignRoleMutation] = useUnassignRoleMutation();
+
+  const handleUnassignRole = async (jobRoleId: number) => {
+    if (!assignRoleModal.talent) return;
+    
+    try {
+      setAssigningRoleId(jobRoleId);
+      const res = await unassignRoleMutation({
+        job_role_id: jobRoleId,
+        job_id: jobId,
+        talent_id: assignRoleModal.talent.talent_id,
+      }).unwrap();
+
+      if (res?.status_message) {
+        toast.success(res.status_message);
+      } else {
+        toast.success("Role unassigned successfully!");
+      }
+      
+      setAssignRoleModal((prev) => {
+        if (!prev.talent) return prev;
+        const updatedAssignedRoles = (prev.talent.assigned_roles || []).map(r => 
+          String(r.role) === String(jobRoleId) || String(r.role) === String(roles.find(role => role.id === jobRoleId)?.job_role) ? { ...r, status: false } : r
+        );
+        return {
+          ...prev,
+          talent: {
+            ...prev.talent,
+            assigned_roles: updatedAssignedRoles,
+          }
+        };
+      });
+
+      setMessages((prevMessages) => 
+        prevMessages.map((msg) => {
+          if (!msg.talents) return msg;
+          return {
+            ...msg,
+            talents: msg.talents.map((t) => 
+              t.talent_id === assignRoleModal.talent!.talent_id
+                ? { ...t, assigned_roles: (t.assigned_roles || []).map(r => String(r.role) === String(jobRoleId) || String(r.role) === String(roles.find(role => role.id === jobRoleId)?.job_role) ? { ...r, status: false } : r) }
+                : t
+            )
+          };
+        })
+      );
+    } catch (error: any) {
+      toast.error(error?.data?.status_message || "Failed to unassign role");
+    } finally {
+      setAssigningRoleId(null);
+    }
+  };
 
   const isGeneratedJob = data?.data?.generate_job;
 
@@ -455,8 +514,40 @@ export default function AIDynamicPage() {
         toast.success(res.status_message);
       } else {
         toast.success("Role assigned successfully!");
-      }
-      setAssignRoleModal({ open: false, talent: null });
+      } 
+      
+      const newRole = {
+        job_id: jobId,
+        job_title: data?.data?.title || "",
+        role: String(roleId),
+        status: true,
+      };
+
+      setAssignRoleModal((prev) => {
+        if (!prev.talent) return prev;
+        const updatedAssignedRoles = [...(prev.talent.assigned_roles || []), newRole];
+        return {
+          ...prev,
+          talent: {
+            ...prev.talent,
+            assigned_roles: updatedAssignedRoles,
+          }
+        };
+      });
+
+      setMessages((prevMessages) => 
+        prevMessages.map((msg) => {
+          if (!msg.talents) return msg;
+          return {
+            ...msg,
+            talents: msg.talents.map((t) => 
+              t.talent_id === assignRoleModal.talent!.talent_id
+                ? { ...t, assigned_roles: [...(t.assigned_roles || []), newRole] }
+                : t
+            )
+          };
+        })
+      );
     } catch (error: any) {
       toast.error(
         error?.data?.status_message ?? "Failed to assign role. Try again.",
@@ -465,8 +556,6 @@ export default function AIDynamicPage() {
       setAssigningRoleId(null);
     }
   };
-
-  console.log({ jobRole });
 
   const runGenerateCasting = async () => {
     try {
@@ -647,9 +736,7 @@ export default function AIDynamicPage() {
                           {message.talents
                             .slice(0, maxVisibleTalent)
                             .map((profile, idx) => {
-                              const imageUrl = profile.images?.[0]
-                                ? `${BASE_URL}${profile.images[0]}`
-                                : "/placeholder.svg";
+                              const imageUrl = profile.images?.[0] || "";
 
                               const hiddenCount =
                                 message.talents!.length - maxVisibleTalent;
@@ -666,7 +753,7 @@ export default function AIDynamicPage() {
                                   <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
                                     <Image
                                       src={getImageUrl(imageUrl)}
-                                      alt={profile.name}
+                                      alt={profile.name} 
                                       width={600}
                                       height={600}
                                       unoptimized
@@ -1352,7 +1439,14 @@ export default function AIDynamicPage() {
 
           <div className='py-2 space-y-2'>
             {roles.length > 0 ? (
-              roles.map((role, i) => (
+              roles.map((role, i) => {
+                const isAssigned = assignRoleModal.talent?.assigned_roles?.some(
+                  (r) =>
+                    String(r.role) === String(role.id) ||
+                    String(r.role) === String(role.job_role)
+                );
+
+                return (
                 <div
                   key={i}
                   className='flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-gray-50'
@@ -1363,20 +1457,36 @@ export default function AIDynamicPage() {
                       {role.job_role}
                     </span>
                   </div>
-                  <Button
-                    size='sm'
-                    disabled={assigningRoleId === role.id}
-                    onClick={() => handleAssignRole(role.id)}
-                    className='bg-[#2563EB] hover:bg-blue-700 text-white text-xs h-8 px-3'
-                  >
-                    {assigningRoleId === role.id ? (
-                      <Loader className='animate-spin w-3 h-3' />
-                    ) : (
-                      "Assign"
-                    )}
-                  </Button>
+                  {isAssigned ? (
+                    <Button
+                      size='sm'
+                      disabled={assigningRoleId === role.id}
+                      onClick={() => handleUnassignRole(role.id)}
+                      variant='outline'
+                      className='text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 text-xs h-8 px-3'
+                    >
+                      {assigningRoleId === role.id ? (
+                        <Loader className='animate-spin w-3 h-3' />
+                      ) : (
+                        "Unassign"
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      size='sm'
+                      disabled={assigningRoleId === role.id}
+                      onClick={() => handleAssignRole(role.id)}
+                      className='bg-[#2563EB] hover:bg-blue-700 text-white text-xs h-8 px-3'
+                    >
+                      {assigningRoleId === role.id ? (
+                        <Loader className='animate-spin w-3 h-3' />
+                      ) : (
+                        "Assign"
+                      )}
+                    </Button>
+                  )}
                 </div>
-              ))
+              )})
             ) : (
               <p className='text-sm text-gray-500 text-center py-6'>
                 No roles available for this job.
