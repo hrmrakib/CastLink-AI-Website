@@ -186,9 +186,15 @@ function TalentRow({
         >
           <Calendar className='h-3 w-3 shrink-0' />
           <span className='whitespace-nowrap'>
-            {talent_info.available_dates?.length
-              ? `${talent_info.available_dates.length} date${talent_info.available_dates.length > 1 ? "s" : ""}`
-              : "No dates"}
+            {(() => {
+              const todayStr = new Date().toISOString().split("T")[0];
+              const futureDatesCount = talent_info.available_dates
+                ? talent_info.available_dates.filter(d => d >= todayStr).length
+                : 0;
+              return futureDatesCount
+                ? `${futureDatesCount} date${futureDatesCount > 1 ? "s" : ""}`
+                : "No dates";
+            })()}
           </span>
         </button>
       </div>
