@@ -516,77 +516,147 @@ export default function ShortlistDetailPage() {
     toast.success("Got it! Link copied to clipboard.");
   };
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+  const handleDownloadPDF = async () => {
+    const toastId = toast.loading("Generating PDF with images. Please wait...");
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, pageWidth, 32, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text(`Shortlist: ${jobTitle}`, 14, 14);
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, pageWidth, 32, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Shortlist: ${jobTitle}`, 14, 14);
 
-    if (jobDescription) {
+      if (jobDescription) {
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const descLines = doc.splitTextToSize(jobDescription, pageWidth - 28);
+        doc.text(descLines.slice(0, 2), 14, 23);
+      }
+
+      doc.setTextColor(100, 116, 139);
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      const descLines = doc.splitTextToSize(jobDescription, pageWidth - 28);
-      doc.text(descLines.slice(0, 2), 14, 23);
+      doc.text(
+        `Generated: ${new Date().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })}   •   ${totalCount} talent${totalCount !== 1 ? "s" : ""}`,
+        14,
+        40,
+      );
+
+      // Pre-load images
+      const base64Images = await Promise.all(
+        allTalents.map(async (t) => {
+          try {
+            if (!t.primaryImage) return null;
+            // Fetch as blob through Next.js image proxy to completely bypass CORS issues
+            const proxiedUrl = `/_next/image?url=${encodeURIComponent(t.primaryImage)}&w=128&q=75`;
+            const res = await fetch(proxiedUrl);
+            if (!res.ok) throw new Error("Network response was not ok");
+            const blob = await res.blob();
+            
+            // Create a local object URL for the blob
+            const objectUrl = URL.createObjectURL(blob);
+            
+            return await new Promise<string>((resolve) => {
+              const img = new window.Image();
+              img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                  // Fill with white background in case of transparent PNGs
+                  ctx.fillStyle = "#ffffff";
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+                  ctx.drawImage(img, 0, 0);
+                  resolve(canvas.toDataURL("image/jpeg", 0.7));
+                } else {
+                  resolve("");
+                }
+                URL.revokeObjectURL(objectUrl);
+              };
+              img.onerror = () => {
+                resolve("");
+                URL.revokeObjectURL(objectUrl);
+              };
+              img.src = objectUrl;
+            });
+          } catch (e) {
+            console.error("PDF Image loading error:", e);
+            return null;
+          }
+        })
+      );
+
+      autoTable(doc, {
+        startY: 46,
+        head: [
+          ["#", "Photo", "Name", "Character", "Location", "Country", "Added"],
+        ],
+        body: allTalents.map((t, i) => [
+          i + 1,
+          "",
+          t.name,
+          t.character,
+          t.location,
+          t.country,
+          formatDate(t.created_at),
+        ]),
+        headStyles: {
+          fillColor: [37, 99, 235],
+          textColor: 255,
+          fontStyle: "bold",
+          fontSize: 9,
+        },
+        bodyStyles: { fontSize: 8.5, textColor: [30, 30, 30], minCellHeight: 14 },
+        alternateRowStyles: { fillColor: [239, 246, 255] },
+        columnStyles: {
+          0: { halign: "center", cellWidth: 10 },
+          1: { halign: "center", cellWidth: 14 },
+          6: { cellWidth: 24 },
+        },
+        margin: { left: 14, right: 14 },
+        didDrawCell: (data) => {
+          if (data.column.index === 1 && data.cell.section === "body") {
+            const base64 = base64Images[data.row.index];
+            if (base64 && base64.length > 20) {
+              const dim = 10;
+              const x = data.cell.x + (data.cell.width - dim) / 2;
+              const y = data.cell.y + (data.cell.height - dim) / 2;
+              try {
+                // Guaranteed to be JPEG from our canvas processing above
+                doc.addImage(base64, "JPEG", x, y, dim, dim);
+              } catch (e) {
+                console.error("Error adding image to PDF:", e);
+              }
+            }
+          }
+        },
+        didDrawPage: (hookData) => {
+          const pageCount = (doc as any).internal.getNumberOfPages();
+          doc.setFontSize(8);
+          doc.setTextColor(160, 160, 160);
+          doc.text(
+            `Page ${hookData.pageNumber} of ${pageCount}`,
+            pageWidth / 2,
+            doc.internal.pageSize.getHeight() - 8,
+            { align: "center" },
+          );
+        },
+      });
+
+      doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
+      toast.success("PDF generated successfully!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate PDF.", { id: toastId });
     }
-
-    doc.setTextColor(100, 116, 139);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `Generated: ${new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })}   •   ${totalCount} talent${totalCount !== 1 ? "s" : ""}`,
-      14,
-      40,
-    );
-
-    autoTable(doc, {
-      startY: 46,
-      head: [
-        ["#", "Name", "Character", "Location", "Country", "Added"],
-      ],
-      body: allTalents.map((t, i) => [
-        i + 1,
-        t.name,
-        t.character,
-        t.location,
-        t.country,
-        formatDate(t.created_at),
-      ]),
-      headStyles: {
-        fillColor: [37, 99, 235],
-        textColor: 255,
-        fontStyle: "bold",
-        fontSize: 9,
-      },
-      bodyStyles: { fontSize: 8.5, textColor: [30, 30, 30] },
-      alternateRowStyles: { fillColor: [239, 246, 255] },
-      columnStyles: {
-        0: { halign: "center", cellWidth: 10 },
-        6: { cellWidth: 24 },
-      },
-      margin: { left: 14, right: 14 },
-      didDrawPage: (hookData) => {
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.setTextColor(160, 160, 160);
-        doc.text(
-          `Page ${hookData.pageNumber} of ${pageCount}`,
-          pageWidth / 2,
-          doc.internal.pageSize.getHeight() - 8,
-          { align: "center" },
-        );
-      },
-    });
-
-    doc.save(`shortlist-${jobTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`);
   };
 
   // ── Mutations ────────────────────────────────────────────────────────────
