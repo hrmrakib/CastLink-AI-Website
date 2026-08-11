@@ -83,7 +83,7 @@ interface Job {
   session_id: string;
   title: string;
   description: string;
-  casting_roles?: string;
+  casting_roles?: any;
   location: string;
   budget_min: string;
   budget_max: string;
@@ -128,6 +128,21 @@ function formatDate(iso: string) {
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function formatCastingRoles(roles: any): string[] {
+  if (!roles) return [];
+  if (Array.isArray(roles)) return roles;
+  if (typeof roles === "string") {
+    try {
+      const parsed = JSON.parse(roles);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // ignore
+    }
+    return [roles];
+  }
+  return [];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -569,15 +584,17 @@ export default function ActiveJobsPage() {
                           <div className='group relative Skinner flex items-center'>
                             <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0' />
                             <span className='whitespace-nowrap ml-2 text-sm truncate max-w-25'>
-                              {job.casting_roles
-                                ? job.casting_roles
-                                    .split(" ")
+                              {formatCastingRoles(job.casting_roles).length > 0
+                                ? formatCastingRoles(job.casting_roles)
                                     .slice(0, 2)
-                                    .join(" ") + "..."
-                                : ""}
+                                    .join(", ") +
+                                  (formatCastingRoles(job.casting_roles).length > 2
+                                    ? "..."
+                                    : "")
+                                : "—"}
                             </span>
                             <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitespace-nowrap shadow-md border border-border z-10'>
-                              {job.casting_roles}
+                              {formatCastingRoles(job.casting_roles).join(", ") || "No roles"}
                             </span>
                           </div>
                         </td>
