@@ -25,12 +25,6 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -71,7 +65,7 @@ export interface TalentInfo {
   talent_id: number;
   name: string;
   gender: string;
-  role: string;
+  role?: string;
   character: string;
   height: string;
   waist: string;
@@ -125,7 +119,7 @@ interface Talent {
   id: string;
   talent_id: number;
   name: string;
-  role: string;
+  role?: string;
   character: string;
   gender: string;
   location: string;
@@ -167,7 +161,6 @@ function normalise(raw: ShortlistedTalent): Talent {
     id: String(raw.shortlisted_id),
     talent_id: ti.talent_id,
     name: ti.name,
-    role: ti.role,
     character: ti.character,
     gender: ti.gender,
     location: ti.location,
@@ -518,12 +511,11 @@ export default function ShortlistDetailPage() {
     autoTable(doc, {
       startY: 46,
       head: [
-        ["#", "Name", "Role", "Character", "Location", "Country", "Added"],
+        ["#", "Name", "Character", "Location", "Country", "Added"],
       ],
       body: allTalents.map((t, i) => [
         i + 1,
         t.name,
-        t.role,
         t.character,
         t.location,
         t.country,
@@ -748,7 +740,7 @@ export default function ShortlistDetailPage() {
                 <div className='space-y-'>
                   {[
                     { label: "Name", value: selectedTalent.name },
-                    { label: "Role", value: selectedTalent.role },
+                    // { label: "Role", value: selectedTalent.role },
                     { label: "Character", value: selectedTalent.character },
                     { label: "Gender", value: selectedTalent.gender },
                     {
