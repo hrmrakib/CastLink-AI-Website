@@ -41,6 +41,7 @@ interface FormData {
   availability: boolean; // true for available/on-request, false for unavailable
   availableOnRequest: boolean; // true only for the middle option
   skills: string;
+  portfolioLink: string;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -521,6 +522,7 @@ const INITIAL_FORM: FormData = {
   availability: true,
   availableOnRequest: false,
   skills: "",
+  portfolioLink: "",
 };
 
 // Main Page Component
@@ -630,6 +632,7 @@ export default function AddTalentPage() {
       payload.append("date_of_birth", formData.dateOfBirth);
       payload.append("is_available", String(formData.availability));
       payload.append("skills", formData.skills);
+      payload.append("portfolio_link", formData.portfolioLink);
       payload.append(
         "is_available_on_request",
         String(formData.availableOnRequest),
@@ -717,8 +720,8 @@ export default function AddTalentPage() {
   };
 
   const downloadTemplate = () => {
-    const headers = ["Gender", "Name", "Height", "Waist", "Bust", "Hips", "Dress Size", "Shoe Size", "Hair Colour", "Eye Colour", "Skin Color", "Hair Type", "Continent", "Country", "Location", "Date of Birth", "Availability", "Skills", "Character"];
-    const sampleRow = ["female", "Jane Doe", "170", "60", "85", "90", "8", "39", "Brown", "Blue", "White", "Straight", "Europe", "UK", "London", "1995-05-15", "Available", "Acting, Dancing", "Actor"];
+    const headers = ["Gender", "Name", "Height", "Waist", "Bust", "Hips", "Dress Size", "Shoe Size", "Hair Colour", "Eye Colour", "Skin Color", "Hair Type", "Continent", "Country", "Location", "Date of Birth", "Availability", "Skills", "Character", "Portfolio Link"];
+    const sampleRow = ["female", "Jane Doe", "170", "60", "85", "90", "8", "39", "Brown", "Blue", "White", "Straight", "Europe", "UK", "London", "1995-05-15", "Available", "Acting, Dancing", "Actor", "https://janedoe.com"];
     
     const csvContent = "data:text/csv;charset=utf-8," 
       + headers.join(",") + "\n"
@@ -806,6 +809,7 @@ export default function AddTalentPage() {
         availability,
         availableOnRequest,
         skills: rowData["skills"] || "",
+        portfolioLink: rowData["portfolio link"] || "",
       }));
       
       setUploadMode('manual');
@@ -1225,6 +1229,25 @@ export default function AddTalentPage() {
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
                 />
               </div>
+            </div>
+
+            {/* Portfolio Link */}
+            <div>
+              <label
+                htmlFor='portfolioLink'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Portfolio Link
+              </label>
+              <input
+                type='url'
+                id='portfolioLink'
+                name='portfolioLink'
+                value={formData.portfolioLink}
+                onChange={handleInputChange}
+                placeholder='https://your-portfolio.com'
+                className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
+              />
             </div>
 
             {/* Skills Section */}

@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ai.poolofcast.com",
       },
+      {
+        protocol: "https",
+        hostname: "api.poolofcast.comhttps",
+      },
     ],
   },
 };

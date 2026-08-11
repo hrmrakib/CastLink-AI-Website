@@ -11,7 +11,9 @@ import { Calendar, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/imagePath";
+import { Label } from "@/components/ui/label"; 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   DropdownMenu,
@@ -45,6 +47,7 @@ interface FormData {
   availability: boolean;
   availableOnRequest: boolean;
   skills: string;
+  portfolioLink: string;
 }
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
@@ -414,6 +417,7 @@ const INITIAL_FORM: FormData = {
   availability: true,
   availableOnRequest: false,
   skills: "",
+  portfolioLink: "",
 };
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -503,6 +507,7 @@ export default function UpdateTalentPage() {
       availability: singleTalent.is_available ?? true,
       availableOnRequest: singleTalent.is_available_on_request ?? false,
       skills: singleTalent.skills ?? "",
+      portfolioLink: singleTalent.portfolio_link ?? "",
     });
 
     setShootDates(singleTalent?.available_dates ?? []);
@@ -594,6 +599,7 @@ export default function UpdateTalentPage() {
 
       payload.append("character", role);
       payload.append("skills", formData.skills);
+      payload.append("portfolio_link", formData.portfolioLink);
 
       shootDates.forEach((date) => {
         payload.append("available_date", date);
@@ -1081,6 +1087,25 @@ export default function UpdateTalentPage() {
               </div>
             </div>
 
+            {/* Portfolio Link */}
+            <div>
+              <label
+                htmlFor='portfolioLink'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Portfolio Link
+              </label>
+              <input
+                type='url'
+                id='portfolioLink'
+                name='portfolioLink'
+                value={formData.portfolioLink}
+                onChange={handleInputChange}
+                placeholder='https://your-portfolio.com'
+                className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
+              />
+            </div>
+
             {/* FIX: Talent type dropdown — label, options, and display value all match Add page */}
             <div className='w-full mb-10'>
               <DropdownMenu>
@@ -1142,9 +1167,11 @@ export default function UpdateTalentPage() {
                         key={image.id}
                         className='group relative aspect-square rounded-lg overflow-hidden bg-muted'
                       >
-                        <img
-                          src={image.url}
+                        <Image
+                          src={getImageUrl(image.url) || "/placeholder.svg"}
                           alt={image.name}
+                          width={100}
+                          height={100}
                           className='w-full h-full object-cover'
                         />
                         <button
