@@ -525,7 +525,7 @@ export default function ChatModalDetail({
                   <Calendar size={20} />
                 </button>
 
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleselftapRequest(talent?.talent_id),
@@ -538,9 +538,9 @@ export default function ChatModalDetail({
                   title='Selftapes Request'
                 >
                   <Camera size={20} />
-                </button>
+                </button> */}
 
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handleECastingRequest(talent?.talent_id),
@@ -553,7 +553,7 @@ export default function ChatModalDetail({
                   title='E-Casting Request'
                 >
                   <Phone size={20} />
-                </button>
+                </button> */}
 
                 <button
                   onClick={() =>
@@ -570,7 +570,7 @@ export default function ChatModalDetail({
                   <Check size={20} />
                 </button>
 
-                <button
+                {/* <button
                   onClick={() =>
                     withConfirm(
                       () => handlePolasRequest(talent?.talent_id),
@@ -583,7 +583,7 @@ export default function ChatModalDetail({
                   title='Polas Request'
                 >
                   <ScanFace size={20} />
-                </button>
+                </button> */}
 
                 <button
                   onClick={() =>
