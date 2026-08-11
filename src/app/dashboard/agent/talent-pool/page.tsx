@@ -361,6 +361,7 @@ export default function TalentVault() {
 
               <div className='absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black via-black/50 to-transparent p-4 sm:p-6'>
                 <div className='space-y-1 text-white'>
+                  <h3 className='text-lg font-bold mb-2'>{talent.name}</h3>
                   <p className='text-sm font-semibold opacity-90'>
                     Height: {talent.height}
                   </p>
