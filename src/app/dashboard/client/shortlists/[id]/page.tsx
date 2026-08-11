@@ -23,6 +23,8 @@ import {
   ScanFace,
   ArrowLeft,
   MessageCircle,
+  Link,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -81,6 +83,7 @@ export interface TalentInfo {
   country: string;
   location: string;
   skills: string;
+  portfolio_link?: string;
   is_available: boolean;
   available_dates: string[];
   images: TalentImage[];
@@ -136,6 +139,7 @@ interface Talent {
   skin_color: string;
   hair_type: string;
   skills: string;
+  portfolio_link?: string;
   is_available: boolean;
   available_dates: string[];
   primaryImage: string;
@@ -177,6 +181,7 @@ function normalise(raw: ShortlistedTalent): Talent {
     skin_color: ti.skin_color,
     hair_type: ti.hair_type,
     skills: ti.skills,
+    portfolio_link: ti.portfolio_link,
     is_available: ti.is_available,
     available_dates: ti.available_dates ?? [],
     primaryImage: resolveImageUrl(getPrimaryImage(ti.images)),
@@ -918,6 +923,39 @@ export default function ShortlistDetailPage() {
                     </div>
                   ))}
                 </div>
+                
+                {selectedTalent.portfolio_link && (
+                  <div className='mt-6 bg-blue-50/50 rounded-2xl p-4 flex items-center justify-between border border-blue-100'>
+                    <div className='flex items-center gap-3 overflow-hidden'>
+                      <div className='w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm'>
+                        <Link size={18} />
+                      </div>
+                      <div className='flex flex-col overflow-hidden'>
+                        <span className='text-sm font-bold text-gray-900'>
+                          Portfolio link
+                        </span>
+                        <a
+                          href={selectedTalent.portfolio_link}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-sm text-blue-600 hover:underline truncate'
+                        >
+                          {selectedTalent.portfolio_link.replace(/^https?:\/\//, '')}
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(selectedTalent.portfolio_link || "");
+                        toast.success("Portfolio link copied!");
+                      }}
+                      className='shrink-0 ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-semibold bg-white shadow-sm'
+                    >
+                      Copy link
+                      <Copy size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Right — images */}
@@ -940,8 +978,10 @@ export default function ShortlistDetailPage() {
                 </div>
 
                 {selectedTalent.images.length > 1 && (
-                  <div className='flex gap-2 flex-wrap'>
-                    {selectedTalent.images.map((img) => {
+                  <div className='flex flex-col gap-2'>
+                    <h3 className='font-bold text-sm text-gray-900 mt-2'>Polas / Selfies</h3>
+                    <div className='flex gap-2 flex-wrap'>
+                      {selectedTalent.images.map((img) => {
                       const url = resolveImageUrl(img.image);
                       const isActive = activeImage === url;
                       return (
@@ -964,6 +1004,7 @@ export default function ShortlistDetailPage() {
                         </div>
                       );
                     })}
+                    </div>
                   </div>
                 )}
               </div>
