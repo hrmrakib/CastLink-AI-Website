@@ -527,7 +527,7 @@ export default function UpdateTalentPage() {
       const existingImages: ImageItem[] = singleTalent.images.map(
         (item: { image_id: number; image: string }) => ({
           id: `existing-${item.image_id}`,
-          url: `${API_BASE_URL}${item.image}`,
+          url: item.image,
           name: item.image.split("/").pop() ?? `image-${item.image_id}`,
           isExisting: true,
           imageId: item.image_id,
