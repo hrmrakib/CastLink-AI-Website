@@ -501,10 +501,14 @@ const ChatWidget = ({
   jobId,
   guestToken,
   guestThread,
+  agentName,
+  agentPhoto,
 }: {
   jobId: string;
   guestToken: string;
   guestThread: string;
+  agentName?: string;
+  agentPhoto?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -623,13 +627,17 @@ const ChatWidget = ({
           <div className='bg-blue-600 text-white p-4 flex justify-between items-center'>
             <div className='flex items-center gap-3'>
               <div className='relative'>
-                <div className='w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold'>
-                  A
-                </div>
+                {agentPhoto ? (
+                  <img src={agentPhoto.startsWith('http') ? agentPhoto : `${BASE_URL}${agentPhoto}`} alt={agentName || 'Agent'} className='w-10 h-10 rounded-full object-cover shrink-0' />
+                ) : (
+                  <div className='w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold'>
+                    {agentName ? agentName.charAt(0) : 'A'}
+                  </div>
+                )}
                 <div className='absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full'></div>
               </div>
               <div>
-                <h3 className='font-semibold'>Agent</h3>
+                <h3 className='font-semibold'>{agentName || 'Agent'}</h3>
                 <p className='text-xs text-blue-100'>Online</p>
               </div>
             </div>
@@ -714,9 +722,13 @@ const ChatWidget = ({
               })
             ) : (
               <div className='flex items-start gap-2'>
-                <div className='w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0'>
-                  A
-                </div>
+                {agentPhoto ? (
+                  <img src={agentPhoto.startsWith('http') ? agentPhoto : `${BASE_URL}${agentPhoto}`} alt={agentName || 'Agent'} className='w-8 h-8 rounded-full object-cover shrink-0' />
+                ) : (
+                  <div className='w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0'>
+                    {agentName ? agentName.charAt(0) : 'A'}
+                  </div>
+                )}
                 <div className='bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800 border border-gray-100'>
                   Hi! Let me know if you have any questions about this
                   shortlist.
@@ -2064,6 +2076,8 @@ export default function ShortlistDetailPage() {
             jobId={id}
             guestToken={guestToken}
             guestThread={guestThread}
+            agentName={job?.created_by_name}
+            agentPhoto={job?.created_by_image}
           />
         </ClientChatProvider>
       )}
