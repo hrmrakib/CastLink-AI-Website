@@ -126,6 +126,8 @@ export interface ShortlistJobDetail {
     assign_status: boolean;
     talent_id: number | null;
   }[];
+  created_by_name?: string;
+  created_by_image?: string;
 }
 
 // ── Internal normalised UI shape ─────────────────────────────────────────────
