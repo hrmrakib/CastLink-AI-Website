@@ -17,7 +17,7 @@ const activeJobsAPI = baseAPI.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["ActiveJobs"],
-    }),
+    }), 
   }),
 });
 

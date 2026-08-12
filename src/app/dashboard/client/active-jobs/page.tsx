@@ -17,7 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import activeJobsAPI, { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
 import useDebounce from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { useDeleteActiveJobMutation, useUpdateActiveJobMutation } from "@/redux/features/ai-chat/aiChatAPI";
@@ -82,6 +84,7 @@ function getApplicantProgress(job: Job): number {
 
 export default function Page() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(searchQuery, 900);
@@ -182,7 +185,32 @@ export default function Page() {
       const res = await updateActiveJobMutation({ job_id: editingJob.job_id, ...body }).unwrap();
       toast.success(res?.status_message || "Job updated successfully");
       setIsEditModalOpen(false);
-      refetch();
+      
+      // Update the local cache without refetching so the skeleton doesn't show
+      dispatch(
+        activeJobsAPI.util.updateQueryData(
+          'getActiveJobs',
+          { page: currentPage, page_size: 10, search: debouncedSearch },
+          (draft) => {
+            const index = draft?.data?.findIndex((j: Job) => String(j.job_id) === String(editingJob.job_id));
+            if (index !== -1 && draft?.data?.[index]) {
+              draft.data[index].title = body.title;
+              draft.data[index].description = body.description;
+              draft.data[index].location = body.location;
+              // Budget logic since there is only a single budget_range field edited now
+              // If we need to distribute it we can, but let's just assign budget_min
+              draft.data[index].budget_min = body.budget_range;
+              draft.data[index].budget_max = body.budget_range;
+              
+              if (!draft.data[index].ai_result) {
+                draft.data[index].ai_result = {};
+              }
+              draft.data[index].ai_result.shot_date = body.shoot_dates;
+            }
+          }
+        )
+      );
+
     } catch (error: any) {
       toast.error(error?.data?.status_message || "Failed to update job.");
     }
