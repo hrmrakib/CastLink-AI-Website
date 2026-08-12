@@ -583,6 +583,13 @@ const ChatWidget = ({
 
     if (!guestToken) return;
 
+    const isValidType = file.type.startsWith("image/") || file.type === "application/pdf";
+    if (!isValidType) {
+      toast.error("Only image and PDF files are allowed");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     const formData = new FormData();
     formData.append("attachment", file);
 
@@ -683,11 +690,11 @@ const ChatWidget = ({
                     >
                       {msg.message_type === "file" || msg.attachment_url ? (
                         <div className="flex flex-col gap-2">
-                          {msg.attachment_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                          {(msg.file_name?.match(/\.(jpeg|jpg|gif|png|webp)$/i) || msg.attachment_url?.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ? (
                             <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer">
                               <img src={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} alt="attachment" className="max-w-full h-auto rounded-lg max-h-48 object-cover" />
                             </a>
-                          ) : msg.attachment_url?.match(/\.pdf$/i) ? (
+                          ) : (msg.file_name?.match(/\.pdf$/i) || msg.attachment_url?.match(/\.pdf(\?.*)?$/i)) ? (
                             <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 underline ${isClient ? 'text-blue-100' : 'text-blue-600'}`}>
                               📄 {msg.file_name || "PDF Document"}
                             </a>
