@@ -940,7 +940,7 @@ export default function ShortlistDetailPage() {
                     )
                   }
                   disabled={bookLoading}
-                  title='Booking Request'
+                  title='Book'
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   <Check size={20} />

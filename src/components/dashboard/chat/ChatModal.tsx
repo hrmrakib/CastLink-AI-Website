@@ -566,7 +566,7 @@ export default function ChatModalDetail({
                   disabled={bookLoading}
                   className='p-2 md:p-3.5 rounded-full shadow-lg hover:bg-blue-100 transition-colors text-[#2563EB] border border-transparent hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400'
                   aria-label='Approve'
-                  title='Booking Request'
+                  title='Book'
                 >
                   <Check size={20} />
                 </button>
