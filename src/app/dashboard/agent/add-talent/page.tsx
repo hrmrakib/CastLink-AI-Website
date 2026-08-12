@@ -1012,6 +1012,7 @@ export default function AddTalentPage() {
                 name='name'
                 value={formData.name}
                 onChange={handleInputChange}
+                required
                 placeholder='Jerry Fura Lia'
                 className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${
                   errors.name ? "border-red-500" : "border-slate-300"
@@ -1071,6 +1072,7 @@ export default function AddTalentPage() {
                       name={field.id}
                       value={formData[field.id as keyof FormData] as string}
                       onChange={handleInputChange}
+                      required
                       placeholder={field.placeholder}
                       className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${
                         field.unit ? "pr-12" : "" // 2. Add extra padding on the right side if a unit tag is present
@@ -1173,6 +1175,7 @@ export default function AddTalentPage() {
                     name={field.id}
                     value={formData[field.id as keyof FormData] as string}
                     onChange={handleInputChange}
+                    required
                     placeholder={field.placeholder}
                     className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
                   />
@@ -1200,6 +1203,7 @@ export default function AddTalentPage() {
                     name={field.id}
                     value={formData[field.id as keyof FormData] as string}
                     onChange={handleInputChange}
+                    required
                     placeholder={field.placeholder}
                     className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
                   />
@@ -1226,6 +1230,7 @@ export default function AddTalentPage() {
                   name='dateOfBirth'
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
+                  required
                   className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
                 />
               </div>
@@ -1289,6 +1294,7 @@ export default function AddTalentPage() {
                       addSkill(skillInput);
                     }
                   }}
+                  required={!formData.skills.trim()}
                   onBlur={() => addSkill(skillInput)}
                   placeholder={
                     formData.skills

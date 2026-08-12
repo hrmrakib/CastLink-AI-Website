@@ -582,6 +582,8 @@ export default function Page() {
                     className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none'
                   />
                 </div>
+
+                */}
                 <div className='md:col-span-2'>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Casting Roles</label>
                   {editFormData.casting_roles.map((role, index) => (
@@ -617,7 +619,7 @@ export default function Page() {
                     <Plus size={16} /> Add Role
                   </button>
                 </div>
-                */}
+                
               </div>
 
               <div className='flex gap-3 justify-end mt-8 pt-4 border-t border-gray-100'>
