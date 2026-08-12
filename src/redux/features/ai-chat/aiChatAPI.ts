@@ -180,6 +180,15 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         method: "DELETE",
       }),
     }),
+
+    updateActiveJob: builder.mutation({
+      query: ({ job_id, ...body }) => ({
+        url: `/api/jobs/edit-job/${job_id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["ActiveJobs"],
+    }),
   }),
 });
 
@@ -204,5 +213,6 @@ export const {
   useAssignRoleMutation,
   useUnassignRoleMutation,
   useDeleteSingleTalentFromShortlistMutation,
+  useUpdateActiveJobMutation,
 } = aiChatAPI;
 export default aiChatAPI;
