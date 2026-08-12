@@ -525,7 +525,13 @@ export default function AIDynamicPage() {
 
       setAssignRoleModal((prev) => {
         if (!prev.talent) return prev;
-        const updatedAssignedRoles = [...(prev.talent.assigned_roles || []), newRole];
+        const targetRoleName = roles.find(r => r.id === roleId)?.job_role;
+        const existingRoles = prev.talent.assigned_roles || [];
+        const isExisting = existingRoles.some(r => String(r.role) === String(roleId) || String(r.role) === String(targetRoleName));
+        const updatedAssignedRoles = isExisting 
+          ? existingRoles.map(r => (String(r.role) === String(roleId) || String(r.role) === String(targetRoleName)) ? { ...r, status: true } : r)
+          : [...existingRoles, newRole];
+
         return {
           ...prev,
           talent: {
@@ -540,11 +546,18 @@ export default function AIDynamicPage() {
           if (!msg.talents) return msg;
           return {
             ...msg,
-            talents: msg.talents.map((t) => 
-              t.talent_id === assignRoleModal.talent!.talent_id
-                ? { ...t, assigned_roles: [...(t.assigned_roles || []), newRole] }
-                : t
-            )
+            talents: msg.talents.map((t) => {
+              if (t.talent_id === assignRoleModal.talent!.talent_id) {
+                const targetRoleName = roles.find(r => r.id === roleId)?.job_role;
+                const existingRoles = t.assigned_roles || [];
+                const isExisting = existingRoles.some(r => String(r.role) === String(roleId) || String(r.role) === String(targetRoleName));
+                const updatedAssignedRoles = isExisting 
+                  ? existingRoles.map(r => (String(r.role) === String(roleId) || String(r.role) === String(targetRoleName)) ? { ...r, status: true } : r)
+                  : [...existingRoles, newRole];
+                return { ...t, assigned_roles: updatedAssignedRoles };
+              }
+              return t;
+            })
           };
         })
       );
@@ -1442,8 +1455,9 @@ export default function AIDynamicPage() {
               roles.map((role, i) => {
                 const isAssigned = assignRoleModal.talent?.assigned_roles?.some(
                   (r) =>
-                    String(r.role) === String(role.id) ||
-                    String(r.role) === String(role.job_role)
+                    (String(r.role) === String(role.id) ||
+                    String(r.role) === String(role.job_role)) &&
+                    r.status === true
                 );
 
                 return (
