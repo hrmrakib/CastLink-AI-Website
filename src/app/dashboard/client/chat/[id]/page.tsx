@@ -8,7 +8,10 @@ import {
   useGetCommentAndActivitiesMutation 
 } from "@/redux/features/client/chatCommentAPI";
 import { ClientChatProvider, useClientChat } from "@/provider/ClientChatProvider";
-import { Eye, CheckCircle2, Send, MessageCircle, Heart, Clock, ArrowLeft } from "lucide-react";
+import { Eye, CheckCircle2, Send, MessageCircle, Heart, Clock, ArrowLeft, Paperclip, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 
 // --- Types ---
 interface Guest {
@@ -201,6 +204,41 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    const formData = new FormData();
+    formData.append("attachment", file);
+
+    try {
+      setIsUploading(true);
+      const res = await fetch(`https://api.poolofcast.com/api/v1/agent/jobs/${jobId}/clients/${guest.id}/chat/upload/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+      if (res.ok) {
+        // success, message will be broadcasted via WS
+      } else {
+        toast.error("Failed to upload file");
+      }
+    } catch (error) {
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const activities = activityData?.data?.activity || [];
   
   // Combine optimistic and server messages for agent
@@ -311,7 +349,26 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
                       ? 'bg-blue-600 text-white border-blue-600 rounded-tr-none' 
                       : 'bg-white text-gray-800 border-gray-100 rounded-tl-none'
                   }`}>
-                    <span className="break-words">{msg.text || msg.content}</span>
+                    {msg.message_type === "file" || msg.attachment_url ? (
+                      <div className="flex flex-col gap-2">
+                        {msg.attachment_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                          <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer">
+                            <img src={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} alt="attachment" className="max-w-full h-auto rounded-lg max-h-48 object-cover" />
+                          </a>
+                        ) : msg.attachment_url?.match(/\.pdf$/i) ? (
+                          <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 underline ${isMe ? 'text-blue-100' : 'text-blue-600'}`}>
+                            📄 {msg.file_name || "PDF Document"}
+                          </a>
+                        ) : (
+                          <a href={msg.attachment_url?.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 underline ${isMe ? 'text-blue-100' : 'text-blue-600'}`}>
+                            📎 {msg.file_name || "File Attachment"}
+                          </a>
+                        )}
+                        {msg.text && <span className="break-words mt-1">{msg.text}</span>}
+                      </div>
+                    ) : (
+                      <span className="break-words">{msg.text || msg.content}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -321,6 +378,21 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
           {/* Input Area */}
           <div className='p-4 bg-white border-t border-gray-100 shrink-0'>
             <div className='flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl p-1.5 shadow-inner focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all'>
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+                accept="image/*,.pdf"
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={!isAuthenticated || isUploading}
+                className='w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                title="Attach file"
+              >
+                {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className='w-5 h-5' />}
+              </button>
               <textarea 
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -336,7 +408,7 @@ function ChatAndActivityView({ guest, jobId, onClose, refetchGuests }: { guest: 
               />
               <button 
                 onClick={handleSend}
-                disabled={!message.trim() || !isAuthenticated}
+                disabled={(!message.trim() && !isUploading) || !isAuthenticated}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                   message.trim() && isAuthenticated 
                     ? 'bg-blue-600 text-white hover:bg-blue-700' 

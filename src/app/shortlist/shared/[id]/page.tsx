@@ -21,6 +21,8 @@ import {
   Layers,
   Link,
   Copy,
+  Paperclip,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -572,6 +574,40 @@ const ChatWidget = ({
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!guestToken) return;
+
+    const formData = new FormData();
+    formData.append("attachment", file);
+
+    try {
+      setIsUploading(true);
+      const res = await fetch(`https://api.poolofcast.com/api/v1/client/talents/shortlisted/${jobId}/chat/upload/`, {
+        method: "POST",
+        headers: {
+          "X-Guest-Token": guestToken
+        },
+        body: formData
+      });
+      if (res.ok) {
+        // success, message broadcasted via WS
+      } else {
+        toast.error("Failed to upload file");
+      }
+    } catch (error) {
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className='fixed bottom-6 right-6 z-50'>
       {isOpen && (
@@ -645,9 +681,26 @@ const ChatWidget = ({
                           : "bg-white text-gray-800 border-gray-100 rounded-tl-none"
                       }`}
                     >
-                      <span className='break-words'>
-                        {msg.text || msg.content}
-                      </span>
+                      {msg.message_type === "file" || msg.attachment_url ? (
+                        <div className="flex flex-col gap-2">
+                          {msg.attachment_url?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                            <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer">
+                              <img src={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} alt="attachment" className="max-w-full h-auto rounded-lg max-h-48 object-cover" />
+                            </a>
+                          ) : msg.attachment_url?.match(/\.pdf$/i) ? (
+                            <a href={msg.attachment_url.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 underline ${isClient ? 'text-blue-100' : 'text-blue-600'}`}>
+                              📄 {msg.file_name || "PDF Document"}
+                            </a>
+                          ) : (
+                            <a href={msg.attachment_url?.startsWith('http') ? msg.attachment_url : `${BASE_URL}${msg.attachment_url}`} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 underline ${isClient ? 'text-blue-100' : 'text-blue-600'}`}>
+                              📎 {msg.file_name || "File Attachment"}
+                            </a>
+                          )}
+                          {msg.text && <span className="break-words mt-1">{msg.text}</span>}
+                        </div>
+                      ) : (
+                        <span className="break-words">{msg.text || msg.content}</span>
+                      )}
                     </div>
                   </div>
                 );
@@ -667,6 +720,21 @@ const ChatWidget = ({
 
           {/* Input */}
           <div className='p-3 bg-white border-t border-gray-100 flex items-center gap-2'>
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+              accept="image/*,.pdf"
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className='w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100'
+              title="Attach file"
+            >
+              {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className='w-5 h-5' />}
+            </button>
             <input
               type='text'
               value={message}
@@ -674,14 +742,14 @@ const ChatWidget = ({
               placeholder='Reply...'
               className='flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50'
               onKeyDown={(e) => {
-                if (e.key === "Enter" && message.trim()) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
                 }
               }}
             />
             <button
-              disabled={!message.trim()}
+              disabled={(!message.trim() && !isUploading)}
               className='w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0'
               onClick={handleSend}
             >
