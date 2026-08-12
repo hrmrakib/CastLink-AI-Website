@@ -234,7 +234,7 @@ export default function TalentVault() {
                 name='search'
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder='Search talent (Working on it)'
+                placeholder='Search talent'
                 className='border border-[#E7E8EA] rounded-lg px-4 py-2 w-full sm:w-80 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500'
               />
             </div>
