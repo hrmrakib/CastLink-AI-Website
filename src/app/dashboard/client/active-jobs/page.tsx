@@ -6,7 +6,7 @@ import {
   Search,
   MapPin,
   Calendar,
-  DollarSign,
+  Euro,
   Users,
   Sparkles,
   Trash2,
@@ -46,8 +46,8 @@ interface Job {
 function formatBudget(min: string, max: string): string {
   const minVal = parseFloat(min);
   const maxVal = parseFloat(max);
-  if (minVal === maxVal) return `$${minVal.toLocaleString()}`;
-  return `$${minVal.toLocaleString()}-$${maxVal.toLocaleString()}`;
+  if (minVal === maxVal) return `€${minVal.toLocaleString()}`;
+  return `€${minVal.toLocaleString()}-€${maxVal.toLocaleString()}`;
 }
 
 function formatDate(dateStr: string): string {
@@ -255,7 +255,7 @@ export default function Page() {
                         {date}
                       </div>
                       <div className='flex items-center gap-2 text-gray-700'>
-                        <DollarSign className='w-4 h-4 text-[#404145]' />
+                        <Euro className='w-4 h-4 text-[#404145]' />
                         {budget}
                       </div>
                     </div>
