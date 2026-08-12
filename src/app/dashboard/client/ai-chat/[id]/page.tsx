@@ -751,6 +751,10 @@ export default function AIDynamicPage() {
                             .map((profile, idx) => {
                               const imageUrl = profile.images?.[0] || "";
 
+                              const hasDates = profile?.available_dates && profile.available_dates.length > 0;
+                              const futureDatesCount = hasDates ? profile.available_dates!.filter(d => !formatAvailabilityDate(d).isPast).length : 0;
+                              const shouldShowAvailable = hasDates ? (futureDatesCount > 0) : (profile?.is_available && !profile?.is_available_on_request);
+
                               const hiddenCount =
                                 message.talents!.length - maxVisibleTalent;
                               const isLastVisible =
@@ -809,22 +813,17 @@ export default function AIDynamicPage() {
                                           </div>
                                         )}
 
-                                        {profile?.is_available &&
-                                          !profile?.is_available_on_request && (
+                                        {shouldShowAvailable && (
                                             <div
                                               className='flex items-center justify-center w-6 h-6'
                                               title={
-                                                profile?.is_available
-                                                  ? "Available "
-                                                  : "Not Available "
+                                                hasDates
+                                                  ? `${futureDatesCount} Available Date${futureDatesCount > 1 ? "s" : ""}`
+                                                  : "Available"
                                               }
                                             >
                                               <span
-                                                className={`w-5 h-5 rounded-full ${
-                                                  profile?.is_available
-                                                    ? "bg-green-400"
-                                                    : "bg-red-500"
-                                                }`}
+                                                className="w-5 h-5 rounded-full bg-green-400"
                                                 aria-hidden='true'
                                               />
                                             </div>
