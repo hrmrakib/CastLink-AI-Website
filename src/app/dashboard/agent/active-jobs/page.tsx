@@ -799,13 +799,25 @@ export default function ActiveJobsPage() {
                     <h3 className='text-sm sm:text-base font-bold text-foreground mb-1'>
                       Shoot Date(s)
                     </h3>
-                    {selectedJob?.ai_result.shoot_date?.length > 0 ? (
+                    {(selectedJob?.ai_result as any)?.shot_date?.length > 0 ? (
                       <div className='flex flex-wrap gap-2'>
-                        {selectedJob?.ai_result?.shoot_date?.map((d, i) => (
-                          <Badge key={i} variant='outline' className='text-xs'>
-                            {d}
-                          </Badge>
-                        ))}
+                        {(selectedJob?.ai_result as any)?.shot_date?.map((d: string, i: number) => {
+                          let parsedDates: string[] = [];
+                          if (typeof d === "string" && d.startsWith("[")) {
+                            try {
+                              parsedDates = JSON.parse(d);
+                            } catch (e) {
+                              parsedDates = [d];
+                            }
+                          } else {
+                            parsedDates = [d];
+                          }
+                          return parsedDates.map((dateStr, j) => (
+                            <Badge key={`${i}-${j}`} variant='outline' className='text-xs'>
+                              {formatDate(dateStr)}
+                            </Badge>
+                          ));
+                        })}
                       </div>
                     ) : (
                       <p className='text-xs sm:text-sm text-muted-foreground'>

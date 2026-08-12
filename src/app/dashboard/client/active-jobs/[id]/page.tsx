@@ -783,20 +783,32 @@ export default function JobDetailPage() {
             <Calendar className='w-5 h-5 text-blue-500' />
             <h3 className='font-semibold text-gray-900'>Shoot Dates</h3>
           </div>
-          {job?.ai_result?.shoot_date?.length === 0 ? (
+          {((job?.ai_result as any)?.shot_date?.length || 0) === 0 ? (
             <p className='text-sm text-gray-400'>
               No shoot dates scheduled yet.
             </p>
           ) : (
             <div className='flex flex-wrap gap-2'>
-              {job?.ai_result?.shoot_date?.map((date, i) => (
-                <span
-                  key={i}
-                  className='bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full font-medium'
-                >
-                  {formatDate(date)}
-                </span>
-              ))}
+              {(job?.ai_result as any)?.shot_date?.map((dateStr: string, i: number) => {
+                let parsedDates: string[] = [];
+                if (typeof dateStr === "string" && dateStr.startsWith("[")) {
+                  try {
+                    parsedDates = JSON.parse(dateStr);
+                  } catch (e) {
+                    parsedDates = [dateStr];
+                  }
+                } else {
+                  parsedDates = [dateStr];
+                }
+                return parsedDates.map((d, j) => (
+                  <span
+                    key={`${i}-${j}`}
+                    className='bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full font-medium'
+                  >
+                    {formatDate(d)}
+                  </span>
+                ));
+              })}
             </div>
           )}
         </div>
