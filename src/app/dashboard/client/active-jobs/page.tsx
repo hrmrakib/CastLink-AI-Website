@@ -13,6 +13,8 @@ import {
   Pencil,
   AlertTriangle,
   Loader,
+  Plus,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetActiveJobsQuery } from "@/redux/features/active-jobs/activeJobsAPI";
@@ -42,6 +44,12 @@ interface Job {
   created_at: string;
   updated_at: string;
   job_photo?: string;
+  casting_roles?: string[];
+  currency?: string;
+  ai_result?: {
+    shot_date?: string[];
+    [key: string]: any;
+  };
 }
 
 function formatBudget(min: string, max: string): string {
@@ -87,10 +95,10 @@ export default function Page() {
     title: "",
     description: "",
     location: "",
-    shoot_dates: "",
+    shoot_dates: [] as string[],
     budget_range: "",
     currency: "R",
-    casting_roles: "",
+    casting_roles: [] as string[],
   });
 
   const [deleteActiveJobMutation, { isLoading: isDeleting }] =
@@ -138,14 +146,21 @@ export default function Page() {
 
   const openEditModal = (job: Job) => {
     setEditingJob(job);
+    let dates = job.ai_result?.shot_date || [];
+    if (dates.length === 1 && dates[0].startsWith('[') && dates[0].endsWith(']')) {
+      try {
+        dates = JSON.parse(dates[0]);
+      } catch (e) {}
+    }
+
     setEditFormData({
       title: job.title || "",
       description: job.description || "",
       location: job.location || "",
-      shoot_dates: "", // Default empty, since we don't parse the complex string here or you could try parsing if needed
+      shoot_dates: dates, 
       budget_range: job.budget_max || job.budget_min || "",
-      currency: "R",
-      casting_roles: "",
+      currency: job.currency || "R",
+      casting_roles: job.casting_roles || [],
     });
     setIsEditModalOpen(true);
   };
@@ -155,14 +170,13 @@ export default function Page() {
     if (!editingJob) return;
 
     try {
+      const cleanedDates = editFormData.shoot_dates.filter(Boolean);
       const body = {
         title: editFormData.title,
         description: editFormData.description,
         location: editFormData.location,
-        shoot_dates: editFormData.shoot_dates ? [editFormData.shoot_dates] : [],
+        shoot_dates: cleanedDates,
         budget_range: editFormData.budget_range,
-        currency: editFormData.currency,
-        casting_roles: editFormData.casting_roles || "N/A",
       };
 
       const res = await updateActiveJobMutation({ job_id: editingJob.job_id, ...body }).unwrap();
@@ -486,14 +500,39 @@ export default function Page() {
                     required
                   />
                 </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>Shoot Date</label>
-                  <input
-                    type='date'
-                    value={editFormData.shoot_dates}
-                    onChange={(e) => setEditFormData({ ...editFormData, shoot_dates: e.target.value })}
-                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none'
-                  />
+                <div className='md:col-span-2'>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Shoot Dates</label>
+                  {editFormData.shoot_dates.map((date, index) => (
+                    <div key={index} className='flex items-center gap-2 mb-2'>
+                      <input
+                        type='date'
+                        value={date}
+                        onChange={(e) => {
+                          const newDates = [...editFormData.shoot_dates];
+                          newDates[index] = e.target.value;
+                          setEditFormData({ ...editFormData, shoot_dates: newDates });
+                        }}
+                        className='flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none'
+                      />
+                      <button
+                        type='button'
+                        onClick={() => {
+                          const newDates = editFormData.shoot_dates.filter((_, i) => i !== index);
+                          setEditFormData({ ...editFormData, shoot_dates: newDates });
+                        }}
+                        className='p-2 text-red-500 hover:bg-red-50 rounded-lg transition'
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type='button'
+                    onClick={() => setEditFormData({ ...editFormData, shoot_dates: [...editFormData.shoot_dates, ""] })}
+                    className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium mt-1'
+                  >
+                    <Plus size={16} /> Add Date
+                  </button>
                 </div>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Budget Range</label>
@@ -505,6 +544,7 @@ export default function Page() {
                     required
                   />
                 </div>
+                {/* 
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Currency</label>
                   <input
@@ -516,14 +556,40 @@ export default function Page() {
                 </div>
                 <div className='md:col-span-2'>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>Casting Roles</label>
-                  <input
-                    type='text'
-                    value={editFormData.casting_roles}
-                    onChange={(e) => setEditFormData({ ...editFormData, casting_roles: e.target.value })}
-                    placeholder='e.g. model 1, model 2'
-                    className='w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none'
-                  />
+                  {editFormData.casting_roles.map((role, index) => (
+                    <div key={index} className='flex items-center gap-2 mb-2'>
+                      <input
+                        type='text'
+                        value={role}
+                        onChange={(e) => {
+                          const newRoles = [...editFormData.casting_roles];
+                          newRoles[index] = e.target.value;
+                          setEditFormData({ ...editFormData, casting_roles: newRoles });
+                        }}
+                        placeholder={`Role ${index + 1}`}
+                        className='flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none'
+                      />
+                      <button
+                        type='button'
+                        onClick={() => {
+                          const newRoles = editFormData.casting_roles.filter((_, i) => i !== index);
+                          setEditFormData({ ...editFormData, casting_roles: newRoles });
+                        }}
+                        className='p-2 text-red-500 hover:bg-red-50 rounded-lg transition'
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type='button'
+                    onClick={() => setEditFormData({ ...editFormData, casting_roles: [...editFormData.casting_roles, ""] })}
+                    className='flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium mt-1'
+                  >
+                    <Plus size={16} /> Add Role
+                  </button>
                 </div>
+                */}
               </div>
 
               <div className='flex gap-3 justify-end mt-8 pt-4 border-t border-gray-100'>
