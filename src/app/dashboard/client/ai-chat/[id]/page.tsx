@@ -714,7 +714,7 @@ export default function AIDynamicPage() {
                       <img
                         src={
                           user?.profile_pic
-                            ? `${BASE_URL}${user.profile_pic}`
+                            ? `${user.profile_pic}`
                             : "/placeholder.svg"
                         }
                         alt='User Avatar'
