@@ -412,7 +412,6 @@ function TalentGroup({
               </button>
               <button
                 title='Delete Talent'
-                disabled
                 onClick={() => onDelete(String(talent.talent_id))}
                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95'
               >
@@ -821,7 +820,7 @@ export default function ShortlistDetailPage() {
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                   onView={handleViewTalent}
-                  onDelete={handleDeleteTalent}
+                  onDelete={(talentId) => withConfirm(() => handleDeleteTalent(talentId), "Delete")}
                 />
               ))}
           </>

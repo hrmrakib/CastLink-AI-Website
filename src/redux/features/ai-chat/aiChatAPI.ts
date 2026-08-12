@@ -163,7 +163,7 @@ const aiChatAPI = aiBaseAPI.injectEndpoints({
         url: `/api/jobs/delete-job-id?job_id=${job_id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["ActiveJobs"],
+      invalidatesTags: ["ActiveJobs"], 
     }),
 
     // delete shortlist
