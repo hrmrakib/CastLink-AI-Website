@@ -8,6 +8,7 @@ import {
   ArrowRight,
   PencilLine,
 } from "lucide-react";
+import Image from "next/image";
 
 // --- Types ---
 interface StepData {
@@ -56,7 +57,7 @@ const stepsData: StepData[] = [
       <div className='bg-blue-50 text-blue-600 rounded-lg p-3 text-sm font-bold flex items-center justify-center gap-2'>
         <CheckCircle2 size={18} strokeWidth={2.5} /> Shortlist saved
       </div>
-    ),
+    ), 
   },
   {
     id: 4,
@@ -66,12 +67,19 @@ const stepsData: StepData[] = [
     footer: (
       <div className='flex flex-col gap-3'>
         <div className='flex items-center justify-center -space-x-2'>
-          {[1, 2, 3, 4].map((i) => (
+          {["t1.jpg", "t2.jpg", "t3.jpg", "t4.jpg"].map((i) => (
             <div
               key={i}
               className='w-8 h-8 rounded-full bg-slate-300 border-2 border-white flex items-center justify-center overflow-hidden'
             >
-              <div className='w-full h-full bg-slate-400' />
+              <Image
+                src={`/${i}`}
+                width={40}
+                height={40}
+                alt={i.toString()}
+                className='w-full h-full object-cover'
+                loading="lazy" 
+              />
             </div>
           ))}
           <div className='w-8 h-8 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-600 z-10'>
