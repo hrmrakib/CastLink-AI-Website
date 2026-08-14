@@ -19,13 +19,13 @@ const roleCards: RoleCard[] = [
   {
     id: "client",
     title: "Client",
-    description: "Post casting calls and find perfect talent",
+    description: "Find the right talent faster and focus on your vision",
     icon: <Briefcase className='w-8 h-8 text-blue-500' />,
   },
   {
     id: "agent",
     title: "Agent",
-    description: "Post casting calls and find perfect talent",
+    description: "Manage casting requests, submit talent availability, upload self-tapes, and grow your ranking",
     icon: <Users className='w-8 h-8 text-blue-500' />,
   },
 ];
