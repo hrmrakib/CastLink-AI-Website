@@ -142,7 +142,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className='mt-4 text-center'>
           <p className='text-sm text-gray-600'>
-            © {new Date().getFullYear()} Poolio. All rights reserved.
+            © {new Date().getFullYear()} Pool of Cast. All rights reserved.
           </p>
         </div>
       </div>
