@@ -10,6 +10,8 @@ import {
   Briefcase,
   Trash,
   MessageCircle,
+  Users,
+  MessageCircleMore,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetShortlistsJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -265,39 +267,53 @@ function ShortlistCard({
       className='rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
     >
       {/* Header */}
-      <div className='mb-3 flex items-start justify-between gap-2'>
-        <div className='flex-1 min-w-0'>
-          <h3 className='text-lg sm:text-xl font-bold leading-tight text-black'>
-            {shortlist.title}
-          </h3>
-          <span className='mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 capitalize'>
-            {shortlist.job_type}
-          </span>
-        </div>
-        <div className='flex shrink flex-row items-center justify-between gap-1'>
-          <span className='rounded-full bg-gray-100 px-3 py-1 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap'>
-            {deduped.length} Shortlisted
-          </span>
-          <button
-            onClick={openDeleteModal}
-            className='rounded px-2 py-0.5 text-xs text-red-400  transition hover:text-red-600'
-          >
-            <Trash size={20} />
-          </button>      
-        </div> 
-        <div>
-           <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/dashboard/client/chat/${shortlist.job_id}`)
-              }}
-              className="flex items-center justify-center gap-2 rounded-lg bg-[linear-gradient(110deg,#3b82f6,45%,#9333ea,55%,#3b82f6)] bg-[length:200%_100%] px-4 py-2 text-sm font-medium text-white shadow-lg transition-transform animate-shimmer hover:scale-[1.02] active:scale-95 sm:text-base cursor-pointer"
-            > 
-              <MessageCircle size={18} />
-              <span>View</span>
-            </button>
-        </div>
+  <div className="mb-3 flex items-start justify-between gap-4">
+  
+      {/* Left: Title & Badge */}
+      <div className="min-w-0 flex-1">
+        <h3 className="text-lg font-bold leading-tight text-black sm:text-xl">
+          {shortlist.title}
+        </h3>
+        <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium capitalize text-gray-500">
+          {shortlist.job_type}
+        </span>
       </div>
+
+                    {/* Right: Actions (All buttons grouped together) */}
+      <div className="flex shrink-0 items-center gap-2">
+        
+        {/* Shortlist Button */}
+        <button
+          onClick={openDeleteModal}
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-blue-500 px-3 text-sm font-medium text-blue-500 transition hover:bg-blue-50 hover:text-blue-600"
+      >
+        <Users size={18} />
+        <span className='text-sm whitespace-nowrap font-semibold'>View shortlist ({deduped.length})</span>
+      </button>      
+      
+      {/* Trash Button */}
+      <button
+        onClick={openDeleteModal}
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-400 text-red-400 transition hover:bg-red-50 hover:text-red-600"
+      >
+        <Trash size={18} />
+      </button>      
+      
+      {/* Chat Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/dashboard/client/chat/${shortlist.job_id}`);
+        }}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-[linear-gradient(110deg,#3b82f6,45%,#9333ea,55%,#3b82f6)] bg-[length:200%_100%] text-white shadow-lg transition-transform animate-shimmer hover:scale-[1.02] active:scale-95"
+      > 
+        <MessageCircleMore size={18} />
+      </button>
+                                       
+    </div>
+                                     
+</div>
+     
 
       {/* Job meta */}
       <div className='mb-3 flex flex-wrap items-center gap-2 text-xs text-gray-400'>
