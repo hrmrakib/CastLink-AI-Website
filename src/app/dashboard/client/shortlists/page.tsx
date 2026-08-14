@@ -284,7 +284,7 @@ function ShortlistCard({
         
         {/* Shortlist Button */}
         <button
-          onClick={openDeleteModal}
+          onClick={()=> router.push(`/dashboard/client/shortlists/${shortlist.job_id}`)}
         className="flex h-10 items-center justify-center gap-2 rounded-lg border border-blue-500 px-3 text-sm font-medium text-blue-500 transition hover:bg-blue-50 hover:text-blue-600"
       >
         <Users size={18} />
