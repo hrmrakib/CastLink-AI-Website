@@ -298,6 +298,7 @@ interface TalentGroupProps {
   groupKey: string;
   onView: (talent: Talent) => void;
   onDelete: (talentId: string) => void;
+  onBook: (talentId: number) => void;
 }
 
 function TalentGroup({
@@ -310,6 +311,7 @@ function TalentGroup({
   groupKey,
   onView,
   onDelete,
+  onBook
 }: TalentGroupProps) {
   if (talents.length === 0) return null;
 
@@ -398,7 +400,8 @@ function TalentGroup({
             {/* Actions */}
             <div className='flex gap-2 shrink-0'>
               <div
-                title='Verified'
+                title='Book'
+                onClick={() => onBook(talent.talent_id)}
                 className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
               >
                 <img src='/badge.png' alt='Verified' />
@@ -689,14 +692,26 @@ export default function ShortlistDetailPage() {
   };
 
   const handleTalentBooking = async (talentId: number) => {
+  const submitForm = new Promise((resolve, reject) => {
+  setTimeout(() => resolve("Success!"), 3000);
+});
+
+// The correct way to use toast.promise
+toast.promise(submitForm, {
+  loading: 'Coming on 15 August, 2026',
+  success: 'Thank you and stay connected',
+  error: 'Something went wrong',
+});
     try {
-      const res = await bookTalentMutation({
-        session_id,
-        talent_id: talentId,
-      }).unwrap();
-      if (res?.status_message) toast.success(res.status_message);
+      // const res = await bookTalentMutation({
+      //   session_id,
+      //   talent_id: talentId,
+      // }).unwrap();
+      // if (res?.status_message) toast.success(res.status_message);
     } catch (error: any) {
-      toast.error(error?.data?.status_message);
+      // toast.error(error?.data?.status_message);
+    }finally{
+
     }
   };
 
@@ -821,6 +836,7 @@ export default function ShortlistDetailPage() {
                   onDrop={handleDrop}
                   onView={handleViewTalent}
                   onDelete={(talentId) => withConfirm(() => handleDeleteTalent(talentId), "Delete")}
+                  onBook={(talentId) => withConfirm(() => handleTalentBooking(talentId), "Booking")}
                 />
               ))}
           </>
