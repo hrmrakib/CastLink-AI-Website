@@ -263,8 +263,8 @@ function ShortlistCard({
 
   return (
     <div
-      onClick={handleCardClick}
-      className='rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all cursor-pointer hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
+      // onClick={handleCardClick}
+      className='rounded-lg border border-gray-200 bg-white p-5 sm:p-6 shadow-sm transition-all hover:shadow-md hover:border-gray-300 overflow-hidden w-full'
     >
       {/* Header */}
   <div className="mb-3 flex items-start justify-between gap-4">
@@ -285,7 +285,7 @@ function ShortlistCard({
         {/* Shortlist Button */}
         <button
           onClick={()=> router.push(`/dashboard/client/shortlists/${shortlist.job_id}`)}
-        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-blue-500 px-3 text-sm font-medium text-blue-500 transition hover:bg-blue-50 hover:text-blue-600"
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-blue-500 px-3 text-sm font-medium text-blue-500 transition hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
       >
         <Users size={18} />
         <span className='text-sm whitespace-nowrap font-semibold'>View shortlist ({deduped.length})</span>
@@ -294,7 +294,7 @@ function ShortlistCard({
       {/* Trash Button */}
       <button
         onClick={openDeleteModal}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-400 text-red-400 transition hover:bg-red-50 hover:text-red-600"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-400 text-red-400 transition hover:bg-red-50 hover:text-red-600 cursor-pointer"
       >
         <Trash size={18} />
       </button>      
