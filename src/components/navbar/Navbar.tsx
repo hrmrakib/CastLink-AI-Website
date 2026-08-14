@@ -16,18 +16,9 @@ export default function Navbar() {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-  const image_url = process.env.NEXT_PUBLIC_IMAGE_URL;
+
   const role = user?.role?.toLowerCase();
 
-  // const navLinks = [
-  //   { name: "Clients", href: "/dashboard/client", role: "client" },
-  //   { name: "Agents", href: "/dashboard/agent", role: "agent" },
-  //   {
-  //     name: "Casting Directors",
-  //     href: "/dashboard/admin",
-  //     role: "admin",
-  //   },
-  // ];
   const navLinks = [
     { name: "Features", href: "/#features", role: "" },
     { name: "Pricing", href: "/#pricing", role: "" },
@@ -90,7 +81,7 @@ export default function Navbar() {
                       className='h-12 w-12 rounded-full!'
                       width={55}
                       height={55}
-                      src={image_url! + user?.profile_pic}
+                      src={user?.profile_pic}
                       alt='Daissy'
                     />
                   )}
