@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import {
   Search,
@@ -9,6 +11,8 @@ import {
   PencilLine,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 // --- Types ---
 interface StepData {
@@ -118,6 +122,18 @@ const DottedConnector = () => (
 );
 
 export default function FlowSection() {
+  const {user} = useAuth();
+  const router = useRouter();
+
+  const handleTryItFree = () => {
+    if (user && user.role) {
+      router.push(`/dashboard/${user.role.toLowerCase()}`);
+    } else {
+      router.push("/login");
+    }
+  };
+
+  console.log({user})
   return (
     <section className='w-full py-16 px-4 bg-[#FDFDFD]'>
       <div className='container mx-auto'>
@@ -167,7 +183,10 @@ export default function FlowSection() {
 
         {/* Call to Action Buttons */}
         <div className='flex flex-col sm:flex-row items-center justify-center gap-4'>
-          <button className='w-full sm:w-auto bg-[#0055FF] hover:bg-blue-700 text-white font-semibold py-3.5 px-8 rounded-full flex items-center justify-center gap-2 transition-colors shadow-sm'>
+          <button 
+            onClick={handleTryItFree}
+            className='w-full sm:w-auto bg-[#0055FF] hover:bg-blue-700 text-white font-semibold py-3.5 px-8 rounded-full flex items-center justify-center gap-2 transition-colors shadow-sm'
+          >
             Try It Free <ArrowRight size={18} strokeWidth={2.5} />
           </button>
 
