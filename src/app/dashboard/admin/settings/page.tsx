@@ -2,7 +2,9 @@ import {
   BookText,
   ChevronRight,
   CircleUserRound,
+  Cookie,
   LockKeyhole,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -37,6 +39,24 @@ const ClientSettingPage = () => {
           >
             <p className='flex items-center gap-2'>
               <BookText size={20} /> Terms & Conditions
+            </p>{" "}
+            <ChevronRight />
+          </Link>
+          <Link
+            className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
+            href='/dashboard/admin/settings/privacy-policy'
+          >
+            <p className='flex items-center gap-2'>
+              <ShieldCheck size={20} /> Privacy Policy
+            </p>{" "}
+            <ChevronRight />
+          </Link>
+          <Link
+            className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
+            href='/dashboard/admin/settings/cookie-policy'
+          >
+            <p className='flex items-center gap-2'>
+              <Cookie size={20} /> Cookie Policy
             </p>{" "}
             <ChevronRight />
           </Link>
