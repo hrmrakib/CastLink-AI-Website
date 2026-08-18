@@ -166,6 +166,7 @@ function normalise(raw: ShortlistedTalent): Talent {
     id: String(raw.shortlisted_id),
     talent_id: ti.talent_id,
     name: ti.name,
+    role: ti.role,
     character: ti.character,
     gender: ti.gender,
     location: ti.location,
@@ -604,16 +605,16 @@ export default function ShortlistDetailPage() {
       autoTable(doc, {
         startY: 46,
         head: [
-          ["#", "Photo", "Name", "Character", "Location", "Country", "Added"],
+          ["#", "Photo", "Name", "Role", "Location", "Country", "Added"],
         ],
         body: allTalents.map((t, i) => [
           i + 1,
           "",
-          t.name,
-          t.character,
-          t.location,
-          t.country,
-          formatDate(t.created_at),
+          t.name || "",
+          t.role || "",
+          t.location || "",
+          t.country || "",
+          formatDate(t.created_at) || "",
         ]),
         headStyles: {
           fillColor: [37, 99, 235],

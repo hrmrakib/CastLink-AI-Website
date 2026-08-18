@@ -1477,17 +1477,16 @@ export default function ShortlistDetailPage() {
       autoTable(doc, {
         startY: 46,
         head: [
-          ["#", "Photo", "Name", "Role", "Character", "Location", "Country", "Added"],
+          ["#", "Photo", "Name", "Role", "Location", "Country", "Added"],
         ],
         body: allTalents.map((t, i) => [
           i + 1,
           "",
-          t.name,
-          t.role,
-          t.character,
-          t.location,
-          t.country,
-          formatDate(t.created_at),
+          t.name || "",
+          t.role || "",
+          t.location || "",
+          t.country || "",
+          formatDate(t.created_at) || "",
         ]),
         headStyles: {
           fillColor: [37, 99, 235],
