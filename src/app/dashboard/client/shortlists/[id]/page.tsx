@@ -399,13 +399,13 @@ function TalentGroup({
 
             {/* Actions */}
             <div className='flex gap-2 shrink-0'>
-              <div
+              <button
                 title='Book'
                 onClick={() => onBook(talent.talent_id)}
-                className='rounded-lg p-2 text-[#404145] transition-colors hover:bg-gray-100 hover:text-[#000000] active:scale-95'
+                className='flex cursor-pointer items-center justify-center rounded-lg border border-[#2563EB] bg-transparent px-4 py-2 text-sm font-medium text-[#2563EB] shadow-sm transition-all hover:bg-[#2563EB] hover:text-white hover:shadow-md active:scale-95'
               >
-                <img src='/badge.png' alt='Verified' />
-              </div>
+                <span>Book</span>
+              </button>
               <button
                 title='View Talent'
                 onClick={() => onView(talent)}
