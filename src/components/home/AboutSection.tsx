@@ -17,7 +17,7 @@ const team: TeamMember[] = [
     name: "Sarah Mitchell",
     title: "CEO & Co-Founder",
     bio: "10+ years transforming the casting industry through technology and creative vision.",
-    photo: "/about1.jpg",
+    photo: "/team/1.png",
     linkedin: "#",
     twitter: "#",
   },
@@ -26,7 +26,7 @@ const team: TeamMember[] = [
     name: "James Okafor",
     title: "CTO & Co-Founder",
     bio: "AI architect and full-stack engineer passionate about building tools that empower creators.",
-    photo: "/about2.jpg",
+    photo: "/team/2.png",
     linkedin: "#",
     twitter: "#",
   },
@@ -35,7 +35,7 @@ const team: TeamMember[] = [
     name: "Priya Nambiar",
     title: "Head of Product",
     bio: "UX leader obsessed with crafting seamless experiences for talent, agents, and brands.",
-    photo: "/about3.jpg",
+    photo: "/team/3.png", 
     linkedin: "#",
   },
   {
@@ -43,7 +43,7 @@ const team: TeamMember[] = [
     name: "Marcus Chen",
     title: "Head of Talent Relations",
     bio: "Former casting director dedicated to fostering global opportunities for underrepresented artists.",
-    photo: "/about4.jpg",
+    photo: "/team/4.png",
     linkedin: "#",
     twitter: "#",
   },
@@ -73,21 +73,20 @@ export default function AboutSection() {
             <div
               key={member.id}
               className='group bg-white rounded-2xl border border-[#E7E8EA] overflow-hidden
-                         shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1'
+                         shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full'
             >
-              {/* Photo */}
-              <div className='relative w-full aspect-square bg-[#E9EFFD] overflow-hidden'>
+              <div className='relative w-full aspect-[4/5] overflow-hidden bg-gradient-to-b from-[#F3F6FF] to-[#E2EAFD]'>
                 <Image
                   src={member.photo || "/placeholder.svg"}
                   alt={`${member.name} – ${member.title}`}
                   fill
                   unoptimized
-                  className='object-cover transition-transform duration-500 group-hover:scale-105'
+                  className='object-cover object-top drop-shadow-xl transition-all duration-500 group-hover:scale-110'
                 />
               </div>
 
               {/* Info */}
-              <div className='p-6'>
+              <div className='p-6 flex-1 flex flex-col'>
                 <h3 className='text-xl font-bold text-[#000000] mb-1'>
                   {member.name}
                 </h3>
