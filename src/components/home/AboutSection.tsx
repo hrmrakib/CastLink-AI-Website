@@ -14,7 +14,7 @@ interface TeamMember {
 const team: TeamMember[] = [
   {
     id: 1,
-    name: "Bleszing Ndlovu",
+    name: "Blessing Ndlovu",
     title: "CEO & Co-Founder",
     bio: "10+ years transforming the casting industry through technology and creative vision.",
     photo: "/team/1.png",
