@@ -85,6 +85,14 @@ function SignupForm() {
       newErrors.password = "Password is required";
     }
 
+    if (!formData.country.trim()) {
+      newErrors.country = "Country is required";
+    }
+
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required";
+    }
+
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error);
   };
