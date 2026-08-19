@@ -14,7 +14,7 @@ interface TeamMember {
 const team: TeamMember[] = [
   {
     id: 1,
-    name: "Sarah Mitchell",
+    name: "Bleszing",
     title: "CEO & Co-Founder",
     bio: "10+ years transforming the casting industry through technology and creative vision.",
     photo: "/team/1.png",
@@ -23,7 +23,7 @@ const team: TeamMember[] = [
   },
   {
     id: 2,
-    name: "James Okafor",
+    name: "Sarah Mitchell",
     title: "CTO & Co-Founder",
     bio: "AI architect and full-stack engineer passionate about building tools that empower creators.",
     photo: "/team/2.png",
@@ -32,7 +32,7 @@ const team: TeamMember[] = [
   },
   {
     id: 3,
-    name: "Priya Nambiar",
+    name: "James Okafor",
     title: "Head of Product",
     bio: "UX leader obsessed with crafting seamless experiences for talent, agents, and brands.",
     photo: "/team/3.png", 
@@ -40,7 +40,7 @@ const team: TeamMember[] = [
   },
   {
     id: 4,
-    name: "Marcus Chen",
+    name: "Maya Chen",
     title: "Head of Talent Relations",
     bio: "Former casting director dedicated to fostering global opportunities for underrepresented artists.",
     photo: "/team/4.png",
