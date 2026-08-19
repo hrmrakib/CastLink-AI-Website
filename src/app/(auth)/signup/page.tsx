@@ -61,6 +61,10 @@ function SignupForm() {
       newErrors.agencyName = "Agency name must be at least 2 characters";
     }
 
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = "Company name is required";
+    }
+
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
     } else {
@@ -243,7 +247,7 @@ function SignupForm() {
                 htmlFor='companyName'
                 className='block text-base lg:text-lg font-medium text-[#1B1B1D] mb-2'
               >
-                Company
+                Company <span className='text-red-500'>*</span>
               </label>
               <input
                 id='companyName'
@@ -256,6 +260,11 @@ function SignupForm() {
                 className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-50 text-[#1B1B1D] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.companyName ? "border-red-500" : "border-gray-200 hover:border-gray-300"}`}
                 disabled={isLoading}
               />
+              <div className='mt-2'>
+                {errors.companyName && (
+                  <p className='text-sm text-red-600'>{errors.companyName}</p>
+                )}
+              </div>
             </div>
 
             {/* Website URL */}
