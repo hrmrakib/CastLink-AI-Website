@@ -12,15 +12,15 @@ export default function Footer() {
 
   const footerLinks = {
     product: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "How It Works", href: "#how-it-works" },
-      { label: "Demo", href: "#demo" },
+      { label: "Features", href: "/#features" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "How It Works", href: "/#how-it-works" },
+      { label: "Demo", href: "/#demo" },
     ],
     company: [
       { label: "About Us", href: "/about-us" },
-      { label: "Careers", href: "#careers" },
-      { label: "Blog", href: "#blog" },
+      { label: "Careers", href: "/#careers" },
+      { label: "Blog", href: "/#blog" },
       { label: "Contact", href: "/contact" },
     ],
     legal: [
