@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+const JoditEditor = dynamic(() => import("@/components/JoditEditor"), { ssr: false });
 
 const EditCookiePolicy = () => {
   const router = useRouter();
