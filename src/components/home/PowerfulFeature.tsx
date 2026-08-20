@@ -133,9 +133,8 @@ export default function FlowSection() {
     }
   };
 
-  console.log({user})
   return (
-    <section className='w-full py-16 px-4 bg-[#FDFDFD]'>
+    <section id="how-it-works" className='w-full py-16 px-4 bg-[#FDFDFD]'>
       <div className='container mx-auto'>
         {/* Heading */}
         <h2 className='text-4xl font-extrabold text-center text-slate-900 mb-16 tracking-tight'>
