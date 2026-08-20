@@ -62,7 +62,7 @@ export default function RolesSection() {
         },
       ],
       buttonText: "Get Started",
-      buttonAction: () => console.log("Client signup clicked"),
+      buttonAction: () => {},
       highlight: true,
     },
     {

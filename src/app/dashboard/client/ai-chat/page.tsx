@@ -431,8 +431,6 @@ function AIChatInner() {
         generate_job: false,
       }).unwrap();
 
-      console.log({ res });
-
       if (res?.data?.session_id) {
         router.push(`/dashboard/client/ai-chat/${res?.data?.session_id}`);
       }
@@ -479,8 +477,6 @@ function AIChatInner() {
       if (avatarFile) {
         formData.append("photo", avatarFile);
       }
-
-      console.log(shootDates);
 
       const res = await generateJobFromMessageMutation(formData).unwrap();
 

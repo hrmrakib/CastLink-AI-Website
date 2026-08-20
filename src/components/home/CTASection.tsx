@@ -12,8 +12,6 @@ export default function CTASection() {
   const [joinAgentClicked, setJoinAgentClicked] = useState(false);
   const { user } = useAuth();
 
-  console.log({ user });
-
   const handleCreateJob = () => {
     setCreateJobClicked(true);
     if (!user) {
@@ -25,13 +23,11 @@ export default function CTASection() {
       return;
     }
     toast.warning("Only client can create job here.");
-    console.log("Create Job clicked");
     setTimeout(() => setCreateJobClicked(false), 200);
   };
 
   const handleJoinAgent = () => {
     setJoinAgentClicked(true);
-    console.log("Join as Agent clicked");
     if (!user) {
       router.push("/login");
       return;

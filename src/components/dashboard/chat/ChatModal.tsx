@@ -296,7 +296,7 @@ export default function ChatModalDetail({
         router.push("/dashboard/client/message");
       }
     } catch (error: any) {
-      console.log(error?.data?.message || "Fail to create new chat!");
+      toast.error(error?.data?.message || "Fail to create new chat!");
     } finally {
       setLoadingConversationId(null);
     }

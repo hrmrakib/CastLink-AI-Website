@@ -115,8 +115,6 @@ function OTPVerifyComponent() {
         otp: otpString,
       }).unwrap();
 
-      console.log({ res });
-
       if (res?.status) {
         toast.success(res?.message);
         localStorage.setItem("access_token", res?.access_token);
@@ -129,7 +127,6 @@ function OTPVerifyComponent() {
           router.push("/reset-password");
         }
       } else {
-        console.log({ res });
       }
     } catch (err: any) {
       const message =

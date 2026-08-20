@@ -124,7 +124,6 @@ export default function UserManagement() {
     page_size: limit,
     search: searchDebounce,
   });
-  console.log({ activeTab });
 
   const totalPages = data?.meta?.total_pages ?? 1;
 
@@ -139,7 +138,6 @@ export default function UserManagement() {
       const res = await deleteUserMutation(
         deleteConfirmUser?.user_id ?? 0,
       ).unwrap();
-      console.log(res);
 
       if (res?.status) {
         toast.success("Deleted successfully!");
@@ -184,13 +182,11 @@ export default function UserManagement() {
         message: emailForm.body,
       }).unwrap();
 
-      console.log({ res });
 
       if (res?.message) {
         toast.success(res?.message || "Rejected and email sent successfully!");
       }
     } catch (error) {
-      console.log(error);
     } finally {
       setShowEmailForm(false);
       setEmailForm({ body: "" });
@@ -208,7 +204,6 @@ export default function UserManagement() {
         toast.success(res?.message || "Status updated!");
       }
     } catch (error) {
-      console.log(error);
       toast.error("Failed to update status.");
     } finally {
       setSelectedUser(null);

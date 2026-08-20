@@ -15,8 +15,6 @@ import { NavItem } from "./CommonItem";
 const AgentSidebar = () => {
   const pathname = usePathname();
 
-  console.log(pathname);
-
   return (
     <>
       <SidebarMenu className='px-4 space-y-2'>

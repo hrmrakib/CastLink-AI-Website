@@ -508,8 +508,6 @@ const ScheduleModal = ({
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
-  console.log(title, scheduledAt);
-
   const handleSchedule = () => {
     setSaving(true);
     setTimeout(() => {
@@ -825,8 +823,6 @@ function ECastingRoomContent() {
     skip: !jobId,
   });
 
-  console.log({ recordingVideoData });
-
   useEffect(() => {
     const tokenValue = localStorage.getItem("access_token");
     if (tokenValue) {
@@ -835,13 +831,11 @@ function ECastingRoomContent() {
   }, []);
 
   const handleStartMeeting = async () => {
-    console.log("hello...........");
     // setModal(null);
     // setActiveMeeting(m);
 
     const res = await createSessionMutation().unwrap();
 
-    console.log({ res });
   };
 
   const handleScheduled = (m: Meeting) => {

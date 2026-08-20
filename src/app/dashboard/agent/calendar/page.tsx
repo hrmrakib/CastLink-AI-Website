@@ -63,12 +63,6 @@ export default function AvailabilityPage() {
 
   const handleApply = () => {
     setSubmitted(true);
-    console.log("Availability submitted:", {
-      selectedDates,
-      fromTime,
-      toTime,
-      repeatWeekly,
-    });
     setTimeout(() => setSubmitted(false), 3000);
   };
 

@@ -107,7 +107,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
 function resolveMedia(path: string) {
   if (!path) return "/placeholder.svg";
   if (path.startsWith("http")) return path;
-  console.log(`${BASE_URL}${path}`);
   return `${BASE_URL}${path}`;
 }
 
@@ -421,8 +420,6 @@ export default function ActiveJobsPage() {
   const jobs: Job[] = data?.data ?? [];
   const totalPages = data?.meta?.total_pages ?? 1;
 
-  console.log({ jobs });
-
   const openJobDetail = (job: Job) => {
     setSelectedJob(job);
     setIsModalOpen(true);
@@ -443,7 +440,6 @@ export default function ActiveJobsPage() {
 
   const handleConfirmDelete = () => {
     if (selectedJobId) {
-      console.log(`Permanently deleting job with ID: ${selectedJobId}`);
       // await deleteJob(selectedJobId).unwrap();
       setIsDeleteModalOpen(false);
       setSelectedJobId(null);
@@ -960,7 +956,6 @@ export default function ActiveJobsPage() {
         jobId={selectedJob?.job_id}
         jobTitle={selectedJob?.title}
         onUploadComplete={(files) => {
-          console.log("Uploaded files:", files);
           setIsUploadOpen(false);
         }}
       />

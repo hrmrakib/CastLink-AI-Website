@@ -164,8 +164,6 @@ export default function JobManagement() {
   const totalPages = data?.meta?.total_pages ?? 1;
   const total = data?.meta?.total ?? 0;
 
-  console.log({ deleteConfirmJob });
-
   const handleDeleteJob = async () => {
     if (!deleteConfirmJob) return;
     try {

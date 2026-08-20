@@ -80,11 +80,6 @@ export default function LoginPage() {
         const role = data?.user?.role?.toLowerCase()?.trim();
 
         if (role) {
-          console.log(
-            "Login successful → Navigating to:",
-            `/dashboard/${role}`,
-          );
-
           router.refresh();
           setTimeout(() => {
             router.replace(`/dashboard/${role}`);

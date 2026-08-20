@@ -118,8 +118,6 @@ export default function Page() {
   const activeJobs: Job[] = data?.data || [];
   const total_pages = data?.meta?.total_pages || 1;
 
-  console.log({ activeJobs });
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > total_pages) return;
     setCurrentPage(page);
@@ -295,8 +293,6 @@ export default function Page() {
                 const progress = getApplicantProgress(job);
                 const budget = formatBudget(job.budget_min, job.budget_max);
                 const date = formatDate(job.created_at);
-
-                console.log({ job });
 
                 return (
                   <div

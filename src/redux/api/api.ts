@@ -14,8 +14,6 @@ const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
   prepareHeaders: (headers, api) => {
-    console.log("Preparing headers for API request", window?.location?.href);
-
     if (typeof window !== "undefined") {
       const guestEndpoints = [
         "identifyGuest",

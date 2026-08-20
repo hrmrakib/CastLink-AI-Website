@@ -478,7 +478,6 @@ export default function UpdateTalentPage() {
   });
 
   const singleTalent = data?.data;
-  console.log({ singleTalent });
 
   // Pre-populate form from fetched talent data
   useEffect(() => {

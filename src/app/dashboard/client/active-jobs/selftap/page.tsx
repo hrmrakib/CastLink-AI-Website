@@ -46,8 +46,6 @@ const Page = () => {
     skip: !jobId,
   });
 
-  console.log({ response });
-
   // Actor and booking data
   const [actorData] = useState({
     name: "Marcus Johnson",

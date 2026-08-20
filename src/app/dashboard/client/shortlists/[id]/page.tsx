@@ -502,7 +502,6 @@ export default function ShortlistDetailPage() {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   const handleDeleteTalent = async (talentId: string) => {
-    console.log({ jobId, talentId });
 
     try {
       const res = await deleteSingleTalentFromShortlistMutation({
@@ -512,7 +511,6 @@ export default function ShortlistDetailPage() {
       refetch();
       toast.success("Deleted the talent successfully!");
 
-      console.log(res);
     } catch (error) {
       console.error(error);
     }

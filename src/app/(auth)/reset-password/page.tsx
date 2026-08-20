@@ -61,7 +61,7 @@ export default function ChangePasswordPage() {
         router.push("/login");
       }
     } catch (error: any) {
-      console.log(error?.data?.message);
+      toast.error(error?.data?.message);
       // ✅ Functional updater avoids stale closure
       setErrors((prev) => ({
         ...prev,

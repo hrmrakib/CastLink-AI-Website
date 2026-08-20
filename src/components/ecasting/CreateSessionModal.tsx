@@ -42,8 +42,6 @@ export function CreateSessionModal({
     });
   };
 
-  console.log({ scheduledTime });
-
   return (
     // Backdrop
     <div

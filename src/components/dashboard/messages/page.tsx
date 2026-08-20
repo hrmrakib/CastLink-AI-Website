@@ -161,9 +161,6 @@ function MessagingComponent() {
     useFileUploadWithMessageMutation();
   const dispatch = useDispatch();
 
-  // TODO::::::::::: test
-  console.log({ selectedConversation });
-
   const {
     data: messagesData,
     refetch: refetchMessages,
@@ -257,8 +254,6 @@ function MessagingComponent() {
     const handleMessage = (event: MessageEvent) => {
       try {
         const raw = JSON.parse(event.data);
-
-        console.log("Incoming RAW:", raw);
 
         const payload = raw?.data ?? raw?.message ?? raw;
 
@@ -358,8 +353,6 @@ function MessagingComponent() {
 
   const handleSelectConversation = (conversation: TConversation) => {
     const updated = { ...conversation, unread_count: 0 };
-
-    console.log(updated);
 
     dispatch(setConversation(updated));
   };
