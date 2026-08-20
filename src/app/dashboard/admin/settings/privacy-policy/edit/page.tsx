@@ -1,83 +1,44 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type Quill from "quill";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  useGetTermsAndConditionsQuery,
-  useUpdateTermsAndConditionsMutation,
+  useGetPrivacyPoliciesQuery,
+  useUpdatePrivacyPoliciesMutation,
 } from "@/redux/features/setting/settingAPI";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
-const EditTermsAndConditions = () => {
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+
+const EditPrivacyPolicy = () => {
   const router = useRouter();
-  const editorRef = useRef<HTMLDivElement>(null);
-  const quillRef = useRef<Quill | null>(null);
-  const quillReadyRef = useRef(false);
   const [content, setContent] = useState<string>("");
 
-  const { data } = useGetTermsAndConditionsQuery({});
-  const [updateTermsAndConditions, { isLoading: isUpdating }] =
-    useUpdateTermsAndConditionsMutation();
+  const { data } = useGetPrivacyPoliciesQuery({});
+  const [updatePrivacyPolicies, { isLoading: isUpdating }] =
+    useUpdatePrivacyPoliciesMutation();
 
-  const existing = data?.data[0];
+  const existing = data?.data?.[0];
 
-  // Step 1: Init Quill once on mount
   useEffect(() => {
-    if (quillReadyRef.current || typeof window === "undefined") return;
-
-    const init = async () => {
-      const { default: Quill } = await import("quill");
-      await import("quill/dist/quill.snow.css");
-
-      if (editorRef.current && !editorRef.current.querySelector(".ql-editor")) {
-        const quill = new Quill(editorRef.current, {
-          theme: "snow",
-          placeholder: "Enter your terms and conditions...",
-        });
-
-        quillRef.current = quill;
-        quillReadyRef.current = true;
-
-        quill.on("text-change", () => {
-          setContent(quill.root.innerHTML);
-        });
-      }
-    };
-
-    init();
-  }, []);
-
-  // Step 2: Once API data is ready AND Quill is ready, populate content
-  useEffect(() => {
-    if (!existing?.content) return;
-
-    // Poll until quillRef is ready (handles async init timing)
-    const interval = setInterval(() => {
-      if (quillRef.current) {
-        quillRef.current.root.innerHTML = existing.content;
-        setContent(existing.content);
-        clearInterval(interval);
-      }
-    }, 50);
-
-    return () => clearInterval(interval);
+    if (existing?.content) {
+      setContent(existing.content);
+    }
   }, [existing?.content]);
 
   const handleSubmit = async () => {
-    if (!existing) return;
     try {
-      const res = await updateTermsAndConditions({
-        title: existing.title,
+      const res = await updatePrivacyPolicies({
+        title: existing?.title || "Privacy Policy",
         content,
       }).unwrap();
 
-      if (!res.status) throw new Error(res.message);
-      if (res?.status) {
-        toast.success("Saved successfully!");
-        router.push("/dashboard/admin/settings/terms-and-conditions");
-      }
+      if (res?.status === false) throw new Error(res.message);
+      
+      toast.success("Saved successfully!");
+      router.push("/dashboard/admin/settings/privacy-policy");
     } catch {
       toast.error("Save failed.");
     }
@@ -87,11 +48,21 @@ const EditTermsAndConditions = () => {
     <div className='min-h-[75vh] w-[96%] mx-auto flex flex-col justify-between gap-6'>
       <div className='space-y-6'>
         <div className='h-auto'>
-          <div
-            ref={editorRef}
-            className='h-[50vh] bg-white text-base'
-            id='quill-editor'
-          />
+          {existing ? (
+            <JoditEditor
+              value={content}
+              config={{
+                readonly: false,
+                placeholder: 'Start typing here...',
+                minHeight: 500,
+                theme: 'default'
+              }}
+              onBlur={(newContent) => setContent(newContent)}
+              onChange={(newContent) => setContent(newContent)}
+            />
+          ) : (
+            <p className="p-4 text-gray-500">Loading editor...</p>
+          )}
         </div>
       </div>
 
@@ -108,4 +79,4 @@ const EditTermsAndConditions = () => {
   );
 };
 
-export default EditTermsAndConditions;
+export default EditPrivacyPolicy;

@@ -53,10 +53,10 @@ const ClientSettingPage = () => {
           </Link>
           <Link
             className='bg-white flex items-center justify-between rounded-md font-medium text-[#3B3B3B] px-5 py-3.5'
-            href='/dashboard/admin/settings/cookie-policy'
+            href='/dashboard/admin/settings/about-us'
           >
             <p className='flex items-center gap-2'>
-              <Cookie size={20} /> Cookie Policy
+              <Cookie size={20} /> About Us
             </p>{" "}
             <ChevronRight />
           </Link>

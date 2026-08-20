@@ -4,21 +4,21 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  useGetTermsAndConditionsQuery,
-  useUpdateTermsAndConditionsMutation,
+  useGetAboutUsQuery,
+  useUpdateAboutUsMutation,
 } from "@/redux/features/setting/settingAPI";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
-const EditTermsAndConditions = () => {
+const EditAboutUs = () => {
   const router = useRouter();
   const [content, setContent] = useState<string>("");
 
-  const { data } = useGetTermsAndConditionsQuery({});
-  const [updateTermsAndConditions, { isLoading: isUpdating }] =
-    useUpdateTermsAndConditionsMutation();
+  const { data } = useGetAboutUsQuery({});
+  const [updateAboutUs, { isLoading: isUpdating }] =
+    useUpdateAboutUsMutation();
 
   const existing = data?.data?.[0];
 
@@ -30,15 +30,15 @@ const EditTermsAndConditions = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await updateTermsAndConditions({
-        title: existing?.title || "Terms and Conditions",
+      const res = await updateAboutUs({
+        title: existing?.title || "About Us",
         content,
       }).unwrap();
 
       if (res?.status === false) throw new Error(res.message);
       
       toast.success("Saved successfully!");
-      router.push("/dashboard/admin/settings/terms-and-conditions");
+      router.push("/dashboard/admin/settings/about-us");
     } catch {
       toast.error("Save failed.");
     }
@@ -79,4 +79,4 @@ const EditTermsAndConditions = () => {
   );
 };
 
-export default EditTermsAndConditions;
+export default EditAboutUs;

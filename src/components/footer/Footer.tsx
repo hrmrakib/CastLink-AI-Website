@@ -18,15 +18,15 @@ export default function Footer() {
       { label: "Demo", href: "#demo" },
     ],
     company: [
-      { label: "About Us", href: "#about" },
+      { label: "About Us", href: "/about-us" },
       { label: "Careers", href: "#careers" },
       { label: "Blog", href: "#blog" },
-      { label: "Contact", href: "#contact" },
+      { label: "Contact", href: "/contact" },
     ],
     legal: [
-      { label: "Privacy Policy", href: "#privacy" },
-      { label: "Terms of Service", href: "#terms" },
-      { label: "Cookie Policy", href: "#cookies" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Service", href: "/terms-and-conditions" },
+      { label: "Cookie Policy", href: "/cookie-policy" },
     ],
   };
 

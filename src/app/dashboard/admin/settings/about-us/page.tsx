@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useGetTermsAndConditionsQuery } from "@/redux/features/setting/settingAPI";
+import { useGetAboutUsQuery } from "@/redux/features/setting/settingAPI";
 
-export default function CookiePolicyPage() {
-  const { data, isLoading } = useGetTermsAndConditionsQuery({});
+export default function AboutUsPage() {
+  const { data, isLoading } = useGetAboutUsQuery({});
 
-  const content = data?.data[0]?.content;
+  const content = data?.data?.[0]?.content;
 
   return (
     <div className='flex min-h-screen bg-gray-50'>
@@ -20,11 +20,11 @@ export default function CookiePolicyPage() {
                 className='inline-flex items-center text-primary hover:text-[#2563EB]'
               >
                 <ArrowLeft className='mr-2 h-4 w-4' />
-                <span className='text-xl font-semibold'>Cookie Policy</span>
+                <span className='text-xl font-semibold'>About Us</span>
               </Link>
 
               <Link
-                href='/dashboard/admin/settings/cookie-policy/edit'
+                href='/dashboard/admin/settings/about-us/edit'
                 className='inline-flex items-center bg-[#2563EB] text-white rounded-md px-4 py-1.5'
               >
                 <span className='text-base font-medium'>Edit</span>

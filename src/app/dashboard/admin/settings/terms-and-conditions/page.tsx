@@ -7,7 +7,7 @@ import { useGetTermsAndConditionsQuery } from "@/redux/features/setting/settingA
 export default function TermsConditionPage() {
   const { data, isLoading } = useGetTermsAndConditionsQuery({});
 
-  const content = data?.data[0]?.content;
+  const content = data?.data?.[0]?.content;
 
   return (
     <div className='flex min-h-screen bg-gray-50'>

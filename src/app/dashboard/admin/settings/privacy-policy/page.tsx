@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useGetTermsAndConditionsQuery } from "@/redux/features/setting/settingAPI";
+import { useGetPrivacyPoliciesQuery } from "@/redux/features/setting/settingAPI";
 
 export default function PrivacyPolicyPage() {
-  const { data, isLoading } = useGetTermsAndConditionsQuery({});
+  const { data, isLoading } = useGetPrivacyPoliciesQuery({});
 
-  const content = data?.data[0]?.content;
+  const content = data?.data?.[0]?.content;
 
   return (
     <div className='flex min-h-screen bg-gray-50'>
