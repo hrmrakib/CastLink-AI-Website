@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from "react";
 import { Jodit } from "jodit";
 import "jodit/es2021/jodit.min.css";
