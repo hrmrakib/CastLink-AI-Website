@@ -46,6 +46,21 @@ const settingAPI = baseAPI.injectEndpoints({
       }),
       invalidatesTags: ["Settings"],
     }),
+
+    getCookiePolicy: builder.query({
+      query: () => ({
+        url: "/settings/cookie_policy/",
+      }),
+      providesTags: ["Settings"],
+    }),
+    updateCookiePolicy: builder.mutation({
+      query: (data) => ({
+        url: "/settings/cookie_policy/",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Settings"],
+    }),
   }),
 });
 
@@ -56,5 +71,7 @@ export const {
   useUpdatePrivacyPoliciesMutation,
   useGetAboutUsQuery,
   useUpdateAboutUsMutation,
+  useGetCookiePolicyQuery,
+  useUpdateCookiePolicyMutation,
 } = settingAPI;
 export default settingAPI;
