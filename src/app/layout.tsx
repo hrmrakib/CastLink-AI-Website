@@ -10,6 +10,7 @@ import Providers from "@/redux/features/Providers";
 import AppInitializer from "@/components/AppInitializer/AppInitializer";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import CookieBanner from "@/components/shared/CookieBanner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ export default function RootLayout({
               <Navbar />
               {children}
               <Footer />
+              <CookieBanner />
             </AppInitializer>
           </TooltipProvider>
         </Providers>
