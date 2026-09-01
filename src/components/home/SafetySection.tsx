@@ -69,10 +69,8 @@ export default function SafetySection() {
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">
             Your safety comes first
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-base md:text-[17px] leading-relaxed max-w-md mx-auto">
-            We use industry-leading security, strict verification, and transparent policies
-            <br className="hidden sm:block" />
-            to protect our community and your data.
+          <p className="text-gray-500 dark:text-gray-400 text-base md:text-[17px] leading-relaxed max-w-xl mx-auto">
+            We use industry-leading security, strict verification, and transparent policies to protect our community and your data.
           </p>
         </div>
 
