@@ -153,7 +153,7 @@ export default function ChatModalDetail({
     ? talent.images.map((img) => getImageUrl(img))
     : ["/placeholder.svg"];
 
-  const profileRows: { label: string; value: string }[] = talent
+  const profileRows: { label: string; value: React.ReactNode }[] = talent
     ? [
         { label: "Name", value: talent.name },
         { label: "Role", value: talent.role },
@@ -171,7 +171,18 @@ export default function ChatModalDetail({
         { label: "Hair Colour", value: talent.hair_color },
         { label: "Skin Colour", value: talent.skin_color },
         { label: "Location", value: `${talent.location}, ${talent.country}` },
-        { label: "Skills", value: talent.skills || "Not provided" },
+        { 
+          label: "Skills", 
+          value: talent.skills 
+            ? <div className="flex flex-wrap gap-1.5">
+                {talent.skills.split(',').map(s => s.trim()).filter(Boolean).map((skill, i) => (
+                  <span key={i} className="bg-gray-100 border border-gray-200 text-gray-700 px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            : "Not provided"
+        },
       ]
     : [];
 
@@ -369,9 +380,9 @@ export default function ChatModalDetail({
                       <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
                         {label}:
                       </span>
-                      <span className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
+                      <div className='text-[#4B5563] font-normal text-sm md:text-base capitalize'>
                         {value}
-                      </span>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -865,7 +865,18 @@ export default function AIDynamicPage() {
                                       <p>Hair: {profile.hair_color}</p>
                                       <p>Eyes: {profile.eye_color}</p>
                                       <p>Agent: {profile.agent_name}</p>
-                                      <p>Skills: {profile.skills || "Not provided"}</p>
+                                      <div className='flex gap-1 flex-wrap'>
+                                        <span className='font-semibold mr-1'>Skills:</span>
+                                        {profile.skills ? (
+                                          profile.skills.split(',').map(s => s.trim()).filter(Boolean).map((skill, i) => (
+                                            <span key={i} className='bg-white/20 text-white px-1.5 py-0.5 rounded text-[10px] capitalize'>
+                                              {skill}
+                                            </span>
+                                          ))
+                                        ) : (
+                                          <span className='text-gray-300'>Not provided</span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
 
