@@ -97,6 +97,8 @@ interface TalentProfile {
   approval_status?: string;
   is_available_on_request?: boolean;
   available_dates?: string[];
+  skills?: string;
+  portfolio_link?: string;
   assigned_roles?: {
     job_id: number;
     job_title: string;
@@ -863,6 +865,7 @@ export default function AIDynamicPage() {
                                       <p>Hair: {profile.hair_color}</p>
                                       <p>Eyes: {profile.eye_color}</p>
                                       <p>Agent: {profile.agent_name}</p>
+                                      <p>Skills: {profile.skills || "Not provided"}</p>
                                     </div>
                                   </div>
 
