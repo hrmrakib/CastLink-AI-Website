@@ -938,7 +938,7 @@ toast.promise(submitForm, {
                   ))}
                 </div>
                 
-                {selectedTalent.portfolio_link && (
+                {selectedTalent.portfolio_link ? (
                   <div className='mt-6 bg-blue-50/50 rounded-2xl p-4 flex items-center justify-between border border-blue-100'>
                     <div className='flex items-center gap-3 overflow-hidden'>
                       <div className='w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm'>
@@ -968,6 +968,22 @@ toast.promise(submitForm, {
                       Copy link
                       <Copy size={12} />
                     </button>
+                  </div>
+                ) : (
+                  <div className='mt-6 bg-gray-50/50 rounded-2xl p-4 flex items-center justify-between border border-gray-100'>
+                    <div className='flex items-center gap-3 overflow-hidden'>
+                      <div className='w-10 h-10 shrink-0 rounded-full bg-gray-300 flex items-center justify-center text-white shadow-sm'>
+                        <Link size={18} />
+                      </div>
+                      <div className='flex flex-col overflow-hidden'>
+                        <span className='text-sm font-bold text-gray-900'>
+                          Portfolio link
+                        </span>
+                        <span className='text-sm text-gray-500'>
+                          Not provided
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
