@@ -1009,7 +1009,7 @@ toast.promise(submitForm, {
 
                 {selectedTalent.images.length > 0 && (
                   <div className='flex flex-col gap-2'>
-                    <h3 className='font-bold text-sm text-gray-900 mt-2'>Polas / Selfies</h3>
+                    <h3 className='font-bold text-sm text-gray-900 mt-2'>Image</h3>
                     <div className='flex gap-2 flex-wrap'>
                       {selectedTalent.images.map((img) => {
                       const url = resolveImageUrl(img.image);
