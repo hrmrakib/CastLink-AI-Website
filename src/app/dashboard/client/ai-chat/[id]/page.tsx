@@ -775,7 +775,7 @@ export default function AIDynamicPage() {
                                       width={600}
                                       height={600}
                                       unoptimized
-                                      className='w-full h-120 object-cover object-top'
+                                      className='w-full aspect-square object-fill'
                                     />
 
                                     {isLastVisible && (

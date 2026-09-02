@@ -55,7 +55,7 @@ const stepsData: StepData[] = [
     id: 3,
     title: "Build Shortlist",
     description:
-      "Review, favorite, and organize\ntalent by role.\nCreate the perfect shortlist.",
+      "Review, favorite, and organize talent by role. See model availability on the go Create the perfect shortlist.",
     icon: (props) => <Heart {...props} fill='currentColor' />, // Filled
     footer: (
       <div className='bg-blue-50 text-blue-600 rounded-lg p-3 text-sm font-bold flex items-center justify-center gap-2'>
@@ -63,7 +63,7 @@ const stepsData: StepData[] = [
       </div>
     ), 
   },
-  {
+  { 
     id: 4,
     title: "Share Presentation",
     description: "Generate a beautiful presentation\nand share a secure link.",
