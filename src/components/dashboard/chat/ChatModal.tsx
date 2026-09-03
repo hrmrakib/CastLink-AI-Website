@@ -440,7 +440,7 @@ export default function ChatModalDetail({
               {/* Right Side - Image and Gallery */}
               <div className='flex flex-col gap-4'>
                 {/* Main Image */}
-                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-200'>
+                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-100'>
                   <img
                     src={galleryImages[currentImageIndex]}
                     alt={talent?.name}

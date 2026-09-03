@@ -768,7 +768,7 @@ export default function AIDynamicPage() {
                                   onClick={() => handleOpenModal(profile, idx)}
                                 >
                                   {/* Profile Card */}
-                                  <div className='relative bg-[#404145] rounded-lg overflow-hidden group cursor-pointer'>
+                                  <div className='relative bg-gray-100 rounded-lg overflow-hidden group cursor-pointer'>
                                     <Image
                                       src={getImageUrl(imageUrl)}
                                       alt={profile.name} 
