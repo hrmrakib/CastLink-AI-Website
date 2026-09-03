@@ -768,14 +768,13 @@ export default function AIDynamicPage() {
                                   onClick={() => handleOpenModal(profile, idx)}
                                 >
                                   {/* Profile Card */}
-                                  <div className='relative bg-gray-100 rounded-lg overflow-hidden group cursor-pointer'>
+                                  <div className='relative aspect-square w-full overflow-hidden bg-gray-100 rounded-lg group cursor-pointer'>
                                     <Image
                                       src={getImageUrl(imageUrl)}
                                       alt={profile.name} 
-                                      width={600}
-                                      height={600} 
+                                      fill
                                       unoptimized
-                                      className='w-full aspect-square object-contain'
+                                      className='object-cover w-full h-full transition-transform duration-700 group-hover:scale-110'
                                     />
 
                                     {isLastVisible && (
@@ -1133,7 +1132,7 @@ export default function AIDynamicPage() {
 
       {/* Talent detail modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className='min-w-[55vw] bg-white max-w-6xl max-h-screen p-0 overflow-hidden'>
+        <DialogContent className='min-w-[55vw] bg-white max-w-6xl h-[calc(100vh-10px)] max-h-[calc(100vh-10px)] p-0 overflow-hidden flex flex-col'>
           {selectedTalent && (
             <ChatModalDetail
               initialIndex={selectedTalentIndex}

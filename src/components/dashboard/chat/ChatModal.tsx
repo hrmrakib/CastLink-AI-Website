@@ -319,8 +319,8 @@ export default function ChatModalDetail({
   };
 
   return (
-    <div className='h-full w-full bg-white'>
-      <div className='bg-white rounded-xl shadow-lg overflow-hidden'>
+    <div className='h-full flex-1 w-full bg-white overflow-y-auto'>
+      <div className='bg-white rounded-xl overflow-hidden'>
         {/* ── Talent Pagination Header ── */}
         <div className='flex items-center justify-between px-6 md:px-8 pt-6 pb-2'>
           <button
@@ -371,11 +371,11 @@ export default function ChatModalDetail({
                 <h1 className='text-2xl md:text-3xl font-bold text-gray-900 mb-6'>
                   Profile Details
                 </h1>
-                <div className='space-y-1'>
+                <div className='flex flex-col gap-1.5'>
                   {profileRows.map(({ label, value }) => (
                     <div
                       key={label}
-                      className='flex gap-6 items-center pb-3 last:border-b-0'
+                      className='flex gap-6 items-center'
                     >
                       <span className='lg:min-w-40 text-[#374151] font-semibold text-sm md:text-base'>
                         {label}:
@@ -440,11 +440,11 @@ export default function ChatModalDetail({
               {/* Right Side - Image and Gallery */}
               <div className='flex flex-col gap-4'>
                 {/* Main Image */}
-                <div className='relative w-full aspect-square rounded-lg overflow-hidden shadow-md bg-gray-100'>
+                <div className='relative w-full rounded-lg overflow-hidden shadow-md bg-gray-100'>
                   <img
                     src={galleryImages[currentImageIndex]}
                     alt={talent?.name}
-                    className='w-full h-full object-contain'
+                    className='object-contain w-full h-auto'
                   />
 
                   <div className='absolute top-2  group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3 z-20'>
