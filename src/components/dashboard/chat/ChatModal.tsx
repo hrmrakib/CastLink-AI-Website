@@ -444,7 +444,7 @@ export default function ChatModalDetail({
                   <img
                     src={galleryImages[currentImageIndex]}
                     alt={talent?.name}
-                    className='w-full h-full object-fill'
+                    className='w-full h-full object-contain'
                   />
 
                   <div className='absolute top-2  group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3 text-white text-sm space-y-3 z-20'>
