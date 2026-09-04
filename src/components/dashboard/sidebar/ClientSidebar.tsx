@@ -13,9 +13,11 @@ import {
 import { usePathname } from "next/navigation";
 import { NavItem } from "./CommonItem";
 import { RoleRedirect } from "@/components/auth/RoleRedirect";
+import { useGetMyConversationsQuery } from "@/redux/features/messages/messagesAPI";
 
 const ClientSidebar = () => {
   const pathname = usePathname();
+  const { data } = useGetMyConversationsQuery({});
 
   return (
     <>
@@ -50,17 +52,7 @@ const ClientSidebar = () => {
               pathname.startsWith("/dashboard/client/active-jobs/")
             }
           />
-
-          {/* <NavItem
-            href='/dashboard/client/draft-jobs'
-            icon={NotepadTextDashed}
-            label='Draft Jobs'
-            active={
-              pathname === "/dashboard/client/draft-jobs" ||
-              pathname.startsWith("/dashboard/client/draft-jobs/")
-            }
-          /> */}
-
+ 
           <NavItem
             href='/dashboard/client/shortlists'
             icon={MousePointerClick}
@@ -75,6 +67,7 @@ const ClientSidebar = () => {
             href='/dashboard/client/message'
             icon={MessageCircleMore}
             label='Messages'
+            badge={data?.data?.unread_conversations}
             active={
               pathname === "/dashboard/client/message" ||
               pathname.startsWith("/dashboard/client/message/")

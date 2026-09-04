@@ -11,9 +11,11 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { NavItem } from "./CommonItem";
+import { useGetMyConversationsQuery } from "@/redux/features/messages/messagesAPI";
 
 const AgentSidebar = () => {
   const pathname = usePathname();
+  const { data } = useGetMyConversationsQuery({});
 
   return (
     <>
@@ -26,7 +28,7 @@ const AgentSidebar = () => {
             pathname === "/dashboard/agent/" || pathname === "/dashboard/agent"
           }
         />
-
+ 
         <NavItem
           href='/dashboard/agent/add-talent'
           icon={BanknoteArrowUp}
@@ -61,6 +63,7 @@ const AgentSidebar = () => {
           href='/dashboard/agent/message'
           icon={MessageCircleMore}
           label='Messages'
+          badge={data?.data?.unread_conversations}
           active={
             pathname === "/dashboard/agent/message" ||
             pathname.startsWith("/dashboard/agent/message/")

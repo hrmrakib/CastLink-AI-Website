@@ -707,7 +707,7 @@ function MessagingComponent() {
           <div className='flex items-center justify-center h-full text-muted-foreground'>
             <p className='text-sm'>Select a conversation to start messaging</p>
           </div>
-        )}
+        )} 
       </div>
     </div>
   );

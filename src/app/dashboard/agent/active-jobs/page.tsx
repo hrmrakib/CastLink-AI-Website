@@ -577,22 +577,26 @@ export default function ActiveJobsPage() {
                           )}
                         </td>
                         <td className='px-6 py-4 text-sm text-foreground'>
-                          <div className='group relative Skinner flex items-center'>
-                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0' />
-                            <span className='whitespace-nowrap ml-2 text-sm truncate max-w-25'>
-                              {formatCastingRoles(job.casting_roles).length > 0
-                                ? formatCastingRoles(job.casting_roles)
-                                    .slice(0, 2)
-                                    .join(", ") +
-                                  (formatCastingRoles(job.casting_roles).length > 2
-                                    ? "..."
-                                    : "")
-                                : "—"}
-                            </span>
-                            <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitespace-nowrap shadow-md border border-border z-10'>
-                              {formatCastingRoles(job.casting_roles).join(", ") || "No roles"}
-                            </span>
-                          </div>
+                          {talent ? (
+                            <span className='capitalize'>{talent.role || "—"}</span>
+                          ) : (
+                            <div className='group relative Skinner flex items-center'>
+                              <Info className='h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0' />
+                              <span className='whitespace-nowrap ml-2 text-sm truncate max-w-25'>
+                                {formatCastingRoles(job.casting_roles).length > 0
+                                  ? formatCastingRoles(job.casting_roles)
+                                      .slice(0, 2)
+                                      .join(", ") +
+                                    (formatCastingRoles(job.casting_roles).length > 2
+                                      ? "..."
+                                      : "")
+                                  : "—"}
+                              </span>
+                              <span className='absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitespace-nowrap shadow-md border border-border z-10'>
+                                {formatCastingRoles(job.casting_roles).join(", ") || "No roles"}
+                              </span>
+                            </div>
+                          )}
                         </td>
                         <td className='px-6 py-4 text-sm text-foreground whitespace-nowrap'>
                           {job.location}

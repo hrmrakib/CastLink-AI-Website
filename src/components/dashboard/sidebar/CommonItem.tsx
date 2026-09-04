@@ -10,6 +10,7 @@ interface NavItemProps {
   icon: React.ElementType;
   label: string;
   active: boolean;
+  badge?: number | string;
 }
 
 export function NavItem({
@@ -17,6 +18,7 @@ export function NavItem({
   icon: Icon,
   label,
   active = false,
+  badge,
 }: NavItemProps) {
   return (
     <SidebarMenuItem>
@@ -32,12 +34,17 @@ export function NavItem({
         >
           <Icon size={18} />
           <span
-            className={`text-lg text-nowrap ${
+            className={`text-lg text-nowrap flex-1 ${
               active ? "text-sidebarActiveColor" : ""
             }`}
           >
             {label}
           </span>
+          {badge !== undefined && badge !== 0 && badge !== "0" && (
+            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center ml-auto">
+              {badge}
+            </span>
+          )}
           {active && (
             <div className='absolute -left-6 h-10 w-2.5 bg-sidebar-link-bg rounded-r-2xl'></div>
           )}
