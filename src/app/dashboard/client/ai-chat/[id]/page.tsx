@@ -7,11 +7,8 @@ import {
   Send,
   Heart,
   Calendar,
-  Camera,
-  Phone,
   Check,
   Sparkles,
-  ScanFace,
   Star,
   ShieldAlert,
   MessageCircleMore,
@@ -99,6 +96,8 @@ interface TalentProfile {
   available_dates?: string[];
   skills?: string;
   portfolio_link?: string;
+  instagram_link?: string | null;
+  rate?: number | string | null;
   assigned_roles?: {
     job_id: number;
     job_title: string;
@@ -864,6 +863,17 @@ export default function AIDynamicPage() {
                                       <p>Hair: {profile.hair_color}</p>
                                       <p>Eyes: {profile.eye_color}</p>
                                       <p>Agent: {profile.agent_name}</p>
+                                      {profile.rate && <p>Rate: {profile.rate}</p>}
+                                      {profile.portfolio_link && (
+                                        <p className="truncate">
+                                          Portfolio: <a href={profile.portfolio_link} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-300" onClick={(e) => e.stopPropagation()}>View</a>
+                                        </p>
+                                      )}
+                                      {profile.instagram_link && (
+                                        <p className="truncate">
+                                          Instagram: <a href={profile.instagram_link} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-300" onClick={(e) => e.stopPropagation()}>View</a>
+                                        </p>
+                                      )}
                                       <div className='flex gap-1 flex-wrap'>
                                         <span className='font-semibold mr-1'>Skills:</span>
                                         {profile.skills ? (

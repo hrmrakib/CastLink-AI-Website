@@ -43,6 +43,7 @@ interface FormData {
   skills: string;
   portfolioLink: string;
   instagramLink: string;
+  rate: string;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -525,6 +526,7 @@ const INITIAL_FORM: FormData = {
   skills: "",
   portfolioLink: "",
   instagramLink: "",
+  rate: "",
 };
 
 // Main Page Component
@@ -585,7 +587,9 @@ export default function AddTalentPage() {
     if (!formData.bust.trim()) newErrors.bust = "Bust measurement is required";
     if (!formData.hips.trim()) newErrors.hips = "Hips measurement is required";
     if (images.length === 0)
-      newErrors.uploadedImages = "Please upload at least one image";
+      if (!formData.uploadedImages || formData.uploadedImages.length === 0)
+      return toast.error("Images are required!");
+    if (!formData.rate) return toast.error("Rate is required!");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -636,6 +640,7 @@ export default function AddTalentPage() {
       payload.append("skills", formData.skills);
       payload.append("portfolio_link", formData.portfolioLink);
       payload.append("instagram_link", formData.instagramLink);
+      payload.append("rate", formData.rate);
       payload.append(
         "is_available_on_request",
         String(formData.availableOnRequest),
@@ -814,6 +819,7 @@ export default function AddTalentPage() {
         skills: rowData["skills"] || "",
         portfolioLink: rowData["portfolio link"] || "",
         instagramLink: rowData["instagram link"] || "",
+        rate: rowData["rate"] || "",
       }));
       
       setUploadMode('manual');
@@ -1276,6 +1282,28 @@ export default function AddTalentPage() {
                 placeholder='https://instagram.com/username'
                 className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
               />
+            </div>
+
+            {/* Rate */}
+            <div>
+              <label
+                htmlFor='rate'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Rate <span className="text-red-500">*</span>
+              </label>
+              <input
+                type='text'
+                id='rate'
+                name='rate'
+                value={formData.rate}
+                onChange={handleInputChange}
+                placeholder='Enter rate (e.g. $100/hr)'
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${errors.rate ? "border-red-500" : "border-slate-300"}`}
+              />
+              {errors.rate && (
+                <p className='text-red-500 text-sm mt-1'>{errors.rate}</p>
+              )}
             </div>
 
             {/* Skills Section */}

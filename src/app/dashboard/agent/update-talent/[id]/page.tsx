@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // Base URL for constructing full image preview URLs from relative /media/... paths
 const API_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URL ?? "";
@@ -49,6 +50,7 @@ interface FormData {
   skills: string;
   portfolioLink: string;
   instagramLink: string;
+  rate: string;
 }
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
@@ -420,6 +422,7 @@ const INITIAL_FORM: FormData = {
   skills: "",
   portfolioLink: "",
   instagramLink: "",
+  rate: "",
 };
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -510,6 +513,7 @@ export default function UpdateTalentPage() {
       skills: singleTalent.skills ?? "",
       portfolioLink: singleTalent.portfolio_link ?? "",
       instagramLink: singleTalent.instagram_link ?? "",
+      rate: singleTalent.rate ?? "",
     });
 
     setShootDates(singleTalent?.available_dates ?? []);
@@ -566,10 +570,11 @@ export default function UpdateTalentPage() {
       });
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    if (!formData.rate) return toast.error("Rate is required!");
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -603,6 +608,7 @@ export default function UpdateTalentPage() {
       payload.append("skills", formData.skills);
       payload.append("portfolio_link", formData.portfolioLink);
       payload.append("instagram_link", formData.instagramLink);
+      payload.append("rate", formData.rate);
 
       shootDates.forEach((date) => {
         payload.append("available_date", date);
@@ -1132,6 +1138,28 @@ export default function UpdateTalentPage() {
                 placeholder='https://instagram.com/username'
                 className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
               />
+            </div>
+
+            {/* Rate */}
+            <div>
+              <label
+                htmlFor='rate'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Rate <span className="text-red-500">*</span>
+              </label>
+              <input
+                type='text'
+                id='rate'
+                name='rate'
+                value={formData.rate}
+                onChange={handleInputChange}
+                placeholder='Enter rate (e.g. $100/hr)'
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 ${errors.rate ? "border-red-500" : "border-slate-300"}`}
+              />
+              {errors.rate && (
+                <p className='text-red-500 text-sm mt-1'>{errors.rate}</p>
+              )}
             </div>
 
             {/* FIX: Talent type dropdown — label, options, and display value all match Add page */}

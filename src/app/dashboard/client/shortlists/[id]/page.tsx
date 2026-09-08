@@ -25,6 +25,8 @@ import {
   MessageCircle,
   Link,
   Copy,
+  Instagram,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetSingleShortlistJobQuery } from "@/redux/features/client/shortlistsJobAPI";
@@ -84,6 +86,8 @@ export interface TalentInfo {
   location: string;
   skills: string;
   portfolio_link?: string;
+  instagram_link?: string | null;
+  rate?: number | string | null;
   is_available: boolean;
   available_dates: string[];
   images: TalentImage[];
@@ -140,6 +144,8 @@ interface Talent {
   hair_type: string;
   skills: string;
   portfolio_link?: string;
+  instagram_link?: string | null;
+  rate?: number | string | null;
   is_available: boolean;
   available_dates: string[];
   primaryImage: string;
@@ -183,6 +189,8 @@ function normalise(raw: ShortlistedTalent): Talent {
     hair_type: ti.hair_type,
     skills: ti.skills,
     portfolio_link: ti.portfolio_link,
+    instagram_link: ti.instagram_link,
+    rate: ti.rate,
     is_available: ti.is_available,
     available_dates: ti.available_dates ?? [],
     primaryImage: resolveImageUrl(getPrimaryImage(ti.images)),
@@ -898,6 +906,9 @@ toast.promise(submitForm, {
                     },
                     { label: "Eyes", value: selectedTalent.eye_colour },
                     { label: "Skin", value: selectedTalent.skin_color },
+                    ...(selectedTalent.rate
+                      ? [{ label: "Rate", value: selectedTalent.rate }]
+                      : []),
                     ...(selectedTalent.skills
                       ? [{ label: "Skills", value: selectedTalent.skills }]
                       : []),
@@ -938,51 +949,80 @@ toast.promise(submitForm, {
                   ))}
                 </div>
                 
-                {selectedTalent.portfolio_link ? (
-                  <div className='mt-6 bg-blue-50/50 rounded-2xl p-4 flex items-center justify-between border border-blue-100'>
-                    <div className='flex items-center gap-3 overflow-hidden'>
-                      <div className='w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm'>
-                        <Link size={18} />
+                {(selectedTalent?.portfolio_link || selectedTalent?.instagram_link) && (
+                  <div className='mt-8 flex flex-col gap-3'>
+                    <h3 className='text-sm font-bold text-slate-700 mb-1 ml-1'>Portfolio & Socials</h3>
+                    
+                    {/* Portfolio */}
+                    <div className={`rounded-xl p-3 flex items-center justify-between border shadow-sm ${selectedTalent?.portfolio_link ? 'bg-white border-slate-100' : 'bg-gray-50 border-gray-100'}`}>
+                      <div className='flex items-center gap-3 overflow-hidden'>
+                        <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white ${selectedTalent?.portfolio_link ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                          <Link size={18} />
+                        </div>
+                        <div className='flex flex-col overflow-hidden'>
+                          <span className={`text-sm font-bold ${selectedTalent?.portfolio_link ? 'text-gray-900' : 'text-gray-400'}`}>
+                            Portfolio
+                          </span>
+                          {selectedTalent?.portfolio_link ? (
+                            <a
+                              href={selectedTalent.portfolio_link}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='text-xs text-blue-500 hover:underline truncate'
+                            >
+                              {selectedTalent.portfolio_link.replace(/^https?:\/\//, '')}
+                            </a>
+                          ) : (
+                            <span className='text-xs text-gray-400'>Not provided</span>
+                          )}
+                        </div>
                       </div>
-                      <div className='flex flex-col overflow-hidden'>
-                        <span className='text-sm font-bold text-gray-900'>
-                          Portfolio link
-                        </span>
-                        <a
+                      {selectedTalent?.portfolio_link && (
+                        <a 
                           href={selectedTalent.portfolio_link}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='text-sm text-blue-600 hover:underline truncate'
+                          className='shrink-0 ml-3 text-blue-500 hover:text-blue-700 transition-colors p-2'
                         >
-                          {selectedTalent.portfolio_link.replace(/^https?:\/\//, '')}
+                          <ExternalLink size={18} />
                         </a>
-                      </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard?.writeText(selectedTalent.portfolio_link || "");
-                        toast.success("Portfolio link copied!");
-                      }}
-                      className='shrink-0 ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-semibold bg-white shadow-sm'
-                    >
-                      Copy link
-                      <Copy size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className='mt-6 bg-gray-50/50 rounded-2xl p-4 flex items-center justify-between border border-gray-100'>
-                    <div className='flex items-center gap-3 overflow-hidden'>
-                      <div className='w-10 h-10 shrink-0 rounded-full bg-gray-300 flex items-center justify-center text-white shadow-sm'>
-                        <Link size={18} />
+
+                    {/* Instagram */}
+                    <div className={`rounded-xl p-3 flex items-center justify-between border shadow-sm ${selectedTalent?.instagram_link ? 'bg-white border-slate-100' : 'bg-gray-50 border-gray-100'}`}>
+                      <div className='flex items-center gap-3 overflow-hidden'>
+                        <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white ${selectedTalent?.instagram_link ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600' : 'bg-gray-300'}`}>
+                          <Instagram size={18} />
+                        </div>
+                        <div className='flex flex-col overflow-hidden'>
+                          <span className={`text-sm font-bold ${selectedTalent?.instagram_link ? 'text-gray-900' : 'text-gray-400'}`}>
+                            Instagram
+                          </span>
+                          {selectedTalent?.instagram_link ? (
+                            <a
+                              href={selectedTalent.instagram_link}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='text-xs text-blue-500 hover:underline truncate'
+                            >
+                              {selectedTalent.instagram_link.replace(/^https?:\/\//, '')}
+                            </a>
+                          ) : (
+                            <span className='text-xs text-gray-400'>Not provided</span>
+                          )}
+                        </div>
                       </div>
-                      <div className='flex flex-col overflow-hidden'>
-                        <span className='text-sm font-bold text-gray-900'>
-                          Portfolio link
-                        </span>
-                        <span className='text-sm text-gray-500'>
-                          Not provided
-                        </span>
-                      </div>
+                      {selectedTalent?.instagram_link && (
+                        <a 
+                          href={selectedTalent.instagram_link}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='shrink-0 ml-3 text-blue-500 hover:text-blue-700 transition-colors p-2'
+                        >
+                          <ExternalLink size={18} />
+                        </a>
+                      )}
                     </div>
                   </div>
                 )}

@@ -19,6 +19,8 @@ import {
   Star,
   Link,
   Copy,
+  Instagram,
+  ExternalLink,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -72,6 +74,8 @@ interface TalentProfile {
   is_available_on_request?: boolean;
   available_dates?: string[];
   portfolio_link?: string;
+  instagram_link?: string | null;
+  rate?: number | string | null;
   skills?: string;
 }
 
@@ -183,6 +187,7 @@ export default function ChatModalDetail({
               </div>
             : "Not provided"
         },
+        { label: "Rate", value: talent.rate || "Not provided" },
       ]
     : [];
 
@@ -387,54 +392,81 @@ export default function ChatModalDetail({
                   ))}
                 </div>
 
-                {talent?.portfolio_link ? (
-                  <div className='mt-6 bg-blue-50/50 rounded-2xl p-4 flex items-center justify-between border border-blue-100'>
+                <div className='mt-8 flex flex-col gap-3'>
+                  <h3 className='text-sm font-bold text-slate-700 mb-1 ml-1'>Portfolio & Socials</h3>
+                  
+                  {/* Portfolio */}
+                  <div className={`rounded-xl p-3 flex items-center justify-between border shadow-sm ${talent?.portfolio_link ? 'bg-white border-slate-100' : 'bg-gray-50 border-gray-100'}`}>
                     <div className='flex items-center gap-3 overflow-hidden'>
-                      <div className='w-10 h-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm'>
+                      <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white ${talent?.portfolio_link ? 'bg-blue-600' : 'bg-gray-300'}`}>
                         <Link size={18} />
                       </div>
                       <div className='flex flex-col overflow-hidden'>
-                        <span className='text-sm font-bold text-gray-900'>
-                          Portfolio link
+                        <span className={`text-sm font-bold ${talent?.portfolio_link ? 'text-gray-900' : 'text-gray-400'}`}>
+                          Portfolio
                         </span>
-                        <a
-                          href={talent.portfolio_link}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-sm text-blue-600 hover:underline truncate'
-                        >
-                          {talent.portfolio_link.replace(/^https?:\/\//, '')}
-                        </a>
+                        {talent?.portfolio_link ? (
+                          <a
+                            href={talent.portfolio_link}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-xs text-blue-500 hover:underline truncate'
+                          >
+                            {talent.portfolio_link.replace(/^https?:\/\//, '')}
+                          </a>
+                        ) : (
+                          <span className='text-xs text-gray-400'>Not provided</span>
+                        )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard?.writeText(talent.portfolio_link || "");
-                        toast.success("Portfolio link copied!");
-                      }}
-                      className='shrink-0 ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-semibold bg-white shadow-sm'
-                    >
-                      Copy link
-                      <Copy size={12} />
-                    </button>
+                    {talent?.portfolio_link && (
+                      <a 
+                        href={talent.portfolio_link}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='shrink-0 ml-3 text-blue-500 hover:text-blue-700 transition-colors p-2'
+                      >
+                        <ExternalLink size={18} />
+                      </a>
+                    )}
                   </div>
-                ) : (
-                  <div className='mt-6 bg-gray-50/50 rounded-2xl p-4 flex items-center justify-between border border-gray-100'>
+
+                  {/* Instagram */}
+                  <div className={`rounded-xl p-3 flex items-center justify-between border shadow-sm ${talent?.instagram_link ? 'bg-white border-slate-100' : 'bg-gray-50 border-gray-100'}`}>
                     <div className='flex items-center gap-3 overflow-hidden'>
-                      <div className='w-10 h-10 shrink-0 rounded-full bg-gray-300 flex items-center justify-center text-white shadow-sm'>
-                        <Link size={18} />
+                      <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white ${talent?.instagram_link ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600' : 'bg-gray-300'}`}>
+                        <Instagram size={18} />
                       </div>
                       <div className='flex flex-col overflow-hidden'>
-                        <span className='text-sm font-bold text-gray-900'>
-                          Portfolio link
+                        <span className={`text-sm font-bold ${talent?.instagram_link ? 'text-gray-900' : 'text-gray-400'}`}>
+                          Instagram
                         </span>
-                        <span className='text-sm text-gray-500'>
-                          Not provided
-                        </span>
+                        {talent?.instagram_link ? (
+                          <a
+                            href={talent.instagram_link}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-xs text-blue-500 hover:underline truncate'
+                          >
+                            {talent.instagram_link.replace(/^https?:\/\//, '')}
+                          </a>
+                        ) : (
+                          <span className='text-xs text-gray-400'>Not provided</span>
+                        )}
                       </div>
                     </div>
+                    {talent?.instagram_link && (
+                      <a 
+                        href={talent.instagram_link}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='shrink-0 ml-3 text-blue-500 hover:text-blue-700 transition-colors p-2'
+                      >
+                        <ExternalLink size={18} />
+                      </a>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Right Side - Image and Gallery */}
@@ -555,12 +587,11 @@ export default function ChatModalDetail({
                   </button>
                 </div>
               </div>
-            </div>
 
             {/* Action Buttons */}
-            <div className='bg-transparent px-6 md:px-8 p-6 flex justify-center gap-6 md:gap-8 flex-wrap'>
+            <div className='col-span-1 lg:col-span-2 flex justify-center py-6'>
               <div
-                className='flex flex-wrap gap-2 sm:gap-3 mt-4'
+                className='flex flex-wrap items-center justify-center gap-4 sm:gap-5'
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -668,7 +699,8 @@ export default function ChatModalDetail({
                 </button>
               </div>
             </div>
-          </>
+          </div>
+          </>  
         )}
       </div>
 
@@ -750,7 +782,7 @@ export default function ChatModalDetail({
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
-            </Dialog>   
+      </Dialog>   
 
       {/* ── Confirm action modal ── */}
       <Dialog
