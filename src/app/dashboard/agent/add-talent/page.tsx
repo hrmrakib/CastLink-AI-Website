@@ -42,6 +42,7 @@ interface FormData {
   availableOnRequest: boolean; // true only for the middle option
   skills: string;
   portfolioLink: string;
+  instagramLink: string;
 }
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -523,6 +524,7 @@ const INITIAL_FORM: FormData = {
   availableOnRequest: false,
   skills: "",
   portfolioLink: "",
+  instagramLink: "",
 };
 
 // Main Page Component
@@ -633,6 +635,7 @@ export default function AddTalentPage() {
       payload.append("is_available", String(formData.availability));
       payload.append("skills", formData.skills);
       payload.append("portfolio_link", formData.portfolioLink);
+      payload.append("instagram_link", formData.instagramLink);
       payload.append(
         "is_available_on_request",
         String(formData.availableOnRequest),
@@ -720,8 +723,8 @@ export default function AddTalentPage() {
   };
 
   const downloadTemplate = () => {
-    const headers = ["Gender", "Name", "Height", "Waist", "Bust", "Hips", "Dress Size", "Shoe Size", "Hair Colour", "Eye Colour", "Skin Color", "Hair Type", "Continent", "Country", "Location", "Date of Birth", "Availability", "Skills", "Character", "Portfolio Link"];
-    const sampleRow = ["female", "Jane Doe", "170", "60", "85", "90", "8", "39", "Brown", "Blue", "White", "Straight", "Europe", "UK", "London", "1995-05-15", "Available", "Acting, Dancing", "Actor", "https://janedoe.com"];
+    const headers = ["Gender", "Name", "Height", "Waist", "Bust", "Hips", "Dress Size", "Shoe Size", "Hair Colour", "Eye Colour", "Skin Color", "Hair Type", "Continent", "Country", "Location", "Date of Birth", "Availability", "Skills", "Character", "Portfolio Link", "Instagram Link"];
+    const sampleRow = ["female", "Jane Doe", "170", "60", "85", "90", "8", "39", "Brown", "Blue", "White", "Straight", "Europe", "UK", "London", "1995-05-15", "Available", "Acting, Dancing", "Actor", "https://janedoe.com", "https://instagram.com/janedoe"];
     
     const csvContent = "data:text/csv;charset=utf-8," 
       + headers.join(",") + "\n"
@@ -810,6 +813,7 @@ export default function AddTalentPage() {
         availableOnRequest,
         skills: rowData["skills"] || "",
         portfolioLink: rowData["portfolio link"] || "",
+        instagramLink: rowData["instagram link"] || "",
       }));
       
       setUploadMode('manual');
@@ -1251,6 +1255,25 @@ export default function AddTalentPage() {
                 value={formData.portfolioLink}
                 onChange={handleInputChange}
                 placeholder='https://your-portfolio.com'
+                className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
+              />
+            </div>
+
+            {/* Instagram Link */}
+            <div>
+              <label
+                htmlFor='instagramLink'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Instagram Link
+              </label>
+              <input
+                type='url'
+                id='instagramLink'
+                name='instagramLink'
+                value={formData.instagramLink}
+                onChange={handleInputChange}
+                placeholder='https://instagram.com/username'
                 className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
               />
             </div>

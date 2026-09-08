@@ -48,6 +48,7 @@ interface FormData {
   availableOnRequest: boolean;
   skills: string;
   portfolioLink: string;
+  instagramLink: string;
 }
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
@@ -418,6 +419,7 @@ const INITIAL_FORM: FormData = {
   availableOnRequest: false,
   skills: "",
   portfolioLink: "",
+  instagramLink: "",
 };
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -507,6 +509,7 @@ export default function UpdateTalentPage() {
       availableOnRequest: singleTalent.is_available_on_request ?? false,
       skills: singleTalent.skills ?? "",
       portfolioLink: singleTalent.portfolio_link ?? "",
+      instagramLink: singleTalent.instagram_link ?? "",
     });
 
     setShootDates(singleTalent?.available_dates ?? []);
@@ -599,6 +602,7 @@ export default function UpdateTalentPage() {
       payload.append("character", role);
       payload.append("skills", formData.skills);
       payload.append("portfolio_link", formData.portfolioLink);
+      payload.append("instagram_link", formData.instagramLink);
 
       shootDates.forEach((date) => {
         payload.append("available_date", date);
@@ -1107,6 +1111,25 @@ export default function UpdateTalentPage() {
                 value={formData.portfolioLink}
                 onChange={handleInputChange}
                 placeholder='https://your-portfolio.com'
+                className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
+              />
+            </div>
+
+            {/* Instagram Link */}
+            <div>
+              <label
+                htmlFor='instagramLink'
+                className='block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2'
+              >
+                Instagram Link
+              </label>
+              <input
+                type='url'
+                id='instagramLink'
+                name='instagramLink'
+                value={formData.instagramLink}
+                onChange={handleInputChange}
+                placeholder='https://instagram.com/username'
                 className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600'
               />
             </div>

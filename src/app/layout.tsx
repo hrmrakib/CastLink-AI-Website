@@ -11,6 +11,7 @@ import AppInitializer from "@/components/AppInitializer/AppInitializer";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import CookieBanner from "@/components/shared/CookieBanner";
+import Analytics from "@/components/shared/Analytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({
               {children}
               <Footer />
               <CookieBanner />
+              <Analytics />
             </AppInitializer>
           </TooltipProvider>
         </Providers>
